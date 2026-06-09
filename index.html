@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EstateCare">
+<meta name="theme-color" content="#c9a84c">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%230a0a0a'/><polyline points='20,105 96,30 172,105' fill='none' stroke='%23c9a84c' stroke-width='8'/><rect x='35' y='105' width='122' height='82' fill='none' stroke='%23c9a84c' stroke-width='8'/><rect x='72' y='122' width='48' height='38' fill='none' stroke='%23c9a84c' stroke-width='5'/></svg>">
 <title>EstateCare</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -58,6 +64,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .err.show{display:block;}
 .feat-wrap{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
 .feat-label{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text);cursor:pointer;}
+
+body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+#app{top:env(safe-area-inset-top);bottom:env(safe-area-inset-bottom);}
+.bnav{padding-bottom:max(12px,env(safe-area-inset-bottom));}
+/* Max width container for desktop */
+#app{max-width:480px;margin:0 auto;box-shadow:0 0 60px rgba(0,0,0,.8);}
 </style>
 </head>
 <body>
@@ -213,8 +225,14 @@ function goToProperty(){
     +fs('Property Type','pType',['Single Family','Estate','Condo','Vacation Home'],signup.propType)
     +'<div class="lbl">Special Features</div>'
     +'<div class="feat-wrap">'
-    +['Pool','Spa','Elevator','Generator','Wine Cellar'].map(function(feat){
+    +['Pool','Spa','Elevator','Wine Cellar'].map(function(feat){
       return '<label class="feat-label"><input type="checkbox" value="'+feat+'" class="feat-cb" style="accent-color:var(--gold)"'+(signup.features.indexOf(feat)>=0?' checked':'')+'>'+feat+'</label>';
+    }).join('')
+    +'</div>'
+    +'<div class="lbl" style="margin-top:8px">Security Features On Site</div>'
+    +'<div class="feat-wrap">'
+    +['Alarm System','Doorbell Camera','Security Camera Coverage','Smart Lock','Motion Sensors','Safe'].map(function(feat){
+      return '<label class="feat-label"><input type="checkbox" value="'+feat+'" class="sec-cb" style="accent-color:var(--gold)"'+(signup.security&&signup.security.indexOf(feat)>=0?' checked':'')+'>'+feat+'</label>';
     }).join('')
     +'</div>'
     +ff('Emergency Contact On Site','text','pEmerg','Name & phone','')
@@ -235,6 +253,8 @@ function saveProperty(){
   signup.propType=document.getElementById('pType').value;
   signup.features=[];
   document.querySelectorAll('.feat-cb:checked').forEach(function(cb){signup.features.push(cb.value);});
+  signup.security=[];
+  document.querySelectorAll('.sec-cb:checked').forEach(function(cb){signup.security.push(cb.value);});
   signup.emergency=document.getElementById('pEmerg').value.trim();
   goToCalendar();
 }
@@ -417,6 +437,14 @@ function doLogin(){
 }
 
 showWelcome();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
+  });
+}
 </script>
 </body>
 </html>

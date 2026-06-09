@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EstateCare">
+<meta name="theme-color" content="#c9a84c">
+<link rel="apple-touch-icon" href="manifest.json">
 <title>EstateCare</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -56,6 +62,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .pd-status{display:inline-flex;align-items:center;gap:8px;border-radius:20px;padding:4px 14px;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
 .btn-gold{width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px;cursor:pointer;margin-top:8px;}
 .btn-ghost{width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer;margin-top:8px;}
+
+body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+#app{top:env(safe-area-inset-top);bottom:env(safe-area-inset-bottom);}
+.bnav{padding-bottom:max(12px,env(safe-area-inset-bottom));}
+/* Max width container for desktop */
+#app{max-width:480px;margin:0 auto;box-shadow:0 0 60px rgba(0,0,0,.8);}
 </style>
 </head>
 <body>
@@ -377,7 +389,17 @@ function openPointDetail(p){
   html+='<button class="btn-ghost" style="margin:0" onclick="closePD()">Close</button>';
   document.getElementById('pdContent').innerHTML=html;
   document.querySelectorAll('[data-pi]').forEach(function(img){
-    img.addEventListener('click',function(){var s=window['_pp'+this.getAttribute('data-pi')];if(s){var w=window.open();w.document.write('<body style="margin:0;background:#000"><img src="'+s+'" style="max-width:100%;display:block;margin:auto"></body>');}});
+    img.addEventListener('click',function(){var s=window['_pdp'+this.getAttribute('data-pidx')];if(s){var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';var im=document.createElement('img');im.src=s;im.style.cssText='max-width:100%;max-height:100%;object-fit:contain';ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};document.body.appendChild(ov);}});
+  });
+}</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
+  });
+}
+</script>
+</body>');}});
   });
   document.getElementById('pdModal').classList.add('open');
 }
@@ -398,6 +420,15 @@ if(newEstate){
   localStorage.removeItem('ec_new_estate');
 }
 goHome();
+</script>
+
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
+  });
+}
 </script>
 </body>
 </html>
