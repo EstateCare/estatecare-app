@@ -387,42 +387,33 @@ function openPointDetail(p){
   document.querySelectorAll('[data-pi]').forEach(function(img){
     img.addEventListener('click',function(){var s=window['_pdp'+this.getAttribute('data-pidx')];if(s){var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';var im=document.createElement('img');im.src=s;im.style.cssText='max-width:100%;max-height:100%;object-fit:contain';ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};document.body.appendChild(ov);}});
   });
+
+function openPD(issueIdx){
+  var iss=window['_issue_'+issueIdx];if(!iss)return;
+  openPointDetail({name:iss.name,status:iss.status,notes:iss.notes,photos:[]});
+}
+function openPointDetail(p){
+  var sc=p.status==='red'?'var(--red)':p.status==='yellow'?'var(--yellow)':'var(--green)';
+  var sl=p.status==='red'?'Attention Required':p.status==='yellow'?'Monitor':'Healthy';
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<div class="modal-title">'+p.name+'</div>'
+    +'<button onclick="closePD()" style="background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer">&#215;</button></div>'
+    +'<span class="pd-status" style="background:'+sc+'22;border:1px solid '+sc+';color:'+sc+'">&#9679; '+sl+'</span>';
+  if(p.notes)html+='<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Inspector Note</div><div style="background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:13px;font-style:italic;line-height:1.7;margin-bottom:12px">&ldquo;'+p.notes+'&rdquo;</div>';
+  else html+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">No notes added.</div>';
+  html+='<button class="btn-ghost" style="margin:0" onclick="closePD()">Close</button>';
+  document.getElementById('pdContent').innerHTML=html;
+  document.getElementById('pdModal').classList.add('open');
+}
+function closePD(){document.getElementById('pdModal').classList.remove('open');}
+function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('client.html','');window.location.href=base+'index.html';}
+goHome();
+
 }</script>
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
-  });
-}
-</script>
-</body>');}});
-  });
-  document.getElementById('pdModal').classList.add('open');
-}
-function closePD(){document.getElementById('pdModal').classList.remove('open');}
-
-function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('client.html','');window.location.href=base+'index.html';}
-
-// Check for new signup estate
-var newEstate=JSON.parse(localStorage.getItem('ec_new_estate')||'null');
-if(newEstate){
-  // Add to estates array
-  newEstate.data={
-    exterior:{label:'Exterior',icon:'&#127969;',points:[]},
-    interior:{label:'Interior',icon:'&#128715;',points:[]},
-    grounds:{label:'Grounds',icon:'&#127807;',points:[]}
-  };
-  estates.push(newEstate);
-  localStorage.removeItem('ec_new_estate');
-}
-goHome();
-</script>
-
-
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
+    navigator.serviceWorker.register('sw.js').then(function(r){}).catch(function(e){});
   });
 }
 </script>

@@ -497,19 +497,6 @@ function openPD(p,cat){
   document.querySelectorAll('[data-pidx]').forEach(function(img){
     img.addEventListener('click',function(){var s=window['_pdp'+this.getAttribute('data-pidx')];if(s){var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';var im=document.createElement('img');im.src=s;im.style.cssText='max-width:100%;max-height:100%;object-fit:contain';ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};document.body.appendChild(ov);}});
   });
-}</script>
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
-  });
-}
-</script>
-</body>');}});
-  });
-  document.getElementById('pdModal').classList.add('open');
-}
-function closePD(){document.getElementById('pdModal').classList.remove('open');}
 
 function setStatus(pid,cat,status){
   var pt=CD()[cat].points.find(function(p){return p.id===pid;});if(!pt)return;
@@ -517,18 +504,16 @@ function setStatus(pid,cat,status){
   var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");
   if(status==='yellow'||status==='red') openModal(pid,cat);
 }
-
 function completeCategory(cat){
   var e=CE();e.completedCats[cat]=new Date();
   showToast(e.data[cat].label+' signed & locked');
   openDateDetail('live');
 }
-
 function openModal(pid,cat){
   var pt=CD()[cat].points.find(function(p){return p.id===pid;});
   activePoint={pid:pid,cat:cat};
   document.getElementById('mTitle').textContent=pt.name;
-  document.getElementById('mSub').textContent=CE().data[cat].label.toUpperCase()+' \u00b7 '+pt.status.toUpperCase();
+  document.getElementById('mSub').textContent=CE().data[cat].label.toUpperCase()+' · '+pt.status.toUpperCase();
   document.getElementById('mNotes').value=pt.notes||'';
   document.getElementById('photoErr').classList.remove('show');
   document.getElementById('reqBadge').style.display=pt.status==='red'?'inline-block':'none';
@@ -560,7 +545,6 @@ function saveNote(){
   var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");
   showToast('Saved');
 }
-
 function startInspection(){
   var e=CE();
   if(e.completedAt){e.pastInspections.push({completedAt:e.completedAt,snapshot:liveSnap(e)});Object.values(e.data).forEach(function(c){c.points.forEach(function(p){p.status=null;p.notes='';p.photos=[];});});e.completedCats={};e.completedAt=null;}
@@ -569,44 +553,35 @@ function startInspection(){
 function confirmNew(){document.getElementById('confirmModal').classList.add('open');}
 function closeConfirm(){document.getElementById('confirmModal').classList.remove('open');}
 function doNew(){closeConfirm();startInspection();}
-
 function finishInsp(){
   var e=CE();e.completedAt=new Date();var sc=liveScore(e);
   var ds=e.completedAt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  document.getElementById('screen').innerHTML='<div class="comp-wrap">'
-    +'<div class="check-circle">&#10003;</div>'
+  document.getElementById('screen').innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center">'
+    +'<div style="width:80px;height:80px;border-radius:50%;background:rgba(76,175,125,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px">&#10003;</div>'
     +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl);margin-bottom:8px">Inspection Complete</div>'
     +'<div class="gold-line"></div>'
     +'<div style="font-size:11px;color:var(--dim);letter-spacing:1px;line-height:1.9;margin-top:12px">'+e.name+'<br>'+ds+'<br><br>Health Score: <span style="color:var(--gl)">'+sc.score+'%</span><br>'+sc.green+' Healthy &middot; '+sc.yellow+' Monitor &middot; '+sc.red+' Attention</div>'
     +'<button class="btn-gold" style="max-width:300px;margin-top:36px" onclick="goProps()">Back to Properties</button>'
     +'</div>';
 }
-
-// ── SETTINGS ──────────────────────────────────────────────────────────────
 function goSettings(){
   document.getElementById('screen').innerHTML='<div class="topbar"><div><div class="topbar-title">Settings</div><div class="topbar-sub">Account</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Inspector</div>'
-    +'<div class="card">'
-    +'<div style="font-size:10px;color:var(--dim);margin-bottom:4px">Signed in as</div>'
+    +'<div class="card"><div style="font-size:10px;color:var(--dim);margin-bottom:4px">Signed in as</div>'
     +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+currentUser.name+'</div>'
-    +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div>'
-    +'</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div></div>'
     +'<button class="btn-gold" style="margin-top:8px" onclick="doSignOut()">Sign Out</button>'
-    +'<button class="btn-ghost" onclick="doSignOut()" style="margin-top:4px;color:var(--dim)">&#8592; Back to Welcome Screen</button>'
     +'</div>'+nav('settings');
 }
-
 function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('inspector.html','');window.location.href=base+'index.html';}
-
 goCal();
-</script>
 
-
+}</script>
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
+    navigator.serviceWorker.register('sw.js').then(function(r){}).catch(function(e){});
   });
 }
 </script>
