@@ -573,7 +573,7 @@ function goSettings(){
     +'</div>'+nav('settings');
 }
 
-function doSignOut(){localStorage.removeItem('ec_user');window.location.href='login.html';}
+function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('inspector.html','');window.location.href=base+'index.html';}
 
 goCal();
 </script>

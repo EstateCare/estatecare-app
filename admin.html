@@ -242,6 +242,23 @@ function goDash(){
       +'<div class="pbar-wrap"><div class="pbar" style="width:'+pct+'%"></div></div>'
       +'</div>';
   });
+  // Walk-through requests (pending)
+  var pendingWalks=estates.filter(function(e){return e.contract&&e.contract.status==='pending'&&e.contract.walkThrough;});
+  if(pendingWalks.length){
+    html+='<div style="font-size:9px;letter-spacing:3px;color:var(--yellow);text-transform:uppercase;margin:4px 0 12px">&#9888; Walk-Through Requests ('+pendingWalks.length+')</div>';
+    pendingWalks.forEach(function(e){
+      var wt=e.contract.walkThrough;
+      var dateStr=new Date(wt.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      html+='<div class="card" style="border-color:var(--yellow);margin-bottom:10px">'
+        +'<div style="display:flex;align-items:center;gap:12px">'
+        +'<div class="cat-ico">'+e.icon+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+'</div>'
+        +'<div style="font-size:10px;color:var(--yellow);margin-top:4px">Walk-Through: '+dateStr+' at '+wt.time+'</div></div>'
+        +'<div style="font-size:9px;color:var(--yellow);letter-spacing:1px;text-transform:uppercase">Pending</div>'
+        +'</div></div>';
+    });
+  }
   html+='</div>'+nav('dash');
   render(html);
 }
@@ -619,7 +636,7 @@ function saveInspector(){
 }
 
 // ── SIGN OUT ──────────────────────────────────────────────────────────────
-function doSignOut(){localStorage.removeItem('ec_user');window.location.href='login.html';}
+function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('admin.html','');window.location.href=base+'index.html';}
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 goDash();
