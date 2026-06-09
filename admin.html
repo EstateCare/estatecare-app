@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EstateCare Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
+:root{--black:#0a0a0a;--ch:#141414;--ch2:#1c1c1c;--ch3:#242424;--gold:#c9a84c;--gl:#e2c97e;--gd:rgba(201,168,76,0.15);--green:#4caf7d;--yellow:#e6b84a;--red:#e05c5c;--text:#f0ece4;--dim:#9a9488;--border:rgba(201,168,76,0.2);--ff:"Cormorant Garamond",serif;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;}
+#screen::-webkit-scrollbar{width:3px;}
+#screen::-webkit-scrollbar-thumb{background:var(--gd);}
+.topbar{background:var(--ch);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:var(--ff);font-size:22px;letter-spacing:2px;color:var(--gl);}
+.topbar-sub{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--gd);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gold);cursor:pointer;flex-shrink:0;font-weight:600;}
+.back-btn{background:none;border:none;color:var(--gold);cursor:pointer;font-size:22px;line-height:1;padding:0;margin-right:12px;}
+.sc{flex:1;padding:20px;}
+.bnav{background:var(--ch);border-top:1px solid var(--border);display:flex;flex-shrink:0;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px;cursor:pointer;color:var(--dim);font-size:8px;letter-spacing:1px;text-transform:uppercase;gap:4px;border:none;background:none;}
+.ni.active{color:var(--gold);}
+.ni span{font-size:16px;}
+.btn-gold{width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px;cursor:pointer;margin-top:8px;}
+.btn-sm{background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;cursor:pointer;}
+.btn-outline{width:100%;background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gl);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:8px;}
+.btn-ghost{width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer;margin-top:8px;}
+.inp{width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:16px;font-weight:300;padding:12px 16px;margin-bottom:14px;outline:none;}
+.inp:focus{border-color:var(--gold);}
+.sel{width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:16px;padding:12px;margin-bottom:14px;outline:none;}
+.lbl{font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;}
+.sec{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;margin-top:4px;}
+.card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:10px;}
+.card.tap{cursor:pointer;transition:border-color .2s;}
+.card.tap:hover{border-color:var(--gold);}
+.pbar-wrap{background:var(--ch3);border-radius:10px;height:5px;overflow:hidden;margin-top:6px;}
+.pbar{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--gl));}
+.pill{border-radius:20px;padding:3px 10px;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+.pill-g{background:rgba(76,175,125,.12);border:1px solid var(--green);color:var(--green);}
+.pill-y{background:rgba(230,184,74,.12);border:1px solid var(--yellow);color:var(--yellow);}
+.pill-d{background:var(--ch3);border:1px solid var(--border);color:var(--dim);}
+.cat-ico{width:38px;height:38px;border-radius:50%;background:var(--gd);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.dr{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(201,168,76,0.08);}
+.dr:last-child{border-bottom:none;}
+.dr-lbl{font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;flex-shrink:0;margin-right:12px;padding-top:2px;}
+.dr-val{font-size:12px;text-align:right;}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ch);border:1px solid var(--gold);border-radius:2px;padding:10px 20px;font-size:11px;color:var(--gl);z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;}
+.ring-bg{fill:none;stroke:var(--ch3);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;}
+.ring-score{font-family:var(--ff);font-size:26px;fill:var(--gl);}
+.stat-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.sname{font-size:10px;letter-spacing:1px;color:var(--dim);flex:1;text-transform:uppercase;}
+.sval{font-size:15px;font-family:var(--ff);}
+</style>
+</head>
+<body>
+<div id="app"><div id="screen"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+// ── AUTH CHECK ─────────────────────────────────────────────────────────────
+var currentUser=JSON.parse(localStorage.getItem('ec_user')||'null');
+// Fallback for direct testing (remove in production)
+if(!currentUser||currentUser.role!=='admin'){
+  currentUser={email:'admin@estatecare.com',password:'test',role:'admin',name:'Justin',initials:'EC'};
+}
+
+// ── DATA ───────────────────────────────────────────────────────────────────
+function mkPt(id,name,status,notes){return{id:id,name:name,status:status,notes:notes,photos:[]};}
+
+var users=[
+  {email:'admin@estatecare.com',password:'test',role:'admin',name:'Justin',initials:'EC'},
+  {email:'inspector@estatecare.com',password:'test',role:'inspector',name:'John Davis',initials:'JD',phone:'239-555-0101',postalCode:'34108'},
+  {email:'client1@estatecare.com',password:'test',role:'client',name:'Michael Hartwell',initials:'MH',phone:'403-555-0201',secondaryContact:'Susan Hartwell',secondaryPhone:'403-555-0202',secondaryAddress:'142 Aspen Ridge Way, Calgary AB T3H 0J5',notes:'Arrives back end of May annually.'},
+  {email:'client2@estatecare.com',password:'test',role:'client',name:'Sandra Beaumont',initials:'SB',phone:'604-555-0301',secondaryContact:'Robert Beaumont',secondaryPhone:'604-555-0302',secondaryAddress:'2200 Wesbrook Mall, Vancouver BC V6T 1Z3',notes:'Prefers morning inspections.'}
+];
+
+var inspectors=[
+  {id:'insp1',name:'John Davis',email:'inspector@estatecare.com',phone:'239-555-0101',initials:'JD',postalCode:'34108',assignedEstates:['vs','mh']}
+];
+
+var estates=[
+  {id:'vs',name:'Hartwell Estate',address:'1402 Pelican Bay Drive, Naples FL 34108',icon:'&#127969;',
+   clientEmail:'client1@estatecare.com',clientName:'Michael Hartwell',
+   propertyType:'Estate',postalCode:'34108',specialFeatures:['Pool','Spa','Generator'],
+   emergencyContact:'Naples Property Mgmt — 239-555-9911',
+   contract:{tier:'Premium',weeklyRate:59.95,inspectionsPerWeek:2,
+     startDate:new Date('2025-11-01'),endDate:new Date('2026-05-29'),returnDate:new Date('2026-05-31'),
+     totalWeeks:26.9,totalInspections:54,contractValue:1612.66,
+     nextInspection:new Date('2026-06-15'),status:'Active',assignedInspector:'insp1'},
+   completedAt:new Date('2026-06-01'),completedCats:{},pastInspections:[],
+   data:{
+    exterior:{label:'Exterior',icon:'&#127969;',points:[mkPt('e1','Front Entry & Door','green',''),mkPt('e2','Roof & Gutters','green',''),mkPt('e3','Windows & Seals','yellow','West window seal has slight gap.'),mkPt('e4','Driveway & Walkways','green',''),mkPt('e5','Garage Door','green',''),mkPt('e6','Exterior Lighting','yellow','Two path lights not working.')]},
+    interior:{label:'Interior',icon:'&#128715;',points:[mkPt('i1','HVAC System','green',''),mkPt('i2','Water Heater','green',''),mkPt('i3','Kitchen Appliances','green',''),mkPt('i4','Plumbing & Fixtures','red','Active leak under guest bath vanity.'),mkPt('i5','Electrical Panel','green',''),mkPt('i6','Security System','yellow','Battery backup low.')]},
+    grounds:{label:'Grounds',icon:'&#127807;',points:[mkPt('g1','Lawn & Landscaping','green',''),mkPt('g2','Irrigation System','yellow','Zone 4 head blocked.'),mkPt('g3','Pool & Equipment','green',''),mkPt('g4','Outdoor Furniture','green','')]}}},
+  {id:'mh',name:'Beaumont Residence',address:'880 Gulf Shore Blvd N, Naples FL 34102',icon:'&#127963;',
+   clientEmail:'client2@estatecare.com',clientName:'Sandra Beaumont',
+   propertyType:'Single Family',postalCode:'34102',specialFeatures:['Pool','Wine Cellar'],
+   emergencyContact:'Gulf Shore Security — 239-555-8822',
+   contract:{tier:'Luxury',weeklyRate:69.95,inspectionsPerWeek:2.33,
+     startDate:new Date('2025-10-15'),endDate:new Date('2026-04-28'),returnDate:new Date('2026-04-30'),
+     totalWeeks:28.2,totalInspections:94,contractValue:1972.59,
+     nextInspection:new Date('2026-06-11'),status:'Active',
+     policyFile:'policy_beaumont.pdf',policyReviewed:true,assignedInspector:'insp1'},
+   completedAt:new Date('2026-05-28'),completedCats:{},pastInspections:[],
+   data:{
+    exterior:{label:'Exterior',icon:'&#127969;',points:[mkPt('me1','Front Entry & Door','green',''),mkPt('me2','Roof & Gutters','yellow','Debris in north valley gutter.'),mkPt('me3','Windows & Seals','green',''),mkPt('me4','Driveway & Walkways','green',''),mkPt('me5','Garage Door','red','Auto-reverse sensor failed.'),mkPt('me6','Exterior Lighting','green','')]},
+    interior:{label:'Interior',icon:'&#128715;',points:[mkPt('mi1','HVAC System','green',''),mkPt('mi2','Water Heater','green',''),mkPt('mi3','Kitchen Appliances','green',''),mkPt('mi4','Plumbing & Fixtures','green',''),mkPt('mi5','Electrical Panel','yellow','Outdoor breaker warm to touch.'),mkPt('mi6','Security System','green','')]},
+    grounds:{label:'Grounds',icon:'&#127807;',points:[mkPt('mg1','Lawn & Landscaping','green',''),mkPt('mg2','Irrigation System','yellow','Zone 3 head clogged.'),mkPt('mg3','Pool & Equipment','green',''),mkPt('mg4','Outdoor Furniture','green','')]}}}
+];
+
+var scheduleItems=[];
+var calViewDate=new Date();
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.status==='green')g++;else if(p.status==='yellow')y++;else if(p.status==='red')r++;});return{score:t>0?Math.round(((g*2+y)/(t*2))*100):0,green:g,yellow:y,red:r,total:t};}
+function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});return scoreOf(all);}
+
+function autoAssign(postal,date){
+  var ds=date.toDateString(),loads={};
+  inspectors.forEach(function(i){loads[i.id]=0;});
+  scheduleItems.forEach(function(s){if(s.date&&s.date.toDateString()===ds&&s.inspectorId)loads[s.inspectorId]=(loads[s.inspectorId]||0)+1;});
+  var sorted=inspectors.slice().sort(function(a,b){
+    var am=a.postalCode&&postal&&a.postalCode.substring(0,3)===postal.substring(0,3)?0:1;
+    var bm=b.postalCode&&postal&&b.postalCode.substring(0,3)===postal.substring(0,3)?0:1;
+    if(am!==bm)return am-bm;return(loads[a.id]||0)-(loads[b.id]||0);
+  });
+  var p=sorted.find(function(i){return(loads[i.id]||0)<8;});
+  return p?p.id:(sorted[0]?sorted[0].id:null);
+}
+
+function genSchedule(estate){
+  if(!estate.contract)return;
+  var con=estate.contract,start=new Date(con.startDate),end=new Date(con.endDate);
+  scheduleItems=scheduleItems.filter(function(s){return s.estateId!==estate.id;});
+  var d=new Date(start),count=0,interval=con.tier==='Basic'?7:con.tier==='Premium'?3.5:3;
+  while(d<=end){
+    scheduleItems.push({id:estate.id+'_'+count,estateId:estate.id,inspectorId:autoAssign(estate.postalCode,new Date(d)),date:new Date(d),status:d<new Date()?'completed':'scheduled'});
+    if(con.tier==='Premium')d.setDate(d.getDate()+(count%2===0?3:4));
+    else d.setDate(d.getDate()+Math.round(interval));
+    count++;
+  }
+}
+
+function getByDate(ds){return scheduleItems.filter(function(s){return s.date&&s.date.toDateString()===ds;});}
+function getByInsp(id){return scheduleItems.filter(function(s){return s.inspectorId===id;});}
+function loadForDate(id,ds){return scheduleItems.filter(function(s){return s.inspectorId===id&&s.date&&s.date.toDateString()===ds;}).length;}
+
+estates.forEach(genSchedule);
+
+function render(html){
+  document.getElementById('screen').innerHTML=html;
+  document.querySelectorAll('select[data-schedid]').forEach(function(sel){
+    sel.addEventListener('change',function(){reassign(this.getAttribute('data-schedid'),this.value);});
+  });
+  document.querySelectorAll('[data-action]').forEach(function(el){
+    el.addEventListener('click',function(){
+      var a=this.getAttribute('data-action');
+      if(a==='estate') goEstateDetail(this.getAttribute('data-id'));
+      else if(a==='client') goClientDetail(this.getAttribute('data-id'));
+      else if(a==='day') adminDayDetail(this.getAttribute('data-date'));
+    });
+  });
+}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+
+function ff(label,type,id,ph){return '<div class="lbl">'+label+'</div><input class="inp" type="'+type+'" id="'+id+'" placeholder="'+(ph||'')+'">';}
+function fs(label,id,opts){return '<div class="lbl">'+label+'</div><select class="sel" id="'+id+'">'+opts+'</select>';}
+function dr(label,val){return '<div class="dr"><div class="dr-lbl">'+label+'</div><div class="dr-val">'+val+'</div></div>';}
+
+function ringHtml(sc){
+  var off=226-(226*sc.score/100);
+  return '<svg width="80" height="80" viewBox="0 0 90 90"><circle class="ring-bg" cx="45" cy="45" r="36"/><circle class="ring-fill" cx="45" cy="45" r="36" stroke="#c9a84c" stroke-dasharray="226" stroke-dashoffset="'+off+'" transform="rotate(-90 45 45)"/><text class="ring-score" x="45" y="50" text-anchor="middle">'+sc.score+'%</text></svg>';
+}
+function statsHtml(sc){
+  return '<div style="flex:1">'
+    +'<div class="stat-row"><div class="sdot" style="background:var(--green)"></div><div class="sname">Healthy</div><div class="sval">'+sc.green+'</div></div>'
+    +'<div class="stat-row"><div class="sdot" style="background:var(--yellow)"></div><div class="sname">Monitor</div><div class="sval">'+sc.yellow+'</div></div>'
+    +'<div class="stat-row"><div class="sdot" style="background:var(--red)"></div><div class="sname">Attention</div><div class="sval">'+sc.red+'</div></div>'
+    +'</div>';
+}
+
+function topBar(title,sub,back){
+  var l=back?'<div style="display:flex;align-items:center"><button class="back-btn" onclick="'+back+'()">&#8592;</button><div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div></div>':'<div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div>';
+  return '<div class="topbar">'+l+'<div class="avatar">EC</div></div>';
+}
+
+function nav(active){
+  return '<div class="bnav">'
+    +'<button class="ni'+(active==='dash'?' active':'')+'" onclick="goDash()"><span>&#9681;</span>Dashboard</button>'
+    +'<button class="ni'+(active==='cal'?' active':'')+'" onclick="goCal()"><span>&#128197;</span>Schedule</button>'
+    +'<button class="ni'+(active==='clients'?' active':'')+'" onclick="goClients()"><span>&#128100;</span>Clients</button>'
+    +'<button class="ni'+(active==='estates'?' active':'')+'" onclick="goEstates()"><span>&#127968;</span>Estates</button>'
+    +'<button class="ni'+(active==='inspectors'?' active':'')+'" onclick="goInspectors()"><span>&#128203;</span>Inspectors</button>'
+    +'</div>';
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────
+function goDash(){
+  var issues=0;
+  estates.forEach(function(e){Object.values(e.data).forEach(function(c){c.points.forEach(function(p){if(p.status==='red'||p.status==='yellow')issues++;});});});
+  var value=estates.reduce(function(s,e){return s+(e.contract?e.contract.contractValue:0);},0);
+  var today=new Date().toDateString();
+  var todayCount=getByDate(today).length;
+
+  var html=topBar('EstateCare','Admin Dashboard')
+    +'<div class="sc">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
+    +statBox('Estates',estates.length,'&#127968;')
+    +statBox('Inspectors',inspectors.length,'&#128203;')
+    +statBox('Active Issues',issues,'&#9888;','var(--yellow)')
+    +statBox('Contract Value','$'+value.toLocaleString('en',{maximumFractionDigits:0}),'&#128181;','var(--green)')
+    +'</div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<div class="sec" style="margin:0">Active Contracts</div>'
+    +(todayCount?'<div style="font-size:9px;color:var(--gold);letter-spacing:1px">'+todayCount+' inspections today</div>':'')
+    +'</div>';
+
+  estates.forEach(function(e){
+    var sc=liveScore(e);
+    var con=e.contract;
+    var insp=con?inspectors.find(function(i){return i.id===con.assignedInspector;}):null;
+    var nextD=con&&con.nextInspection?new Date(con.nextInspection).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'-';
+    var completed=e.pastInspections.length+(e.completedAt?1:0);
+    var pct=con&&con.totalInspections>0?Math.round(completed/con.totalInspections*100):0;
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+' &nbsp;&#183;&nbsp; <span style="color:var(--gold)">'+con.tier+'</span></div></div>'
+      +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl)">'+sc.score+'%</div></div>'
+      +'<div style="display:flex;gap:16px;margin-bottom:10px">'
+      +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px">NEXT<br><span style="color:var(--text);font-size:12px">'+nextD+'</span></div>'
+      +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px">INSPECTOR<br><span style="color:var(--text);font-size:12px">'+(insp?insp.name.split(' ')[0]:'—')+'</span></div>'
+      +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px">VALUE<br><span style="color:var(--green);font-size:12px">$'+con.contractValue.toLocaleString('en',{maximumFractionDigits:0})+'</span></div>'
+      +'</div>'
+      +'<div style="font-size:9px;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:4px"><span>'+completed+' / '+con.totalInspections+' inspections</span><span>'+pct+'%</span></div>'
+      +'<div class="pbar-wrap"><div class="pbar" style="width:'+pct+'%"></div></div>'
+      +'</div>';
+  });
+  html+='</div>'+nav('dash');
+  render(html);
+}
+
+function statBox(label,val,icon,color){
+  return '<div class="card" style="text-align:center;padding:14px">'
+    +'<div style="font-size:20px">'+icon+'</div>'
+    +'<div style="font-family:var(--ff);font-size:22px;color:'+(color||'var(--gl)')+';margin:4px 0">'+val+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">'+label+'</div>'
+    +'</div>';
+}
+
+// ── SCHEDULE / CALENDAR ───────────────────────────────────────────────────
+function goCal(){renderCal(calViewDate);}
+
+function renderCal(vd){
+  calViewDate=vd;
+  var y=vd.getFullYear(),m=vd.getMonth();
+  var mn=vd.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+  var today=new Date();
+
+  var html=topBar('Schedule','Admin View')
+    +'<div class="sc">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+    +'<button onclick="shiftCal(-1)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--gold);padding:8px 14px;cursor:pointer;font-size:18px">&#8249;</button>'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+mn+'</div>'
+    +'<button onclick="shiftCal(1)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--gold);padding:8px 14px;cursor:pointer;font-size:18px">&#8250;</button>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){html+='<div style="text-align:center;font-size:9px;color:var(--dim);padding:4px">'+d+'</div>';});
+  html+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">';
+  for(var i=0;i<fd;i++) html+='<div></div>';
+  for(var d=1;d<=dim;d++){
+    var td=new Date(y,m,d),ds=td.toDateString();
+    var items=getByDate(ds);
+    var isT=td.toDateString()===today.toDateString();
+    var hasR=items.some(function(s){var e=estates.find(function(x){return x.id===s.estateId;});return e&&Object.values(e.data).some(function(c){return c.points.some(function(p){return p.status==='red';});});});
+    html+='<div data-action="day" data-date="'+ds+'" style="min-height:46px;background:'+(isT?'rgba(201,168,76,0.15)':'var(--ch2)')+';border:1px solid '+(isT?'var(--gold)':'var(--border)')+';border-radius:2px;padding:4px;cursor:'+(items.length?'pointer':'default')+'">'
+      +'<div style="font-size:11px;color:'+(isT?'var(--gold)':'var(--dim)')+'">'+d+'</div>'
+      +(items.length?'<div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:3px">'+items.slice(0,5).map(function(){return '<div style="width:6px;height:6px;border-radius:50%;background:'+(hasR?'var(--red)':'var(--green)')+'"></div>';}).join('')+(items.length>5?'<span style="font-size:7px;color:var(--dim)">+'+( items.length-5)+'</span>':'')+'</div>':'')
+      +'</div>';
+  }
+  html+='</div>';
+
+  var todayItems=getByDate(today.toDateString());
+  if(todayItems.length){
+    html+='<div class="sec" style="margin-top:20px">Today — '+todayItems.length+' Inspection'+(todayItems.length>1?'s':'')+'</div>';
+    inspectors.forEach(function(insp){
+      var mine=todayItems.filter(function(s){return s.inspectorId===insp.id;});
+      if(!mine.length)return;
+      html+='<div class="card" style="margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:8px">'
+        +'<div style="font-size:13px;font-weight:500">'+insp.name+'</div>'
+        +'<div style="font-size:9px;color:var(--gold);letter-spacing:1px">'+mine.length+'/8</div></div>';
+      mine.forEach(function(s){
+        var e=estates.find(function(x){return x.id===s.estateId;});if(!e)return;
+        html+='<div style="padding:8px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px">'
+          +'<div style="flex:1"><div style="font-size:12px">'+e.name+'</div>'
+          +'<div style="font-size:10px;color:var(--dim);margin-top:1px">'+e.address+'</div></div>'
+          +'<div style="font-size:9px;color:'+(s.status==='completed'?'var(--green)':'var(--dim)')+';text-transform:uppercase;letter-spacing:1px">'+s.status+'</div></div>';
+      });
+      html+='</div>';
+    });
+  }
+  html+='</div>'+nav('cal');
+  render(html);
+}
+
+function shiftCal(d){calViewDate=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+d,1);renderCal(calViewDate);}
+
+function adminDayDetail(dateStr){
+  var items=getByDate(dateStr);if(!items.length)return;
+  var d=new Date(dateStr);
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goCal()">&#8592;</button><div><div class="topbar-title">'+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'</div><div class="topbar-sub">'+items.length+' Inspection'+(items.length>1?'s':'')+'</div></div></div><div class="avatar">EC</div></div>'
+    +'<div class="sc">';
+  inspectors.forEach(function(insp){
+    var mine=items.filter(function(s){return s.inspectorId===insp.id;});if(!mine.length)return;
+    var load=loadForDate(insp.id,dateStr);
+    html+='<div class="sec">'+insp.name+' &nbsp;<span style="color:'+(load>=8?'var(--red)':'var(--gold)')+'">'+load+'/8</span></div>';
+    mine.forEach(function(s){
+      var e=estates.find(function(x){return x.id===s.estateId;});if(!e)return;
+      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
+        +'<div class="cat-ico">'+e.icon+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
+        +'<div style="font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:1px">'+e.postalCode+' &nbsp;&#183;&nbsp; '+e.contract.tier+'</div></div>'
+        +'<div style="text-align:right">'
+        +'<div style="font-size:9px;color:'+(s.status==='completed'?'var(--green)':'var(--dim)')+';text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">'+s.status+'</div>'
+        +'<select data-schedid="'+s.id+'" style="background:var(--ch3);border:1px solid var(--border);color:var(--text);font-size:9px;padding:4px;border-radius:2px">'
+        +inspectors.map(function(i){return '<option value="'+i.id+'"'+(s.inspectorId===i.id?' selected':'')+'>'+i.name.split(' ')[0]+'</option>';}).join('')
+        +'</select></div></div>';
+    });
+  });
+  html+='</div>';
+  render(html);
+}
+
+function reassign(schedId,inspId){
+  var item=scheduleItems.find(function(s){return s.id===schedId;});
+  if(item){item.inspectorId=inspId;showToast('Reassigned');}
+}
+
+// ── CLIENTS ───────────────────────────────────────────────────────────────
+function goClients(){
+  var clients=users.filter(function(u){return u.role==='client';});
+  var html=topBar('Clients',clients.length+' Active')
+    +'<div class="sc">'
+    +'<button class="btn-sm" onclick="goAddClient()" style="margin-bottom:16px">+ Add Client</button>';
+  clients.forEach(function(u){
+    var myE=estates.filter(function(e){return e.clientEmail===u.email;});
+    html+='<div class="card tap" data-action="client" data-id="'+u.email+'" style="display:flex;align-items:center;gap:12px">'
+      +'<div class="avatar">'+u.initials+'</div>'
+      +'<div style="flex:1"><div style="font-size:14px;font-weight:500">'+u.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+u.email+'</div>'
+      +'<div style="font-size:10px;color:var(--dim)">'+u.phone+'</div>'
+      +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+myE.length+' propert'+(myE.length===1?'y':'ies')+'</div>'
+      +'</div><div style="color:var(--dim);font-size:18px">&#8250;</div></div>';
+  });
+  html+='</div>'+nav('clients');
+  render(html);
+}
+
+function goClientDetail(email){
+  var u=users.find(function(x){return x.email===email;});if(!u)return;
+  var myE=estates.filter(function(e){return e.clientEmail===u.email;});
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goClients()">&#8592;</button><div><div class="topbar-title">'+u.name+'</div><div class="topbar-sub">Client Profile</div></div></div><div class="avatar">'+u.initials+'</div></div>'
+    +'<div class="sc"><div class="sec">Contact</div><div class="card">'
+    +dr('Email',u.email)+dr('Phone',u.phone||'—')
+    +dr('Secondary Contact',(u.secondaryContact||'—')+(u.secondaryPhone?' &nbsp;&#183;&nbsp; '+u.secondaryPhone:''))
+    +dr('Secondary Address',u.secondaryAddress||'—')
+    +(u.notes?'<div style="padding-top:10px;margin-top:4px;border-top:1px solid var(--border)"><div class="lbl">Notes</div><div style="font-size:12px">'+u.notes+'</div></div>':'')
+    +'</div><div class="sec" style="margin-top:4px">Properties ('+myE.length+')</div>';
+  myE.forEach(function(e){
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:16px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim)">'+e.address+'</div>'
+      +(e.contract?'<div style="font-size:9px;color:var(--gold);margin-top:3px;letter-spacing:1px">'+e.contract.tier+' &nbsp;&#183;&nbsp; $'+e.contract.weeklyRate+'/wk</div>':'')
+      +'</div><div style="color:var(--dim);font-size:18px">&#8250;</div></div>';
+  });
+  html+='</div>';
+  render(html);
+}
+
+function goAddClient(){
+  var html=topBar('Add Client','New Account','goClients')
+    +'<div class="sc"><div class="sec">Account</div><div class="card">'
+    +ff('Full Name','text','ncName','e.g. John Smith')+ff('Email','email','ncEmail','login@email.com')+ff('Password','text','ncPass','test')+ff('Phone','tel','ncPhone','')
+    +'</div><div class="sec" style="margin-top:4px">Secondary Contact</div><div class="card">'
+    +ff('Name','text','ncSecName','Spouse / Property Manager')+ff('Phone','tel','ncSecPhone','')+ff('Secondary Address','text','ncSecAddr','Where living while away')
+    +'</div><div class="sec" style="margin-top:4px">Notes</div><div class="card"><textarea id="ncNotes" style="width:100%;background:var(--ch2);border:1px solid var(--border);color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;padding:12px;resize:none;height:80px;outline:none;border-radius:1px" placeholder="Preferences, notes…"></textarea></div>'
+    +'<div id="ncErr" style="display:none;font-size:10px;color:var(--red);letter-spacing:1px;margin-top:10px">Please fill in name, email and password.</div>'
+    +'<button class="btn-gold" onclick="saveClient()">Save Client</button>'
+    +'<button class="btn-ghost" onclick="goClients()">Cancel</button></div>';
+  render(html);
+}
+
+function saveClient(){
+  var name=document.getElementById('ncName').value.trim();
+  var email=document.getElementById('ncEmail').value.trim().toLowerCase();
+  if(!name||!email){document.getElementById('ncErr').style.display='block';return;}
+  var initials=name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  users.push({email:email,password:document.getElementById('ncPass').value.trim()||'test',role:'client',name:name,initials:initials,phone:document.getElementById('ncPhone').value.trim(),secondaryContact:document.getElementById('ncSecName').value.trim(),secondaryPhone:document.getElementById('ncSecPhone').value.trim(),secondaryAddress:document.getElementById('ncSecAddr').value.trim(),notes:document.getElementById('ncNotes').value.trim()});
+  showToast('Client added');goClients();
+}
+
+// ── ESTATES ───────────────────────────────────────────────────────────────
+function goEstates(){
+  var html=topBar('Estates',estates.length+' Properties')
+    +'<div class="sc"><button class="btn-sm" onclick="goAddEstate()" style="margin-bottom:16px">+ Add Estate</button>';
+  estates.forEach(function(e){
+    var sc=liveScore(e);var con=e.contract;
+    var completed=e.pastInspections.length+(e.completedAt?1:0);
+    var pct=con&&con.totalInspections>0?Math.round(completed/con.totalInspections*100):0;
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+'</div></div>'
+      +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc.score+'%</div></div>'
+      +(con?'<div style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">'+con.tier+' &nbsp;&#183;&nbsp; $'+con.contractValue.toLocaleString('en',{maximumFractionDigits:0})+' total</div>'
+        +'<div style="font-size:9px;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:4px"><span>'+completed+' / '+con.totalInspections+' inspections</span><span>'+pct+'%</span></div>'
+        +'<div class="pbar-wrap"><div class="pbar" style="width:'+pct+'%"></div></div>':'')
+      +'</div>';
+  });
+  html+='</div>'+nav('estates');
+  render(html);
+}
+
+function goEstateDetail(id){
+  var e=estates.find(function(x){return x.id===id;});if(!e)return;
+  var con=e.contract,sc=liveScore(e);
+  var insp=con?inspectors.find(function(i){return i.id===con.assignedInspector;}):null;
+  var completed=e.pastInspections.length+(e.completedAt?1:0);
+  var remaining=con?(con.totalInspections-completed):0;
+  var pct=con&&con.totalInspections>0?Math.round(completed/con.totalInspections*100):0;
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goEstates()">&#8592;</button><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">Estate Detail</div></div></div><div class="avatar">EC</div></div>'
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px">'+ringHtml(sc)+statsHtml(sc)+'</div></div>'
+    +'<div class="sec">Property</div><div class="card">'
+    +dr('Address',e.address)+dr('Type',e.propertyType||'—')+dr('Postal Code',e.postalCode||'—')
+    +dr('Client',e.clientName)+dr('Features',(e.specialFeatures||[]).join(', ')||'—')
+    +dr('Emergency',e.emergencyContact||'—')
+    +'</div>';
+  if(con){
+    var s=new Date(con.startDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    var end=new Date(con.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    var ret=new Date(con.returnDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    var nxt=new Date(con.nextInspection).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    html+='<div class="sec" style="margin-top:4px">Service Contract</div><div class="card">'
+      +dr('Tier','<span style="color:var(--gold)">'+con.tier+'</span>')
+      +dr('Rate','$'+con.weeklyRate+' / week')
+      +dr('Contract Value','<span style="color:var(--green)">$'+con.contractValue.toLocaleString('en',{maximumFractionDigits:0})+'</span>')
+      +dr('Start',s)+dr('End (Service)',end)+dr('Client Returns',ret)
+      +dr('Inspector',insp?insp.name:'<span style="color:var(--yellow)">Unassigned</span>')
+      +dr('Next Inspection','<span style="color:var(--gl)">'+nxt+'</span>')
+      +(con.tier==='Luxury'?dr('Policy',con.policyReviewed?'&#10003; Reviewed':'&#9888; Pending Review'):'')
+      +'<div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">'
+      +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Contract Progress</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:4px"><span>'+completed+' of '+con.totalInspections+'</span><span>'+pct+'%</span></div>'
+      +'<div class="pbar-wrap" style="height:6px"><div class="pbar" style="width:'+pct+'%"></div></div>'
+      +'<div style="display:flex;justify-content:space-between;margin-top:10px">'
+      +'<div style="text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1px">REMAINING</div><div style="font-family:var(--ff);font-size:22px">'+remaining+'</div></div>'
+      +'<div style="text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1px">WEEKS</div><div style="font-family:var(--ff);font-size:22px">'+con.totalWeeks+'</div></div>'
+      +'<div style="text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1px">TIER</div><div style="font-size:14px;color:var(--gold);margin-top:4px">'+con.tier+'</div></div>'
+      +'</div></div></div>';
+  }
+  html+='</div>';
+  render(html);
+}
+
+function goAddEstate(){
+  var clients=users.filter(function(u){return u.role==='client';});
+  var clientOpts=clients.map(function(u){return '<option value="'+u.email+'">'+u.name+'</option>';}).join('');
+  var inspOpts=inspectors.map(function(i){return '<option value="'+i.id+'">'+i.name+'</option>';}).join('');
+  var html=topBar('Add Estate','New Property','goEstates')
+    +'<div class="sc"><div class="sec">Property</div><div class="card">'
+    +ff('Property Name','text','neName','e.g. Hartwell Estate')+ff('Address','text','neAddr','')+ff('Postal Code','text','nePostal','e.g. 34108')
+    +fs('Property Type','neType','<option>Single Family</option><option>Estate</option><option>Condo</option><option>Vacation Home</option>')
+    +'<div class="lbl">Special Features</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">'
+    +['Pool','Spa','Elevator','Generator','Wine Cellar'].map(function(f){return '<label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer"><input type="checkbox" value="'+f+'" class="feat-cb" style="accent-color:var(--gold)"> '+f+'</label>';}).join('')
+    +'</div>'+ff('Emergency Contact','text','neEmerg','Name & phone')
+    +'</div><div class="sec" style="margin-top:4px">Client</div><div class="card">'
+    +'<div class="lbl">Select Client</div><select class="sel" id="neClient">'+clientOpts+'</select>'
+    +'</div><div class="sec" style="margin-top:4px">Service Contract</div><div class="card">'
+    +'<div class="lbl">Service Tier</div>'
+    +'<select class="sel" id="neTier" onchange="onTierChange()">'
+    +'<option value="Basic">Basic — $49.95/week (1 inspection/week)</option>'
+    +'<option value="Premium">Premium — $59.95/week (2 inspections/week)</option>'
+    +'<option value="Luxury">Luxury — $69.95/week (every 3 days)</option>'
+    +'</select>'
+    +'<div id="luxSection" style="display:none;background:rgba(201,168,76,0.08);border:1px solid var(--border);border-radius:2px;padding:12px;margin-bottom:14px">'
+    +'<div style="font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">&#128196; Insurance Policy Required</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-bottom:10px">Upload client home insurance policy. Frequency confirmed after review.</div>'
+    +'<input type="file" id="nePolicy" accept=".pdf,.jpg,.png" style="font-size:12px;color:var(--text)">'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:6px">Default pricing: every 3 days</div>'
+    +'</div>'
+    +ff('Service Start Date','date','neStart','')+ff('Client Return Date','date','neReturn','')
+    +'<div id="calcDiv" style="display:none;background:var(--ch3);border-radius:2px;padding:12px;margin-bottom:14px"><div class="lbl">Contract Summary</div><div id="calcText" style="font-size:12px;line-height:2"></div></div>'
+    +fs('Assign Inspector','neInspector',inspOpts)
+    +'</div>'
+    +'<div id="neErr" style="display:none;font-size:10px;color:var(--red);letter-spacing:1px;margin-top:8px">Please fill in all required fields.</div>'
+    +'<button class="btn-gold" onclick="saveEstate()">Save Estate</button>'
+    +'<button class="btn-ghost" onclick="goEstates()">Cancel</button></div>';
+  render(html);
+  document.getElementById('neStart').addEventListener('change',updateCalc);
+  document.getElementById('neReturn').addEventListener('change',updateCalc);
+}
+
+function onTierChange(){
+  var tier=document.getElementById('neTier').value;
+  var lux=document.getElementById('luxSection');
+  if(lux)lux.style.display=tier==='Luxury'?'block':'none';
+  updateCalc();
+}
+
+function updateCalc(){
+  var start=document.getElementById('neStart').value;
+  var ret=document.getElementById('neReturn').value;
+  var tier=document.getElementById('neTier').value;
+  var cd=document.getElementById('calcDiv');
+  if(!start||!ret||!cd)return;
+  var sd=new Date(start),rd=new Date(ret),ed=new Date(ret);
+  ed.setDate(ed.getDate()-2);
+  var days=Math.round((ed-sd)/(86400000));
+  if(days<=0){cd.style.display='none';return;}
+  var weeks=days/7,rate=tier==='Basic'?49.95:tier==='Premium'?59.95:69.95;
+  var insp=tier==='Basic'?Math.round(weeks):tier==='Premium'?Math.round(weeks*2):Math.round(days/3);
+  var val=(weeks*rate).toFixed(2);
+  var ends=ed.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('calcText').innerHTML='End Date (2 days before return): <b style="color:var(--gl)">'+ends+'</b><br>Contract Weeks: <b style="color:var(--gl)">'+Math.round(weeks*10)/10+'</b><br>Total Inspections: <b style="color:var(--gl)">'+insp+'</b><br>Contract Value: <b style="color:var(--green)">$'+parseFloat(val).toLocaleString()+'</b>';
+  cd.style.display='block';
+}
+
+function saveEstate(){
+  var name=document.getElementById('neName').value.trim();
+  var addr=document.getElementById('neAddr').value.trim();
+  var start=document.getElementById('neStart').value;
+  var ret=document.getElementById('neReturn').value;
+  if(!name||!addr||!start||!ret){document.getElementById('neErr').style.display='block';return;}
+  var tier=document.getElementById('neTier').value;
+  var rate=tier==='Basic'?49.95:tier==='Premium'?59.95:69.95;
+  var sd=new Date(start),rd=new Date(ret),ed=new Date(ret);ed.setDate(ed.getDate()-2);
+  var days=Math.round((ed-sd)/(86400000)),weeks=days/7;
+  var totalInsp=tier==='Basic'?Math.round(weeks):tier==='Premium'?Math.round(weeks*2):Math.round(days/3);
+  var features=[];
+  document.querySelectorAll('.feat-cb:checked').forEach(function(cb){features.push(cb.value);});
+  var clientEmail=document.getElementById('neClient').value;
+  var client=users.find(function(u){return u.email===clientEmail;});
+  var inspId=document.getElementById('neInspector').value;
+  var id='estate_'+Date.now();
+  var newEstate={id:id,name:name,address:addr,icon:'&#127968;',
+    clientEmail:clientEmail,clientName:client?client.name:clientEmail,
+    propertyType:document.getElementById('neType').value,
+    postalCode:document.getElementById('nePostal').value.trim(),
+    specialFeatures:features,
+    emergencyContact:document.getElementById('neEmerg').value.trim(),
+    contract:{tier:tier,weeklyRate:rate,inspectionsPerWeek:tier==='Basic'?1:tier==='Premium'?2:2.33,
+      startDate:sd,endDate:ed,returnDate:rd,
+      totalWeeks:Math.round(weeks*10)/10,totalInspections:totalInsp,
+      contractValue:Math.round(weeks*rate*100)/100,
+      nextInspection:new Date(sd),status:'Active',
+      policyFile:null,policyReviewed:false,assignedInspector:inspId},
+    completedAt:null,completedCats:{},pastInspections:[],
+    data:{
+      exterior:{label:'Exterior',icon:'&#127969;',points:[mkPt('ex1','Front Entry & Door',null,''),mkPt('ex2','Roof & Gutters',null,''),mkPt('ex3','Windows & Seals',null,''),mkPt('ex4','Driveway & Walkways',null,''),mkPt('ex5','Garage Door',null,''),mkPt('ex6','Exterior Lighting',null,'')]},
+      interior:{label:'Interior',icon:'&#128715;',points:[mkPt('in1','HVAC System',null,''),mkPt('in2','Water Heater',null,''),mkPt('in3','Kitchen Appliances',null,''),mkPt('in4','Plumbing & Fixtures',null,''),mkPt('in5','Electrical Panel',null,''),mkPt('in6','Security System',null,'')]},
+      grounds:{label:'Grounds',icon:'&#127807;',points:[mkPt('gr1','Lawn & Landscaping',null,''),mkPt('gr2','Irrigation System',null,''),mkPt('gr3','Pool & Equipment',null,''),mkPt('gr4','Outdoor Furniture',null,'')]}}};
+  estates.push(newEstate);
+  genSchedule(newEstate);
+  showToast('Estate added');goEstates();
+}
+
+// ── INSPECTORS ────────────────────────────────────────────────────────────
+function goInspectors(){
+  var html=topBar('Inspectors',inspectors.length+' Active')
+    +'<div class="sc"><button class="btn-sm" onclick="goAddInspector()" style="margin-bottom:16px">+ Add Inspector</button>';
+  inspectors.forEach(function(insp){
+    var assigned=estates.filter(function(e){return e.contract&&e.contract.assignedInspector===insp.id;});
+    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="avatar">'+insp.initials+'</div>'
+      +'<div style="flex:1"><div style="font-size:14px;font-weight:500">'+insp.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+insp.email+'</div>'
+      +'<div style="font-size:10px;color:var(--dim)">'+insp.phone+'</div>'
+      +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+assigned.length+' assigned &nbsp;&#183;&nbsp; Postal: '+insp.postalCode+'</div>'
+      +'</div></div>';
+  });
+  html+='</div>'+nav('inspectors');
+  render(html);
+}
+
+function goAddInspector(){
+  var html=topBar('Add Inspector','New Team Member','goInspectors')
+    +'<div class="sc"><div class="sec">Inspector Details</div><div class="card">'
+    +ff('Full Name','text','niName','')+ff('Email','email','niEmail','')+ff('Password','text','niPass','test')
+    +ff('Phone','tel','niPhone','')+ff('Postal Code','text','niPostal','Base postal code')
+    +'</div>'
+    +'<div id="niErr" style="display:none;font-size:10px;color:var(--red);letter-spacing:1px;margin-top:8px">Please fill name and email.</div>'
+    +'<button class="btn-gold" onclick="saveInspector()">Save Inspector</button>'
+    +'<button class="btn-ghost" onclick="goInspectors()">Cancel</button></div>';
+  render(html);
+}
+
+function saveInspector(){
+  var name=document.getElementById('niName').value.trim();
+  var email=document.getElementById('niEmail').value.trim().toLowerCase();
+  if(!name||!email){document.getElementById('niErr').style.display='block';return;}
+  var initials=name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  var id='insp_'+Date.now();
+  inspectors.push({id:id,name:name,email:email,phone:document.getElementById('niPhone').value.trim(),initials:initials,postalCode:document.getElementById('niPostal').value.trim(),assignedEstates:[]});
+  users.push({email:email,password:document.getElementById('niPass').value.trim()||'test',role:'inspector',name:name,initials:initials});
+  showToast('Inspector added');goInspectors();
+}
+
+// ── SIGN OUT ──────────────────────────────────────────────────────────────
+function doSignOut(){localStorage.removeItem('ec_user');window.location.href='login.html';}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+goDash();
+</script>
+</body>
+</html>

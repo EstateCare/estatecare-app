@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EstateCare</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
+:root{--black:#0a0a0a;--ch:#141414;--ch2:#1c1c1c;--gold:#c9a84c;--gl:#e2c97e;--gd:rgba(201,168,76,0.15);--red:#e05c5c;--text:#f0ece4;--dim:#9a9488;--border:rgba(201,168,76,0.2);--ff:"Cormorant Garamond",serif;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);background:var(--black);}
+#screen{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.gold-line{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto;}
+.btn-gold{width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:16px;cursor:pointer;}
+.btn-outline-gold{width:100%;background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gl);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;padding:14px;cursor:pointer;}
+.btn-ghost{width:100%;background:transparent;border:none;color:var(--dim);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:4px;}
+.inp{width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:16px;font-weight:300;padding:12px 16px;margin-bottom:16px;outline:none;}
+.inp:focus{border-color:var(--gold);}
+.lbl{font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;}
+.card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:24px;}
+</style>
+</head>
+<body>
+<div id="app"><div id="screen"></div></div>
+<script>
+var EC=window.EC||{};
+
+var users=[
+  {email:'admin@estatecare.com',password:'test',role:'admin',name:'Justin',initials:'EC'},
+  {email:'inspector@estatecare.com',password:'test',role:'inspector',name:'John Davis',initials:'JD'},
+  {email:'client1@estatecare.com',password:'test',role:'client',name:'Michael Hartwell',initials:'MH'},
+  {email:'client2@estatecare.com',password:'test',role:'client',name:'Sandra Beaumont',initials:'SB'}
+];
+
+function render(html){document.getElementById('screen').innerHTML=html;}
+
+function showWelcome(){
+  render(
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 60px;background:radial-gradient(ellipse at 50% 30%,#2a1e05 0%,#0a0a0a 70%);min-height:100vh">'
+    +'<div style="text-align:center;margin-bottom:40px;padding:0 24px">'
+    +'<svg width="70" height="80" viewBox="0 0 80 90" style="margin-bottom:8px">'
+    +'<polyline points="8,42 40,10 72,42" fill="none" stroke="#c9a84c" stroke-width="2.5" stroke-linejoin="round"/>'
+    +'<rect x="14" y="42" width="52" height="36" fill="none" stroke="#c9a84c" stroke-width="2.5"/>'
+    +'<rect x="30" y="50" width="20" height="16" fill="none" stroke="#c9a84c" stroke-width="1.5"/>'
+    +'<line x1="40" y1="50" x2="40" y2="66" stroke="#c9a84c" stroke-width="1"/>'
+    +'<line x1="30" y1="58" x2="50" y2="58" stroke="#c9a84c" stroke-width="1"/>'
+    +'<line x1="40" y1="78" x2="40" y2="90" stroke="#c9a84c" stroke-width="2.5"/>'
+    +'<circle cx="40" cy="78" r="5" fill="none" stroke="#c9a84c" stroke-width="2"/>'
+    +'<line x1="44" y1="83" x2="48" y2="83" stroke="#c9a84c" stroke-width="1.5"/>'
+    +'<line x1="44" y1="87" x2="47" y2="87" stroke="#c9a84c" stroke-width="1.5"/>'
+    +'</svg>'
+    +'<div style="font-family:var(--ff);font-size:38px;font-weight:600;letter-spacing:6px;color:var(--gl)">ESTATE CARE</div>'
+    +'<div class="gold-line"></div>'
+    +'<div style="font-size:10px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;opacity:.85">Luxury Home Maintenance</div>'
+    +'</div>'
+    +'<div style="width:100%;padding:0 32px;display:flex;flex-direction:column;gap:12px">'
+    +'<button class="btn-gold" onclick="showLogin()">Get Started</button>'
+    +'<button class="btn-outline-gold" onclick="showLogin()">Already a Client? Log In</button>'
+    +'</div></div>'
+  );
+}
+
+function showLogin(){
+  render(
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a);min-height:100vh">'
+    +'<div style="text-align:center;margin-bottom:32px">'
+    +'<div style="font-family:var(--ff);font-size:36px;letter-spacing:5px;color:var(--gl)">EstateCare</div>'
+    +'<div class="gold-line"></div>'
+    +'<div style="font-size:10px;letter-spacing:4px;color:var(--dim);text-transform:uppercase">Luxury Home Maintenance</div>'
+    +'</div>'
+    +'<div class="card" style="width:100%;max-width:360px">'
+    +'<div class="lbl">Email</div>'
+    +'<input class="inp" type="email" id="loginEmail" placeholder="your@email.com">'
+    +'<div class="lbl">Password</div>'
+    +'<input class="inp" type="password" id="loginPass" placeholder="••••••••">'
+    +'<div id="loginErr" style="display:none;font-size:10px;color:var(--red);letter-spacing:1px;text-align:center;margin-bottom:12px">Incorrect email or password</div>'
+    +'<button class="btn-gold" onclick="doLogin()">Sign In</button>'
+    +'<button class="btn-ghost" onclick="showWelcome()">&#8592; Back</button>'
+    +'</div>'
+    +'<div style="margin-top:24px;text-align:center;font-size:9px;color:var(--dim);letter-spacing:1px;line-height:2">'
+    +'TEST ACCOUNTS<br>'
+    +'admin@estatecare.com / test<br>'
+    +'inspector@estatecare.com / test<br>'
+    +'client1@estatecare.com / test<br>'
+    +'client2@estatecare.com / test'
+    +'</div>'
+    +'</div>'
+  );
+}
+
+function doLogin(){
+  var email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  var pass=document.getElementById('loginPass').value;
+  var user=users.find(function(u){return u.email===email&&u.password===pass;});
+  if(!user){document.getElementById('loginErr').style.display='block';return;}
+
+  // Store current user for the destination app
+  localStorage.setItem('ec_user',JSON.stringify(user));
+
+  // Route to correct app
+  if(user.role==='admin') window.location.href='admin.html';
+  else if(user.role==='inspector') window.location.href='inspector.html';
+  else window.location.href='client.html';
+}
+
+// Allow Enter key to submit
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter') doLogin();
+});
+
+showWelcome();
+</script>
+</body>
+</html>

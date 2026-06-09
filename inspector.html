@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EstateCare Inspector</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
+:root{--black:#0a0a0a;--ch:#141414;--ch2:#1c1c1c;--ch3:#242424;--gold:#c9a84c;--gl:#e2c97e;--gd:rgba(201,168,76,0.15);--green:#4caf7d;--yellow:#e6b84a;--red:#e05c5c;--text:#f0ece4;--dim:#9a9488;--border:rgba(201,168,76,0.2);--ff:"Cormorant Garamond",serif;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;}
+#screen::-webkit-scrollbar{width:3px;}
+#screen::-webkit-scrollbar-thumb{background:var(--gd);}
+.topbar{background:var(--ch);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:var(--ff);font-size:22px;letter-spacing:2px;color:var(--gl);}
+.topbar-sub{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--gd);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold);cursor:pointer;flex-shrink:0;}
+.back-btn{background:none;border:none;color:var(--gold);cursor:pointer;font-size:22px;line-height:1;padding:0;margin-right:12px;}
+.sc{flex:1;padding:20px;}
+.bnav{background:var(--ch);border-top:1px solid var(--border);display:flex;flex-shrink:0;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px;cursor:pointer;color:var(--dim);font-size:8px;letter-spacing:1px;text-transform:uppercase;gap:4px;border:none;background:none;}
+.ni.active{color:var(--gold);}
+.ni span{font-size:16px;}
+.btn-gold{width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px;cursor:pointer;margin-top:8px;}
+.btn-outline{width:100%;background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gl);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:8px;}
+.btn-ghost{width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer;margin-top:8px;}
+.sec{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;margin-top:4px;}
+.card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:10px;}
+.card.tap{cursor:pointer;transition:border-color .2s;}
+.card.tap:hover{border-color:var(--gold);}
+.cat-ico{width:38px;height:38px;border-radius:50%;background:var(--gd);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.cstat{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.cs-g{background:var(--green);box-shadow:0 0 5px var(--green);}
+.cs-y{background:var(--yellow);box-shadow:0 0 5px var(--yellow);}
+.cs-r{background:var(--red);box-shadow:0 0 5px var(--red);}
+.cs-p{background:var(--ch3);border:1px solid var(--dim);}
+.pbar-wrap{background:var(--ch3);border-radius:10px;height:3px;margin-top:6px;overflow:hidden;}
+.pbar{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--gl));}
+.cat-signed{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:1.5px;color:var(--green);text-transform:uppercase;margin-top:4px;}
+.point-card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:border-color .2s;}
+.point-card.tappable{cursor:pointer;}
+.point-card.tappable:hover{border-color:var(--gold);}
+.point-card.locked{opacity:.6;}
+.sbtn{width:32px;height:32px;border-radius:50%;border:2px solid var(--ch3);background:var(--ch3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+.sbtn.g{border-color:var(--green);background:rgba(76,175,125,.15);}
+.sbtn.y{border-color:var(--yellow);background:rgba(230,184,74,.15);}
+.sbtn.r{border-color:var(--red);background:rgba(224,92,92,.15);}
+.trio{display:flex;gap:6px;}
+.locked-banner{background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.25);border-radius:2px;padding:10px 14px;font-size:10px;letter-spacing:1.5px;color:var(--green);text-transform:uppercase;margin-bottom:12px;}
+.ring-bg{fill:none;stroke:var(--ch3);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;}
+.ring-score{font-family:var(--ff);font-size:26px;fill:var(--gl);}
+.stat-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.sname{font-size:10px;letter-spacing:1px;color:var(--dim);flex:1;text-transform:uppercase;}
+.sval{font-size:15px;font-family:var(--ff);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:var(--ch);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:var(--ff);font-size:20px;color:var(--gl);margin-bottom:4px;}
+.modal-sub{font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:16px;}
+.mtextarea{width:100%;background:var(--ch2);border:1px solid var(--border);color:var(--text);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:300;padding:12px;resize:none;height:90px;outline:none;margin-bottom:14px;border-radius:1px;}
+.photo-add{width:72px;height:72px;border-radius:2px;border:1px dashed var(--border);background:var(--ch2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);gap:4px;}
+.photo-add:hover{border-color:var(--gold);color:var(--gold);}
+.photo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.thumb-wrap{position:relative;width:72px;height:72px;}
+.thumb{width:72px;height:72px;object-fit:cover;border-radius:2px;border:1px solid var(--border);}
+.thumb-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.photo-err{font-size:10px;color:var(--red);letter-spacing:1px;margin-bottom:10px;display:none;}
+.photo-err.show{display:block;}
+.req-badge{background:rgba(224,92,92,.15);border:1px solid var(--red);border-radius:10px;padding:2px 8px;font-size:8px;letter-spacing:1.5px;color:var(--red);text-transform:uppercase;}
+.pd-status{display:inline-flex;align-items:center;gap:8px;border-radius:20px;padding:4px 14px;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ch);border:1px solid var(--gold);border-radius:2px;padding:10px 20px;font-size:11px;color:var(--gl);z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;}
+.comp-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;}
+.check-circle{width:80px;height:80px;border-radius:50%;background:rgba(76,175,125,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px;}
+.gold-line{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto;}
+</style>
+</head>
+<body>
+<div id="app"><div id="screen"></div></div>
+<div class="modal-overlay" id="notesModal">
+  <div class="modal-sheet">
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-sub" id="mSub"></div>
+    <div style="font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px">Photos <span class="req-badge" id="reqBadge" style="display:none">Required</span></div>
+    <div class="photo-grid" id="photoGrid"></div>
+    <div class="photo-err" id="photoErr">Photo required for red conditions</div>
+    <input type="file" id="photoInput" accept="image/*" capture="environment" multiple style="display:none" onchange="onPhotoSelected(event)">
+    <textarea class="mtextarea" id="mNotes" placeholder="Describe the issue…"></textarea>
+    <div style="display:flex;gap:10px">
+      <button class="btn-ghost" style="margin:0" onclick="closeModal()">Cancel</button>
+      <button class="btn-gold" style="margin:0" onclick="saveNote()">Save</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="pdModal">
+  <div class="modal-sheet" id="pdContent"></div>
+</div>
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-sheet">
+    <div class="modal-title">Start New Inspection?</div>
+    <div class="modal-sub" style="margin-bottom:20px">Previous inspection will be saved to history.</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-ghost" style="margin:0" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-gold" style="margin:0" onclick="doNew()">Start Fresh</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var currentUser=JSON.parse(localStorage.getItem('ec_user')||'null');
+// Fallback for direct testing (remove in production)
+if(!currentUser||currentUser.role!=='inspector'){
+  currentUser={email:'inspector@estatecare.com',password:'test',role:'inspector',name:'John Davis',initials:'JD'};
+}
+
+function mkPt(id,name,status,notes){return{id:id,name:name,status:status,notes:notes,photos:[]};}
+
+var inspectors=[{id:'insp1',name:'John Davis',email:'inspector@estatecare.com',phone:'239-555-0101',initials:'JD',postalCode:'34108'}];
+
+var estates=[
+  {id:'vs',name:'Hartwell Estate',address:'1402 Pelican Bay Drive, Naples FL 34108',icon:'&#127969;',clientEmail:'client1@estatecare.com',postalCode:'34108',
+   contract:{tier:'Premium',weeklyRate:59.95,nextInspection:new Date('2026-06-15'),assignedInspector:'insp1'},
+   completedAt:new Date('2026-06-01'),completedCats:{exterior:new Date('2026-06-01'),interior:new Date('2026-06-01'),grounds:new Date('2026-06-01')},pastInspections:[],
+   data:{
+    exterior:{label:'Exterior',icon:'&#127969;',points:[mkPt('e1','Front Entry & Door','green',''),mkPt('e2','Roof & Gutters','green',''),mkPt('e3','Windows & Seals','yellow','West window seal has slight gap.'),mkPt('e4','Driveway & Walkways','green',''),mkPt('e5','Garage Door','green',''),mkPt('e6','Exterior Lighting','yellow','Two path lights not working.')]},
+    interior:{label:'Interior',icon:'&#128715;',points:[mkPt('i1','HVAC System','green',''),mkPt('i2','Water Heater','green',''),mkPt('i3','Kitchen Appliances','green',''),mkPt('i4','Plumbing & Fixtures','red','Active leak under guest bath vanity.'),mkPt('i5','Electrical Panel','green',''),mkPt('i6','Security System','yellow','Battery backup low.')]},
+    grounds:{label:'Grounds',icon:'&#127807;',points:[mkPt('g1','Lawn & Landscaping','green',''),mkPt('g2','Irrigation System','yellow','Zone 4 head blocked.'),mkPt('g3','Pool & Equipment','green',''),mkPt('g4','Outdoor Furniture','green','')]}}},
+  {id:'mh',name:'Beaumont Residence',address:'880 Gulf Shore Blvd N, Naples FL 34102',icon:'&#127963;',clientEmail:'client2@estatecare.com',postalCode:'34102',
+   contract:{tier:'Luxury',weeklyRate:69.95,nextInspection:new Date('2026-06-11'),assignedInspector:'insp1'},
+   completedAt:new Date('2026-05-28'),completedCats:{exterior:new Date('2026-05-28'),interior:new Date('2026-05-28'),grounds:new Date('2026-05-28')},pastInspections:[],
+   data:{
+    exterior:{label:'Exterior',icon:'&#127969;',points:[mkPt('me1','Front Entry & Door','green',''),mkPt('me2','Roof & Gutters','yellow','Debris in north valley gutter.'),mkPt('me3','Windows & Seals','green',''),mkPt('me4','Driveway & Walkways','green',''),mkPt('me5','Garage Door','red','Auto-reverse sensor failed.'),mkPt('me6','Exterior Lighting','green','')]},
+    interior:{label:'Interior',icon:'&#128715;',points:[mkPt('mi1','HVAC System','green',''),mkPt('mi2','Water Heater','green',''),mkPt('mi3','Kitchen Appliances','green',''),mkPt('mi4','Plumbing & Fixtures','green',''),mkPt('mi5','Electrical Panel','yellow','Outdoor breaker warm to touch.'),mkPt('mi6','Security System','green','')]},
+    grounds:{label:'Grounds',icon:'&#127807;',points:[mkPt('mg1','Lawn & Landscaping','green',''),mkPt('mg2','Irrigation System','yellow','Zone 3 head clogged.'),mkPt('mg3','Pool & Equipment','green',''),mkPt('mg4','Outdoor Furniture','green','')]}}}
+];
+
+var scheduleItems=[];
+var calViewDate=new Date();
+var curEstateId=null,curCat=null,activePoint=null,selKey=null;
+
+function CE(){return estates.find(function(e){return e.id===curEstateId;});}
+function CD(){return CE()?CE().data:null;}
+
+function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.status==='green')g++;else if(p.status==='yellow')y++;else if(p.status==='red')r++;});return{score:t>0?Math.round(((g*2+y)/(t*2))*100):0,green:g,yellow:y,red:r,total:t};}
+function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});return scoreOf(all);}
+function liveSnap(e){var s={};Object.keys(e.data).forEach(function(k){var c=e.data[k];s[k]={label:c.label,icon:c.icon,points:c.points.map(function(p){return{id:p.id,name:p.name,status:p.status,notes:p.notes,photos:(p.photos||[]).slice()};})};});return s;}
+
+function autoAssign(postal,date){
+  var ds=date.toDateString(),loads={};
+  inspectors.forEach(function(i){loads[i.id]=0;});
+  scheduleItems.forEach(function(s){if(s.date&&s.date.toDateString()===ds&&s.inspectorId)loads[s.inspectorId]=(loads[s.inspectorId]||0)+1;});
+  var sorted=inspectors.slice().sort(function(a,b){var am=a.postalCode&&postal&&a.postalCode.substring(0,3)===postal.substring(0,3)?0:1;var bm=b.postalCode&&postal&&b.postalCode.substring(0,3)===postal.substring(0,3)?0:1;if(am!==bm)return am-bm;return(loads[a.id]||0)-(loads[b.id]||0);});
+  var p=sorted.find(function(i){return(loads[i.id]||0)<8;});return p?p.id:null;
+}
+function genSchedule(estate){
+  if(!estate.contract)return;
+  var con=estate.contract,start=new Date(con.startDate||new Date()),end=new Date(con.endDate||new Date());
+  scheduleItems=scheduleItems.filter(function(s){return s.estateId!==estate.id;});
+  var d=new Date(start),count=0,interval=con.tier==='Basic'?7:con.tier==='Premium'?3.5:3;
+  while(d<=end){
+    scheduleItems.push({id:estate.id+'_'+count,estateId:estate.id,inspectorId:autoAssign(estate.postalCode,new Date(d)),date:new Date(d),status:d<new Date()?'completed':'scheduled'});
+    if(con.tier==='Premium')d.setDate(d.getDate()+(count%2===0?3:4));else d.setDate(d.getDate()+Math.round(interval));
+    count++;
+  }
+}
+estates.forEach(genSchedule);
+
+function getMySchedule(){return scheduleItems.filter(function(s){return s.inspectorId==='insp1';});}
+function getMyForDate(ds){return getMySchedule().filter(function(s){return s.date&&s.date.toDateString()===ds;});}
+
+function render(html){
+  document.getElementById('screen').innerHTML=html;
+  document.querySelectorAll('[data-action]').forEach(function(el){
+    el.addEventListener('click',function(){
+      var a=this.getAttribute('data-action');
+      if(a==='openEstate'){curEstateId=this.getAttribute('data-id');openDetail('live');}
+      else if(a==='openDay') inspDayDetail(this.getAttribute('data-date'));
+    });
+  });
+  document.querySelectorAll('.sbtn[data-pid]').forEach(function(btn){
+    btn.addEventListener('click',function(ev){ev.stopPropagation();setStatus(this.getAttribute('data-pid'),this.getAttribute('data-cat'),this.getAttribute('data-s'));});
+  });
+  document.querySelectorAll('[data-pdkey]').forEach(function(card){
+    card.addEventListener('click',function(ev){if(ev.target.closest('.sbtn'))return;var fn=window[this.getAttribute('data-pdkey')];if(fn)fn();});
+  });
+}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+
+function ringHtml(sc,sz){sz=sz||80;var off=226-(226*sc.score/100);return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 90 90"><circle class="ring-bg" cx="45" cy="45" r="36"/><circle class="ring-fill" cx="45" cy="45" r="36" stroke="#c9a84c" stroke-dasharray="226" stroke-dashoffset="'+off+'" transform="rotate(-90 45 45)"/><text class="ring-score" x="45" y="50" text-anchor="middle">'+sc.score+'%</text></svg>';}
+function statsHtml(sc){return '<div style="flex:1"><div class="stat-row"><div class="sdot" style="background:var(--green)"></div><div class="sname">Healthy</div><div class="sval">'+sc.green+'</div></div><div class="stat-row"><div class="sdot" style="background:var(--yellow)"></div><div class="sname">Monitor</div><div class="sval">'+sc.yellow+'</div></div><div class="stat-row"><div class="sdot" style="background:var(--red)"></div><div class="sname">Attention</div><div class="sval">'+sc.red+'</div></div></div>';}
+function nav(active){return '<div class="bnav"><button class="ni'+(active==='cal'?' active':'')+'" onclick="goCal()"><span>&#128197;</span>Schedule</button><button class="ni'+(active==='props'?' active':'')+'" onclick="goProps()"><span>&#127968;</span>Properties</button><button class="ni'+(active==='settings'?' active':'')+'" onclick="goSettings()"><span>&#9881;</span>Settings</button></div>';}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────────
+function goCal(){renderCal(calViewDate);}
+
+function renderCal(vd){
+  calViewDate=vd;
+  var y=vd.getFullYear(),m=vd.getMonth();
+  var mn=vd.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+  var today=new Date();
+  var myItems=getMySchedule();
+
+  var html='<div class="topbar"><div><div class="topbar-title">My Schedule</div><div class="topbar-sub">'+currentUser.name+'</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+    +'<button onclick="shiftCal(-1)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--gold);padding:8px 14px;cursor:pointer;font-size:18px">&#8249;</button>'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+mn+'</div>'
+    +'<button onclick="shiftCal(1)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--gold);padding:8px 14px;cursor:pointer;font-size:18px">&#8250;</button>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){html+='<div style="text-align:center;font-size:9px;color:var(--dim);padding:4px">'+d+'</div>';});
+  html+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">';
+  for(var i=0;i<fd;i++) html+='<div></div>';
+  for(var d=1;d<=dim;d++){
+    var td=new Date(y,m,d),ds=td.toDateString();
+    var items=myItems.filter(function(s){return s.date&&s.date.toDateString()===ds;});
+    var isT=td.toDateString()===today.toDateString();
+    html+='<div data-action="openDay" data-date="'+ds+'" style="min-height:46px;background:'+(isT?'rgba(201,168,76,0.15)':'var(--ch2)')+';border:1px solid '+(isT?'var(--gold)':'var(--border)')+';border-radius:2px;padding:4px;cursor:'+(items.length?'pointer':'default')+'">'
+      +'<div style="font-size:11px;color:'+(isT?'var(--gold)':'var(--dim)')+'">'+d+'</div>'
+      +(items.length?'<div style="margin-top:3px;font-size:12px;font-weight:500;color:var(--gl)">'+items.length+'</div>':'')
+      +'</div>';
+  }
+  html+='</div>';
+
+  var todayItems=getMyForDate(today.toDateString());
+  if(todayItems.length){
+    html+='<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Today ('+todayItems.length+')</div>';
+    todayItems.forEach(function(s){
+      var e=estates.find(function(x){return x.id===s.estateId;});if(!e)return;
+      html+='<div class="card tap" data-action="openEstate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px">'
+        +'<div class="cat-ico">'+e.icon+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
+        +'<div style="font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:1px">'+e.postalCode+'</div></div>'
+        +'<div style="font-size:9px;color:'+(s.status==='completed'?'var(--green)':'var(--dim)')+';text-transform:uppercase;letter-spacing:1px">'+s.status+'</div></div>';
+    });
+  }
+  html+='</div>'+nav('cal');
+  render(html);
+}
+
+function shiftCal(d){calViewDate=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+d,1);renderCal(calViewDate);}
+
+function inspDayDetail(dateStr){
+  var items=getMyForDate(dateStr);if(!items.length)return;
+  var d=new Date(dateStr);
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goCal()">&#8592;</button><div><div class="topbar-title">'+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div><div class="topbar-sub">'+items.length+' Inspection'+(items.length>1?'s':'')+'</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc"><div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">'+d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+'</div>';
+  items.forEach(function(s,i){
+    var e=estates.find(function(x){return x.id===s.estateId;});if(!e)return;
+    html+='<div class="card tap" data-action="openEstate" data-id="'+e.id+'">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="font-family:var(--ff);font-size:24px;color:var(--gold);min-width:28px;text-align:center">'+(i+1)+'</div>'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:1px">'+e.postalCode+' &nbsp;&#183;&nbsp; '+(e.contract?e.contract.tier:'')+'</div></div>'
+      +'<div style="text-align:right"><div style="font-size:9px;color:'+(s.status==='completed'?'var(--green)':'var(--dim)')+';text-transform:uppercase;letter-spacing:1px">'+s.status+'</div>'
+      +'<div style="font-size:9px;color:var(--gold);margin-top:4px">Tap &#8250;</div></div></div></div>';
+  });
+  html+='</div>';
+  render(html);
+}
+
+// ── PROPERTIES LIST ───────────────────────────────────────────────────────
+function goProps(){
+  var html='<div class="topbar"><div><div class="topbar-title">Properties</div><div class="topbar-sub">Assigned Estates</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+  estates.forEach(function(e){
+    var sc=liveScore(e);
+    var isComp=!!e.completedAt;
+    var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});
+    var done=all.filter(function(p){return p.status!==null;}).length;
+    var lastDate=e.completedAt?new Date(e.completedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
+    html+='<div class="card tap" data-action="openEstate" data-id="'+e.id+'">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
+      +(lastDate?'<div style="font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:1px">Last inspected: '+lastDate+'</div>':'')
+      +'</div><div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc.score+'%</div></div>'
+      +'<div style="display:flex;gap:10px">'
+      +'<div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div><span style="font-size:9px;color:var(--dim)">'+sc.green+'</span></div>'
+      +'<div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:var(--yellow)"></div><span style="font-size:9px;color:var(--dim)">'+sc.yellow+'</span></div>'
+      +'<div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div><span style="font-size:9px;color:var(--dim)">'+sc.red+'</span></div>'
+      +'<span style="flex:1"></span>'
+      +'<span style="font-size:9px;color:'+(isComp?'var(--green)':done>0?'var(--yellow)':'var(--dim)')+';letter-spacing:1px;text-transform:uppercase">'+(isComp?'&#10003; Complete':done>0?'In Progress':'Not Started')+'</span>'
+      +'</div></div>';
+  });
+  html+='</div>'+nav('props');
+  render(html);
+}
+
+// ── ESTATE OVERVIEW / DATE LIST ───────────────────────────────────────────
+function openDetail(key){
+  selKey=key;
+  var e=CE();if(!e)return;
+  var isLive=(key==='live');
+  var isComp=!!e.completedAt;
+  var sc=liveScore(e);
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goProps()">&#8592;</button><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">Property Overview</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px">'
+    +'<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:14px">Current Estate Health</div>'
+    +'<div style="display:flex;align-items:center;gap:20px">'+ringHtml(sc)+statsHtml(sc)+'</div>'
+    +'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Inspections</div>';
+
+  if(isComp){
+    var ds=new Date(e.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'});
+    html+=inspDateCard('live',ds,'&#10003; Completed',sc,false);
+  } else {
+    var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});
+    var done=all.filter(function(p){return p.status!==null;}).length;
+    html+=inspDateCard('live','Current Inspection',done===0?'Not started':done+' / '+all.length+' inspected',scoreOf(all),true);
+  }
+  for(var i=e.pastInspections.length-1;i>=0;i--){
+    var insp=e.pastInspections[i];
+    var ds2=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
+    var sc2=insp.snapshot?scoreOf(Object.values(insp.snapshot).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]);
+    html+=inspDateCard(i,ds2,'&#10003; Completed',sc2,false);
+  }
+
+  var neverStarted=liveScore(e).total===0&&e.pastInspections.length===0;
+  var canStart=neverStarted||isComp;
+  if(canStart) html+='<button class="btn-outline" onclick="startInspection()" style="margin-top:8px">'+(neverStarted?'+ Start Inspection':'+ Start New Inspection')+'</button>';
+  html+='</div>';
+  render(html);
+}
+
+function inspDateCard(key,dateStr,sub,sc,isCurrent){
+  return '<div class="card tap" data-action="openEstate" data-id="'+curEstateId+'" onclick="openDateDetail(\''+key+'\')" style="display:flex;align-items:center;gap:14px;'+(isCurrent?'border-color:var(--yellow)':'')+'">'
+    +'<div style="flex:1"><div style="font-size:13px">'+dateStr+'</div>'
+    +'<div style="font-size:9px;color:'+(isCurrent?'var(--yellow)':'var(--green)')+';letter-spacing:1.5px;text-transform:uppercase;margin-top:3px">'+sub+'</div>'
+    +'<div style="display:flex;gap:5px;align-items:center;margin-top:6px">'
+    +'<div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div><span style="font-size:9px;color:var(--dim);margin-right:6px">'+sc.green+'</span>'
+    +'<div style="width:7px;height:7px;border-radius:50%;background:var(--yellow)"></div><span style="font-size:9px;color:var(--dim);margin-right:6px">'+sc.yellow+'</span>'
+    +'<div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div><span style="font-size:9px;color:var(--dim)">'+sc.red+'</span>'
+    +'</div></div>'
+    +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:22px;color:var(--gl)">'+sc.score+'%</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:4px">View &#8250;</div></div></div>';
+}
+
+function openDateDetail(key){
+  selKey=key;
+  var e=CE();
+  var isLive=(key==='live');
+  var isComp=!!e.completedAt;
+
+  var snap=isLive?null:(e.pastInspections[parseInt(key)]?e.pastInspections[parseInt(key)].snapshot:null);
+  var sc=isLive?liveScore(e):(snap?scoreOf(Object.values(snap).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]));
+  var dateLabel=isLive?(isComp?new Date(e.completedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'Current Inspection'):(e.pastInspections[parseInt(key)]&&e.pastInspections[parseInt(key)].completedAt?new Date(e.pastInspections[parseInt(key)].completedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'Past');
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="openDetail(\'live\')">&#8592;</button><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">'+dateLabel+'</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:20px">'+ringHtml(sc,70)+statsHtml(sc)+'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Categories</div>';
+
+  var cats=[{k:'exterior',ico:'&#127969;'},{k:'interior',ico:'&#128715;'},{k:'grounds',ico:'&#127807;'}];
+  cats.forEach(function(cat){
+    if(isLive){
+      var c=e.data[cat.k];
+      var locked=!!e.completedCats[cat.k];
+      var pts=c.points;
+      var done=pts.filter(function(p){return p.status!==null;}).length;
+      var pct=Math.round(done/pts.length*100);
+      var hasR=pts.some(function(p){return p.status==='red';});
+      var hasY=pts.some(function(p){return p.status==='yellow';});
+      var allG=done>0&&pts.every(function(p){return p.status==='green';});
+      var cs=hasR?'cs-r':hasY?'cs-y':allG?'cs-g':'cs-p';
+      var canEdit=!locked;
+      html+='<div class="card tap" onclick="'+(canEdit?'openLiveCat':'openReadCat')+'(\''+cat.k+'\')">'
+        +'<div style="display:flex;align-items:center;gap:14px">'
+        +'<div class="cat-ico">'+cat.ico+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:500;letter-spacing:1px;margin-bottom:4px">'+c.label+'</div>'
+        +'<div style="font-size:10px;color:var(--dim)">'+(locked?'&#10003; Signed &amp; Locked':done+' / '+pts.length+' inspected')+'</div>'
+        +(locked?'<div class="cat-signed">&#10003; Signed &amp; Locked</div>':'')
+        +'<div class="pbar-wrap"><div class="pbar" style="width:'+(locked?100:pct)+'%"></div></div></div>'
+        +'<div class="cstat '+cs+'"></div></div></div>';
+    } else if(snap&&snap[cat.k]){
+      var c2=snap[cat.k];var sc2=scoreOf(c2.points);
+      var hasR2=c2.points.some(function(p){return p.status==='red';});
+      var hasY2=c2.points.some(function(p){return p.status==='yellow';});
+      var cs2=hasR2?'cs-r':hasY2?'cs-y':'cs-g';
+      html+='<div class="card tap" onclick="openPastCat(\''+cat.k+'\')">'
+        +'<div style="display:flex;align-items:center;gap:14px">'
+        +'<div class="cat-ico">'+cat.ico+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:500;letter-spacing:1px;margin-bottom:4px">'+c2.label+'</div>'
+        +'<div class="cat-signed">&#10003; Signed &amp; Locked</div></div>'
+        +'<div class="cstat '+cs2+'"></div></div></div>';
+    }
+  });
+
+  var allLocked=['exterior','interior','grounds'].every(function(k){return !!e.completedCats[k];});
+  if(!isComp&&allLocked) html+='<button class="btn-gold" onclick="finishInsp()">Complete Inspection</button>';
+  if(isComp) html+='<button class="btn-outline" onclick="confirmNew()" style="margin-top:8px">+ Start New Inspection</button>';
+  html+='</div>';
+  render(html);
+}
+
+// ── CATEGORY / POINTS ─────────────────────────────────────────────────────
+function openLiveCat(cat){curCat=cat;var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");}
+function openReadCat(cat){curCat=cat;var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,true,"openDateDetail('live')");}
+function openPastCat(cat){
+  curCat=cat;var e=CE();var idx=parseInt(selKey);
+  var snap=e.pastInspections[idx].snapshot;var c=snap[cat];
+  renderCatScreen(c.label,e.name,c.points,cat,true,"openDateDetail('"+selKey+"')");
+}
+
+function renderCatScreen(label,estateName,pts,cat,readOnly,backFn){
+  window._catPts=pts;window._catCat=cat;window._catBack=backFn;
+  var html='<div class="topbar"><div style="display:flex;align-items:center">'
+    +'<button class="back-btn" onclick="'+backFn+'">&#8592;</button>'
+    +'<div><div class="topbar-title">'+label+'</div><div class="topbar-sub">'+estateName+'</div></div></div>'
+    +'<div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+
+  if(readOnly) html+='<div class="locked-banner">&#10003; Signed &amp; locked &mdash; read only</div>';
+
+  pts.forEach(function(p,idx){
+    var gc=p.status==='green'?'g':'',yc=p.status==='yellow'?'y':'',rc=p.status==='red'?'r':'';
+    var gco=p.status==='green'?'var(--green)':'var(--ch3)';
+    var yco=p.status==='yellow'?'var(--yellow)':'var(--ch3)';
+    var rco=p.status==='red'?'var(--red)':'var(--ch3)';
+    var isIssue=p.status==='yellow'||p.status==='red';
+    var locked=readOnly;
+    var tappable=locked&&isIssue;
+    var noteHtml=p.notes?'<div style="font-size:10px;color:var(--dim);margin-top:4px;font-style:italic">&quot;'+p.notes.substring(0,50)+(p.notes.length>50?'&hellip;':'')+'&quot;</div>':'';
+    var pcnt=p.photos?p.photos.length:0;
+    var photoHtml=pcnt>0?'<div style="font-size:9px;color:var(--gold);margin-top:3px">&#128247; '+pcnt+' photo'+(pcnt>1?'s':'')+'</div>':(p.status==='red'&&pcnt===0&&!readOnly?'<div style="font-size:9px;color:var(--red);margin-top:3px">&#9888; Photo required</div>':'');
+    var pdKey='_pd_'+cat+'_'+idx;
+    window[pdKey]=(function(pp,cc){return function(){openPD(pp,cc);};})(p,cat);
+
+    html+='<div class="point-card'+(locked?' locked':'')+(tappable?' tappable':'')+'"'+(tappable?' data-pdkey="'+pdKey+'"':'')+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s-ready="1"')+'>'
+      +'<div style="flex:1"><div style="font-size:12px">'+p.name+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+label+'</div>'
+      +noteHtml+photoHtml+'</div>'
+      +'<div class="trio">'
+      +'<div class="sbtn '+gc+'"'+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s="green"')+' title="Healthy"><span style="color:'+gco+'">&#9679;</span></div>'
+      +'<div class="sbtn '+yc+'"'+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s="yellow"')+' title="Monitor"><span style="color:'+yco+'">&#9679;</span></div>'
+      +'<div class="sbtn '+rc+'"'+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s="red"')+' title="Attention"><span style="color:'+rco+'">&#9679;</span></div>'
+      +'</div></div>';
+  });
+
+  if(!readOnly){
+    var allDone=pts.every(function(p){return p.status!==null;});
+    var catLabel=CE()&&CE().data[cat]?CE().data[cat].label:cat;
+    window._completeCat=cat;
+    html+='<button class="btn-gold" id="btnComplete" style="display:'+(allDone?'block':'none')+'" onclick="completeCategory(window._completeCat)">&#10003; Sign &amp; Complete '+catLabel+'</button>';
+  }
+  html+='</div>';
+  render(html);
+
+  // Re-attach sbtn listeners after render
+  document.querySelectorAll('.sbtn[data-pid]').forEach(function(btn){
+    btn.addEventListener('click',function(ev){ev.stopPropagation();setStatus(this.getAttribute('data-pid'),this.getAttribute('data-cat'),this.getAttribute('data-s'));});
+  });
+  document.querySelectorAll('[data-pdkey]').forEach(function(card){
+    card.addEventListener('click',function(ev){if(ev.target.closest('.sbtn'))return;var fn=window[this.getAttribute('data-pdkey')];if(fn)fn();});
+  });
+}
+
+function openPD(p,cat){
+  var sc=p.status==='red'?'var(--red)':p.status==='yellow'?'var(--yellow)':'var(--green)';
+  var sl=p.status==='red'?'Attention Required':p.status==='yellow'?'Monitor':'Healthy';
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<div class="modal-title">'+p.name+'</div>'
+    +'<button onclick="closePD()" style="background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer">&#215;</button></div>'
+    +'<span class="pd-status" style="background:'+sc+'22;border:1px solid '+sc+';color:'+sc+'">&#9679; '+sl+'</span>';
+  if(p.notes) html+='<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Inspector Note</div><div style="background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:13px;font-style:italic;line-height:1.7;margin-bottom:12px">&ldquo;'+p.notes+'&rdquo;</div>';
+  else html+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">No notes added.</div>';
+  if(p.photos&&p.photos.length){
+    html+='<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Photos</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">';
+    p.photos.forEach(function(src,i){window['_pdp'+i]=src;html+='<img style="width:80px;height:80px;object-fit:cover;border-radius:2px;border:1px solid var(--border);cursor:pointer" src="'+src+'" data-pidx="'+i+'">';});
+    html+='</div>';
+  }
+  html+='<button class="btn-ghost" style="margin:0" onclick="closePD()">Close</button>';
+  document.getElementById('pdContent').innerHTML=html;
+  document.querySelectorAll('[data-pidx]').forEach(function(img){
+    img.addEventListener('click',function(){var s=window['_pdp'+this.getAttribute('data-pidx')];if(s){var w=window.open();w.document.write('<body style="margin:0;background:#000"><img src="'+s+'" style="max-width:100%;display:block;margin:auto"></body>');}});
+  });
+  document.getElementById('pdModal').classList.add('open');
+}
+function closePD(){document.getElementById('pdModal').classList.remove('open');}
+
+function setStatus(pid,cat,status){
+  var pt=CD()[cat].points.find(function(p){return p.id===pid;});if(!pt)return;
+  pt.status=status;
+  var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");
+  if(status==='yellow'||status==='red') openModal(pid,cat);
+}
+
+function completeCategory(cat){
+  var e=CE();e.completedCats[cat]=new Date();
+  showToast(e.data[cat].label+' signed & locked');
+  openDateDetail('live');
+}
+
+function openModal(pid,cat){
+  var pt=CD()[cat].points.find(function(p){return p.id===pid;});
+  activePoint={pid:pid,cat:cat};
+  document.getElementById('mTitle').textContent=pt.name;
+  document.getElementById('mSub').textContent=CE().data[cat].label.toUpperCase()+' \u00b7 '+pt.status.toUpperCase();
+  document.getElementById('mNotes').value=pt.notes||'';
+  document.getElementById('photoErr').classList.remove('show');
+  document.getElementById('reqBadge').style.display=pt.status==='red'?'inline-block':'none';
+  renderPhotoGrid(pt.photos||[]);
+  document.getElementById('notesModal').classList.add('open');
+}
+function closeModal(){document.getElementById('notesModal').classList.remove('open');activePoint=null;}
+function renderPhotoGrid(photos){
+  var html='';
+  photos.forEach(function(src,i){html+='<div class="thumb-wrap"><img class="thumb" src="'+src+'"><button class="thumb-del" onclick="removePhoto('+i+')">&#x2715;</button></div>';});
+  html+='<div class="photo-add" onclick="triggerCam()"><div style="font-size:22px">&#128247;</div><div style="font-size:8px;letter-spacing:1px;text-transform:uppercase">Add</div></div>';
+  document.getElementById('photoGrid').innerHTML=html;
+}
+function triggerCam(){document.getElementById('photoInput').value='';document.getElementById('photoInput').click();}
+function onPhotoSelected(e){
+  if(!activePoint)return;
+  var pt=CD()[activePoint.cat].points.find(function(p){return p.id===activePoint.pid;});
+  if(!pt.photos)pt.photos=[];
+  var files=Array.from(e.target.files),rem=files.length;if(!rem)return;
+  files.forEach(function(f){var r=new FileReader();r.onload=function(ev){pt.photos.push(ev.target.result);rem--;if(rem===0){renderPhotoGrid(pt.photos);document.getElementById('photoErr').classList.remove('show');}};r.readAsDataURL(f);});
+}
+function removePhoto(i){if(!activePoint)return;var pt=CD()[activePoint.cat].points.find(function(p){return p.id===activePoint.pid;});pt.photos.splice(i,1);renderPhotoGrid(pt.photos);}
+function saveNote(){
+  if(!activePoint)return;
+  var pt=CD()[activePoint.cat].points.find(function(p){return p.id===activePoint.pid;});
+  if(pt.status==='red'&&(!pt.photos||pt.photos.length===0)){document.getElementById('photoErr').classList.add('show');return;}
+  pt.notes=document.getElementById('mNotes').value;
+  var cat=activePoint.cat;closeModal();
+  var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");
+  showToast('Saved');
+}
+
+function startInspection(){
+  var e=CE();
+  if(e.completedAt){e.pastInspections.push({completedAt:e.completedAt,snapshot:liveSnap(e)});Object.values(e.data).forEach(function(c){c.points.forEach(function(p){p.status=null;p.notes='';p.photos=[];});});e.completedCats={};e.completedAt=null;}
+  openDateDetail('live');
+}
+function confirmNew(){document.getElementById('confirmModal').classList.add('open');}
+function closeConfirm(){document.getElementById('confirmModal').classList.remove('open');}
+function doNew(){closeConfirm();startInspection();}
+
+function finishInsp(){
+  var e=CE();e.completedAt=new Date();var sc=liveScore(e);
+  var ds=e.completedAt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('screen').innerHTML='<div class="comp-wrap">'
+    +'<div class="check-circle">&#10003;</div>'
+    +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl);margin-bottom:8px">Inspection Complete</div>'
+    +'<div class="gold-line"></div>'
+    +'<div style="font-size:11px;color:var(--dim);letter-spacing:1px;line-height:1.9;margin-top:12px">'+e.name+'<br>'+ds+'<br><br>Health Score: <span style="color:var(--gl)">'+sc.score+'%</span><br>'+sc.green+' Healthy &middot; '+sc.yellow+' Monitor &middot; '+sc.red+' Attention</div>'
+    +'<button class="btn-gold" style="max-width:300px;margin-top:36px" onclick="goProps()">Back to Properties</button>'
+    +'</div>';
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────
+function goSettings(){
+  document.getElementById('screen').innerHTML='<div class="topbar"><div><div class="topbar-title">Settings</div><div class="topbar-sub">Account</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc"><div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Inspector</div>'
+    +'<div class="card"><div style="font-size:10px;color:var(--dim);margin-bottom:4px">Signed in as</div>'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+currentUser.name+'</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div></div>'
+    +'<button class="btn-gold" onclick="doSignOut()">Sign Out</button>'
+    +'</div>'+nav('settings');
+}
+
+function doSignOut(){localStorage.removeItem('ec_user');window.location.href='login.html';}
+
+goCal();
+</script>
+</body>
+</html>
