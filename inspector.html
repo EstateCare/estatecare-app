@@ -125,9 +125,10 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <div class="toast" id="toast"></div>
 <script>
 var currentUser=JSON.parse(localStorage.getItem('ec_user')||'null');
-// Fallback for direct testing (remove in production)
+// If no valid inspector session, redirect to login
 if(!currentUser||currentUser.role!=='inspector'){
-  currentUser={email:'inspector@estatecare.com',password:'test',role:'inspector',name:'John Davis',initials:'JD'};
+  var base=window.location.pathname.replace('inspector.html','');
+  window.location.href=base+'index.html';
 }
 
 function mkPt(id,name,status,notes){return{id:id,name:name,status:status,notes:notes,photos:[]};}
