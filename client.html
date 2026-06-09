@@ -63,11 +63,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .btn-gold{width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px;cursor:pointer;margin-top:8px;}
 .btn-ghost{width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer;margin-top:8px;}
 
-body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
-#app{top:env(safe-area-inset-top);bottom:env(safe-area-inset-bottom);}
-.bnav{padding-bottom:max(12px,env(safe-area-inset-bottom));}
-/* Max width container for desktop */
-#app{max-width:480px;margin:0 auto;box-shadow:0 0 60px rgba(0,0,0,.8);}
+.bnav{padding-bottom:max(10px,env(safe-area-inset-bottom));}
+#app{max-width:480px;margin:0 auto;}
 </style>
 </head>
 <body>
@@ -153,11 +150,11 @@ function goHome(){
 // ── CLIENT DASHBOARD ──────────────────────────────────────────────────────
 function goDashboard(){
   var e=CE();if(!e)return;
-  // New client with no inspections - show welcome screen
-  var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});
+  var all=[];Object.values(e.data).forEach(function(cc){all=all.concat(cc.points);});
   if(all.length===0&&!e.completedAt&&e.pastInspections.length===0){
     showNewClientDash(e);return;
   }
+  showFullDashboard(e);
 }
 function showNewClientDash(e){
   var con=e.contract||{};
@@ -192,10 +189,8 @@ function showNewClientDash(e){
     +'</div>';
   document.getElementById('screen').innerHTML=html;
 }
-function _goDashboard(){
+function showFullDashboard(){
   var e=CE();if(!e)return;
-  var all2=[];Object.values(e.data).forEach(function(c){all2=all2.concat(c.points);});
-  if(all2.length===0&&!e.completedAt&&e.pastInspections.length===0){showNewClientDash(e);return;}
   var sc=liveScore(e);
   var con=e.contract;
   var completed=e.pastInspections.length+(e.completedAt?1:0);
