@@ -55,7 +55,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .trio{display:flex;gap:6px;}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:flex-end;justify-content:center;}
 .modal-overlay.open{display:flex;}
-.modal-sheet{background:var(--ch);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:slideUp .25s ease;}
+.modal-sheet{background:var(--ch);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;padding:24px 20px 36px;width:100%;max-height:85vh;overflow-y:auto;animation:slideUp .25s ease;}
 @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-title{font-family:var(--ff);font-size:20px;color:var(--gl);margin-bottom:4px;}
 .modal-sub{font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:16px;}
@@ -113,7 +113,7 @@ function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.
 function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});return scoreOf(all);}
 
 function render(html){
-  document.getElementById('screen').innerHTML='<div style="display:flex;flex-direction:column;flex:1;min-height:100vh">'+html+'</div>';
+  document.getElementById('screen').innerHTML=html;
   document.querySelectorAll('[data-action]').forEach(function(el){
     el.addEventListener('click',function(){
       var a=this.getAttribute('data-action');
@@ -384,7 +384,7 @@ function openPointDetail(p){
   html+='<button class="btn-ghost" style="margin:0" onclick="closePD()">Close</button>';
   document.getElementById('pdContent').innerHTML=html;
   document.querySelectorAll('[data-pi]').forEach(function(img){
-    img.addEventListener('click',function(){var s=window['_pp'+this.getAttribute('data-pi')];if(s){var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';var im=document.createElement('img');im.src=s;im.style.cssText='max-width:100%;max-height:100%;object-fit:contain';ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};document.body.appendChild(ov);}});
+    img.addEventListener('click',function(){var s=window['_pp'+this.getAttribute('data-pi')];if(s){var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';var im=document.createElement('img');im.src=s;im.style.cssText='max-height:100%;object-fit:contain';ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};document.body.appendChild(ov);}});
   });
   document.getElementById('pdModal').classList.add('open');
 }
@@ -415,6 +415,47 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').then(function(r){}).catch(function(e){});
   });
+}
+</script>
+
+<div id="pwaBanner" style="display:none;position:fixed;bottom:70px;left:12px;right:12px;background:var(--ch);border:1px solid var(--gold);border-radius:4px;padding:12px 16px;z-index:300;box-shadow:0 4px 24px rgba(0,0,0,.6)">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:20px;flex-shrink:0">&#128241;</div>
+    <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--gl);margin-bottom:2px">Add EstateCare to Home Screen</div><div style="font-size:10px;color:var(--dim)">One tap access — no app store needed</div></div>
+    <button onclick="showPWASteps()" style="background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:2px;color:#000;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:8px 12px;cursor:pointer;white-space:nowrap">How To</button>
+    <button onclick="dismissPWA()" style="background:transparent;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:4px">&#215;</button>
+  </div>
+  <div id="pwaStepsInner" style="display:none;background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:12px;margin-top:10px"></div>
+</div>
+<script>
+(function(){
+  if(window.navigator.standalone===true) return;
+  if(window.matchMedia('(display-mode: standalone)').matches) return;
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isAndroid=/Android/.test(navigator.userAgent);
+  if(!isIOS&&!isAndroid) return;
+  if(sessionStorage.getItem('pwa_dismissed')) return;
+  setTimeout(function(){
+    var b=document.getElementById('pwaBanner');
+    if(b) b.style.display='block';
+  },4000);
+})();
+function showPWASteps(){
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var steps=document.getElementById('pwaStepsInner');
+  if(!steps) return;
+  var s=isIOS
+    ?'<div style="font-size:11px;color:var(--text);line-height:2">1. Tap the <b style="color:var(--gold)">Share button</b> &#9650; at the bottom of Safari<br>2. Tap <b style="color:var(--gold)">Add to Home Screen</b><br>3. Tap <b style="color:var(--gold)">Add</b></div>'
+    :'<div style="font-size:11px;color:var(--text);line-height:2">1. Tap the <b style="color:var(--gold)">three dots menu</b> in Chrome<br>2. Tap <b style="color:var(--gold)">Add to Home Screen</b><br>3. Tap <b style="color:var(--gold)">Add</b></div>';
+  steps.innerHTML=s;
+  steps.style.display='block';
+  var btn=document.getElementById('pwaBanner').querySelector('button');
+  if(btn){btn.textContent='Got it!';btn.onclick=dismissPWA;}
+}
+function dismissPWA(){
+  sessionStorage.setItem('pwa_dismissed','1');
+  var b=document.getElementById('pwaBanner');
+  if(b) b.style.display='none';
 }
 </script>
 </body>
