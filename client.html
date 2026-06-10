@@ -15,7 +15,7 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 :root{--black:#0a0a0a;--ch:#141414;--ch2:#1c1c1c;--ch3:#242424;--gold:#c9a84c;--gl:#e2c97e;--gd:rgba(201,168,76,0.15);--green:#4caf7d;--yellow:#e6b84a;--red:#e05c5c;--text:#f0ece4;--dim:#9a9488;--border:rgba(201,168,76,0.2);--ff:"Cormorant Garamond",serif;}
-#app{position:fixed;inset:0;display:flex;flex-direction:column;font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--black);font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);}
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;}
 #screen::-webkit-scrollbar{width:3px;}
 #screen::-webkit-scrollbar-thumb{background:var(--gd);}
@@ -24,7 +24,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .topbar-sub{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--gd);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold);cursor:pointer;flex-shrink:0;}
 .back-btn{background:none;border:none;color:var(--gold);cursor:pointer;font-size:22px;line-height:1;padding:0;margin-right:12px;}
-.sc{flex:1;padding:20px;}
+.sc{flex:1;padding:20px;overflow-y:auto;}
 .sec{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;margin-top:4px;}
 .card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:10px;}
 .card.tap{cursor:pointer;transition:border-color .2s;}
@@ -113,7 +113,7 @@ function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.
 function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});return scoreOf(all);}
 
 function render(html){
-  document.getElementById('screen').innerHTML=html;
+  document.getElementById('screen').innerHTML='<div style="display:flex;flex-direction:column;flex:1;min-height:100vh">'+html+'</div>';
   document.querySelectorAll('[data-action]').forEach(function(el){
     el.addEventListener('click',function(){
       var a=this.getAttribute('data-action');
