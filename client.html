@@ -85,12 +85,21 @@ if(!currentUser||currentUser.role!=='client'){
 function mkPt(id,name,status,notes){return{id:id,name:name,status:status,notes:notes,photos:[]};}
 
 var clientInvoices=[
-  {id:'ci001',amount:59.95,period:'Weekly',dueDate:new Date('2026-06-15'),status:'upcoming',notes:'Premium plan'},
-  {id:'ci002',amount:59.95,period:'Weekly',dueDate:new Date('2026-06-08'),status:'unpaid',notes:'Premium plan'},
-  {id:'ci003',amount:239.80,period:'Monthly',dueDate:new Date('2026-05-01'),status:'paid',paidDate:new Date('2026-05-01'),notes:'Premium plan - May'},
-  {id:'ci004',amount:239.80,period:'Monthly',dueDate:new Date('2026-04-01'),status:'paid',paidDate:new Date('2026-04-02'),notes:'Premium plan - April'},
-  {id:'ci005',amount:69.95,period:'Weekly',dueDate:new Date('2026-06-15'),status:'upcoming',notes:'Luxury plan'},
-  {id:'ci006',amount:69.95,period:'Weekly',dueDate:new Date('2026-06-08'),status:'paid',paidDate:new Date('2026-06-08'),notes:'Luxury plan'}
+  {id:'ci001',invoiceNum:'EC-2026-041',amount:59.95,period:'Weekly',
+   dueDate:new Date('2026-06-15'),status:'upcoming',paidDate:null,
+   notes:'Premium Plan — Week of Jun 15',paymentMethod:null,autoPay:false},
+  {id:'ci002',invoiceNum:'EC-2026-040',amount:59.95,period:'Weekly',
+   dueDate:new Date('2026-06-08'),status:'unpaid',paidDate:null,
+   notes:'Premium Plan — Week of Jun 8',paymentMethod:null,autoPay:false},
+  {id:'ci003',invoiceNum:'EC-2026-035',amount:239.80,period:'Monthly',
+   dueDate:new Date('2026-05-01'),status:'paid',paidDate:new Date('2026-05-03'),
+   notes:'Premium Plan — May 2026',paymentMethod:'E-Transfer',autoPay:false},
+  {id:'ci004',invoiceNum:'EC-2026-028',amount:239.80,period:'Monthly',
+   dueDate:new Date('2026-04-01'),status:'paid',paidDate:new Date('2026-04-01'),
+   notes:'Premium Plan — April 2026',paymentMethod:'Credit Card',autoPay:true},
+  {id:'ci005',invoiceNum:'EC-2026-020',amount:239.80,period:'Monthly',
+   dueDate:new Date('2026-03-01'),status:'paid',paidDate:new Date('2026-03-01'),
+   notes:'Premium Plan — March 2026',paymentMethod:'Credit Card',autoPay:true}
 ];
 
 var estates=[
@@ -133,10 +142,18 @@ function clientNav(active){
     +'</div>';
 }
 
+function showToast(msg){var t=document.createElement('div');t.textContent=msg;t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ch);border:1px solid var(--gold);border-radius:2px;padding:10px 20px;font-size:11px;color:var(--gl);z-index:200;white-space:nowrap';document.body.appendChild(t);setTimeout(function(){document.body.removeChild(t);},2200);}
+
 function render(html){
   document.getElementById('screen').innerHTML=html;
   document.querySelectorAll('[data-action="cnav"]').forEach(function(el){
     el.addEventListener('click',function(){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();});
+  });
+  document.querySelectorAll('[data-invid]').forEach(function(el){
+    el.addEventListener('click',function(){openInvoice(this.getAttribute('data-invid'));});
+  });
+  document.querySelectorAll('[data-action="payopt"]').forEach(function(el){
+    el.addEventListener('click',function(){showPayContact(this.getAttribute('data-paymethod'));});
   });
   document.querySelectorAll('[data-action="openDetail"]').forEach(function(el){
     el.addEventListener('click',function(){openDateDetail(this.getAttribute('data-key'));});
@@ -213,6 +230,12 @@ function showNewClientDash(e){
   document.getElementById('screen').innerHTML=html;
   document.querySelectorAll('[data-action="cnav"]').forEach(function(el){
     el.addEventListener('click',function(){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();});
+  });
+  document.querySelectorAll('[data-invid]').forEach(function(el){
+    el.addEventListener('click',function(){openInvoice(this.getAttribute('data-invid'));});
+  });
+  document.querySelectorAll('[data-action="payopt"]').forEach(function(el){
+    el.addEventListener('click',function(){showPayContact(this.getAttribute('data-paymethod'));});
   });
 }
 function showFullDashboard(){
@@ -435,33 +458,37 @@ function openPointDetail(p){
 }
 function closePD(){document.getElementById('pdModal').classList.remove('open');}
 function goClientInvoices(){
-  var myInvoices=clientInvoices.filter(function(i){return i.notes.indexOf(CE()&&CE().contract?CE().contract.tier:'')>=0||true;});
+  var myInvoices=clientInvoices;
   var unpaidTotal=myInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
-  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goDashboard">&#8592;</button><div><div class="topbar-title">Invoices</div><div class="topbar-sub">Billing History</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
-    +'<div class="sc">';
-  if(unpaidTotal>0){
-    html+='<div class="card" style="border-color:var(--red);margin-bottom:16px;text-align:center">'
-      +'<div style="font-size:9px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">&#9888; Payment Due</div>'
-      +'<div style="font-family:var(--ff);font-size:28px;color:var(--red)">$'+unpaidTotal.toFixed(2)+'</div>'
-      +'<div style="font-size:10px;color:var(--dim);margin-top:4px">Please contact us to arrange payment</div>'
-      +'<div style="margin-top:12px;font-size:10px;color:var(--gold)">E-Transfer &nbsp;&#183;&nbsp; Credit Card &nbsp;&#183;&nbsp; Apple Pay &nbsp;&#183;&nbsp; Google Pay</div>'
-      +'</div>';
-  }
-  html+='<input oninput="filterClientInvoices(this.value)" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;padding:10px 14px;outline:none;margin-bottom:16px" placeholder="Search invoices…">'
-    +'<div class="sec">Invoice History</div>'
+  var upcomingCount=myInvoices.filter(function(i){return i.status==='upcoming';}).length;
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goDashboard">&#8592;</button><div><div class="topbar-title">Invoices</div><div class="topbar-sub">Billing & Payments</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">'
+    +'<div class="card" style="padding:12px;text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Upcoming</div><div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+upcomingCount+'</div></div>'
+    +'<div class="card" style="padding:12px;text-align:center;border-color:'+(unpaidTotal>0?'var(--red)':'var(--border)')+'"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Unpaid</div><div style="font-family:var(--ff);font-size:20px;color:'+(unpaidTotal>0?'var(--red)':'var(--gl)')+'">$'+unpaidTotal.toFixed(2)+'</div></div>'
+    +'<div class="card" style="padding:12px;text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Paid</div><div style="font-family:var(--ff);font-size:20px;color:var(--green)">'+myInvoices.filter(function(i){return i.status==='paid';}).length+'</div></div>'
+    +'</div>'
+    +'<input oninput="filterClientInvoices(this.value)" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;padding:10px 14px;outline:none;margin-bottom:16px" placeholder="Search invoices…">'
+    +'<div class="sec">All Invoices</div>'
     +'<div id="clientInvList">';
   myInvoices.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
-    var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px">'
+    var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    window['_inv_'+inv.id]=inv;
+    html+='<div class="card tap" data-invid="'+inv.id+'" style="border-left:3px solid '+col+';margin-bottom:8px;cursor:pointer">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
-      +'<div><div style="font-size:12px;font-weight:500">'+inv.notes+'</div>'
-      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; '+dueStr+'</div>'
-      +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div>':'')
+      +'<div style="flex:1">'
+      +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:3px">'+inv.invoiceNum+'</div>'
+      +'<div style="font-size:13px;font-weight:500">'+inv.notes+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; Due '+dueStr+'</div>'
+      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px">&#9654; Auto-Pay</div>':'')
+      +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid '+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
       +'</div>'
-      +'<div style="text-align:right">'
-      +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
-      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px">'+inv.status+'</div>'
+      +'<div style="text-align:right;margin-left:12px">'
+      +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:4px">View &#8250;</div>'
       +'</div></div></div>';
   });
   html+='</div></div>'+clientNav('invoices');
@@ -479,16 +506,21 @@ function filterClientInvoices(v){
   var html='';
   filtered.sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
-    var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px">'
+    var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    window['_inv_'+inv.id]=inv;
+    html+='<div class="card tap" data-invid="'+inv.id+'" style="border-left:3px solid '+col+';margin-bottom:8px;cursor:pointer">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
-      +'<div><div style="font-size:12px;font-weight:500">'+inv.notes+'</div>'
-      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; '+dueStr+'</div>'
-      +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div>':'')
+      +'<div style="flex:1">'
+      +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:3px">'+inv.invoiceNum+'</div>'
+      +'<div style="font-size:13px;font-weight:500">'+inv.notes+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; Due '+dueStr+'</div>'
+      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px">&#9654; Auto-Pay</div>':'')
+      +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
       +'</div>'
-      +'<div style="text-align:right">'
-      +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
-      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px">'+inv.status+'</div>'
+      +'<div style="text-align:right;margin-left:12px">'
+      +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:4px">View &#8250;</div>'
       +'</div></div></div>';
   });
   var el=document.getElementById('clientInvList');
@@ -557,6 +589,90 @@ function goContact(){
     +'<button class="btn-ghost" onclick="doSignOut()">Sign Out</button>'
     +'</div>'+clientNav('contact');
   render(html);
+}
+
+function openInvoice(invId){
+  var inv=window['_inv_'+invId]||clientInvoices.find(function(i){return i.id===invId;});
+  if(!inv) return;
+  var e=CE();
+  var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--gold)';
+  var statusLabel=inv.status==='paid'?'&#10003; Paid':inv.status==='unpaid'?'&#9888; Payment Required':'&#128197; Upcoming';
+  var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goClientInvoices">&#8592;</button><div><div class="topbar-title">'+inv.invoiceNum+'</div><div class="topbar-sub">Invoice Detail</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    // Invoice header card
+    +'<div class="card" style="border-color:'+col+';margin-bottom:16px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+    +'<div>'
+    +'<div style="font-family:var(--ff);font-size:28px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' billing</div>'
+    +'</div>'
+    +'<div style="background:'+col+'22;border:1px solid '+col+';border-radius:20px;padding:4px 14px;font-size:10px;color:'+col+';letter-spacing:1px;text-transform:uppercase">'+statusLabel+'</div>'
+    +'</div>'
+    +'<div style="border-top:1px solid var(--border);padding-top:12px">'
+    +invRow('Invoice #',inv.invoiceNum)
+    +invRow('Description',inv.notes)
+    +invRow('Period',inv.period)
+    +invRow('Due Date',dueStr)
+    +(inv.status==='paid'?invRow('Paid On',new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})):'')
+    +(inv.paymentMethod?invRow('Payment Method',inv.paymentMethod):'')
+    +(e&&e.contract?invRow('Property',e.name):'')
+    +(e&&e.contract?invRow('Service Tier',e.contract.tier):'')
+    +(inv.autoPay?'<div style="margin-top:8px;padding:8px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px"><div style="font-size:11px;color:var(--green)">&#9654; Auto-Pay Enabled</div><div style="font-size:10px;color:var(--dim)">Charged automatically on due date</div></div>':'')
+    +'</div></div>';
+
+  // Payment options for unpaid invoices
+  if(inv.status==='unpaid'||inv.status==='upcoming'){
+    html+='<div class="sec">Payment Options</div>'
+      +'<div class="card" style="margin-bottom:10px">'
+      +'<div style="font-size:10px;color:var(--dim);line-height:1.8;margin-bottom:14px">Choose your preferred payment method. Contact us to complete your payment or set up auto-pay.</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+      +payOption('&#128179;','E-Transfer','hello@myestatecare.ca','Instant')
+      +payOption('&#127758;','Credit Card','Secure online','Processing fee may apply')
+      +payOption('&#63743;','Apple Pay','Tap to pay','Quick & secure')
+      +payOption('&#9684;','Google Pay','Tap to pay','Quick & secure')
+      +'</div>'
+      +'<div style="background:var(--ch3);border-radius:2px;padding:12px;font-size:10px;color:var(--dim);line-height:1.7">'
+      +'To pay via e-transfer, send to <span style="color:var(--gold)">hello@myestatecare.ca</span> with invoice number <span style="color:var(--gl)">'+inv.invoiceNum+'</span> in the message.'
+      +'</div></div>'
+      +'<div class="sec">Auto-Pay</div>'
+      +'<div class="card">'
+      +'<div style="font-size:11px;color:var(--dim);line-height:1.7;margin-bottom:12px">Set up automatic payments so you never miss an invoice. Contact us to enable auto-pay on your account.</div>'
+      +'<button data-action="payopt" data-paymethod="AutoPay" style="width:100%;background:var(--gd);border:1px solid var(--gold);border-radius:1px;color:var(--gl);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer">Set Up Auto-Pay</button>'
+      +'</div>';
+  }
+
+  html+='<div class="sec" style="margin-top:4px">Questions?</div>'
+    +'<div class="card">'
+    +'<div style="font-size:11px;color:var(--dim);line-height:1.8">Contact your account manager for any billing questions.<br>'
+    +'<span style="color:var(--gold)">hello@myestatecare.ca</span></div>'
+    +'</div>'
+    +'</div>'+clientNav('invoices');
+  render(html);
+}
+
+function invRow(label,val){
+  return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(201,168,76,0.08)">'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;flex-shrink:0;margin-right:12px">'+label+'</div>'
+    +'<div style="font-size:12px;text-align:right">'+val+'</div></div>';
+}
+
+function payOption(icon,name,detail,sub){
+  return '<div class="card" style="padding:12px;text-align:center;cursor:pointer" data-paymethod="'+name+'" data-action="payopt">'
+    +'<div style="font-size:22px;margin-bottom:6px">'+icon+'</div>'
+    +'<div style="font-size:11px;font-weight:500;color:var(--text)">'+name+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:3px">'+detail+'</div>'
+    +'<div style="font-size:9px;color:var(--gold);margin-top:2px">'+sub+'</div>'
+    +'</div>';
+}
+
+function showPayContact(method){
+  showToast('Contact us to pay via '+method);
+}
+
+function showAutoPayInfo(){
+  showToast('Contact hello@myestatecare.ca to set up Auto-Pay');
 }
 
 function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('client.html','');window.location.href=base+'index.html';}
