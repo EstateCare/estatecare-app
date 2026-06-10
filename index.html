@@ -67,6 +67,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 
 .bnav{padding-bottom:max(10px,env(safe-area-inset-bottom));}
 
+
+.pwa-banner{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1a1608,#141414);border-top:1px solid var(--gold);padding:16px 20px;z-index:300;display:none;animation:slideUp .3s ease;}
+.pwa-banner.show{display:block;}
+.pwa-banner-title{font-family:var(--ff);font-size:16px;color:var(--gl);margin-bottom:4px;}
+.pwa-banner-sub{font-size:11px;color:var(--dim);line-height:1.6;margin-bottom:12px;}
+.pwa-banner-row{display:flex;gap:10px;align-items:center;}
+.pwa-btn{flex:1;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;}
+.pwa-dismiss{background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px 16px;cursor:pointer;}
+.pwa-steps{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:14px;margin-top:10px;display:none;}
+.pwa-steps.show{display:block;}
+.pwa-step{font-size:11px;color:var(--text);padding:6px 0;border-bottom:1px solid rgba(201,168,76,0.08);display:flex;align-items:center;gap:10px;}
+.pwa-step:last-child{border-bottom:none;}
+.pwa-step-num{width:20px;height:20px;border-radius:50%;background:var(--gd);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--gold);flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -434,6 +447,50 @@ function doLogin(){
 }
 
 showWelcome();
+
+// PWA Install Banner
+(function(){
+  // Don't show if already installed as PWA
+  if(window.navigator.standalone===true) return;
+  if(window.matchMedia('(display-mode: standalone)').matches) return;
+  // Don't show if dismissed in last 7 days
+  var dismissed=localStorage.getItem('pwa_dismissed');
+  if(dismissed && Date.now()-parseInt(dismissed) < 7*24*60*60*1000) return;
+  
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isAndroid=/Android/.test(navigator.userAgent);
+  if(!isIOS&&!isAndroid) return; // Only show on mobile
+  
+  setTimeout(function(){
+    document.getElementById('pwaBanner').classList.add('show');
+  }, 2000);
+})();
+
+function showPwaSteps(){
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var steps=document.getElementById('pwaSteps');
+  var html='';
+  if(isIOS){
+    html='<div class="pwa-step"><div class="pwa-step-num">1</div><span>Tap the <b style="color:var(--gold)">Share</b> button at the bottom of Safari (box with arrow)</span></div>'
+      +'<div class="pwa-step"><div class="pwa-step-num">2</div><span>Scroll down and tap <b style="color:var(--gold)">Add to Home Screen</b></span></div>'
+      +'<div class="pwa-step"><div class="pwa-step-num">3</div><span>Tap <b style="color:var(--gold)">Add</b> in the top right corner</span></div>'
+      +'<div class="pwa-step"><div class="pwa-step-num">&#10003;</div><span style="color:var(--green)">EstateCare will appear on your home screen!</span></div>';
+  } else {
+    html='<div class="pwa-step"><div class="pwa-step-num">1</div><span>Tap the <b style="color:var(--gold)">three dots menu</b> in Chrome (top right)</span></div>'
+      +'<div class="pwa-step"><div class="pwa-step-num">2</div><span>Tap <b style="color:var(--gold)">Add to Home Screen</b></span></div>'
+      +'<div class="pwa-step"><div class="pwa-step-num">3</div><span>Tap <b style="color:var(--gold)">Add</b> to confirm</span></div>'
+      +'<div class="pwa-step"><div class="pwa-step-num">&#10003;</div><span style="color:var(--green)">EstateCare will appear on your home screen!</span></div>';
+  }
+  steps.innerHTML=html;
+  steps.classList.add('show');
+  document.getElementById('pwaInstallBtn').textContent='Got it!';
+  document.getElementById('pwaInstallBtn').onclick=dismissPwa;
+}
+
+function dismissPwa(){
+  localStorage.setItem('pwa_dismissed',Date.now().toString());
+  document.getElementById('pwaBanner').classList.remove('show');
+}
 </script>
 
 <script>
@@ -443,5 +500,15 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-title">&#128241; Get the Full App Experience</div>
+  <div class="pwa-banner-sub" id="pwaBannerSub">Add EstateCare to your home screen for instant access — no app store needed.</div>
+  <div class="pwa-banner-row">
+    <button class="pwa-btn" id="pwaInstallBtn" onclick="showPwaSteps()">Add to Home Screen</button>
+    <button class="pwa-dismiss" onclick="dismissPwa()">Not Now</button>
+  </div>
+  <div class="pwa-steps" id="pwaSteps"></div>
+</div>
 </body>
 </html>
