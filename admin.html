@@ -122,6 +122,21 @@ var estates=[
 ];
 
 var scheduleItems=[];
+
+var invoices=[
+  {id:'inv001',clientEmail:'client1@estatecare.com',clientName:'Michael Hartwell',estateId:'vs',
+   amount:59.95,period:'Weekly',dueDate:new Date('2026-06-15'),status:'upcoming',paidDate:null,notes:'Premium plan'},
+  {id:'inv002',clientEmail:'client1@estatecare.com',clientName:'Michael Hartwell',estateId:'vs',
+   amount:59.95,period:'Weekly',dueDate:new Date('2026-06-08'),status:'unpaid',paidDate:null,notes:'Premium plan'},
+  {id:'inv003',clientEmail:'client1@estatecare.com',clientName:'Michael Hartwell',estateId:'vs',
+   amount:239.80,period:'Monthly',dueDate:new Date('2026-05-01'),status:'paid',paidDate:new Date('2026-05-01'),notes:'Premium plan - May'},
+  {id:'inv004',clientEmail:'client2@estatecare.com',clientName:'Sandra Beaumont',estateId:'mh',
+   amount:69.95,period:'Weekly',dueDate:new Date('2026-06-15'),status:'upcoming',paidDate:null,notes:'Luxury plan'},
+  {id:'inv005',clientEmail:'client2@estatecare.com',clientName:'Sandra Beaumont',estateId:'mh',
+   amount:69.95,period:'Weekly',dueDate:new Date('2026-06-08'),status:'paid',paidDate:new Date('2026-06-08'),notes:'Luxury plan'},
+  {id:'inv006',clientEmail:'client2@estatecare.com',clientName:'Sandra Beaumont',estateId:'mh',
+   amount:279.80,period:'Monthly',dueDate:new Date('2026-05-01'),status:'paid',paidDate:new Date('2026-05-02'),notes:'Luxury plan - May'}
+];
 var calViewDate=new Date();
 
 // ── HELPERS ────────────────────────────────────────────────────────────────
@@ -162,6 +177,10 @@ estates.forEach(genSchedule);
 
 function render(html){
   document.getElementById('screen').innerHTML=html;
+  // Wire all data-back buttons
+  document.querySelectorAll('[data-back]').forEach(function(el){
+    el.addEventListener('click',function(){var fn=this.getAttribute('data-back');if(fn&&window[fn])window[fn]();});
+  });
   document.querySelectorAll('select[data-schedid]').forEach(function(sel){
     sel.addEventListener('change',function(){reassign(this.getAttribute('data-schedid'),this.value);});
   });
@@ -194,17 +213,18 @@ function statsHtml(sc){
 }
 
 function topBar(title,sub,back){
-  var l=back?'<div style="display:flex;align-items:center"><button class="back-btn" onclick="'+back+'()">&#8592;</button><div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div></div>':'<div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div>';
-  return '<div class="topbar">'+l+'<div class="avatar">EC</div></div>';
+  var l=back?'<div style="display:flex;align-items:center"><button class="back-btn" data-back="'+back+'">&#8592;</button><div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div></div>':'<div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div>';
+  return '<div class="topbar">'+l+'<div class="avatar" data-action="nav" data-fn="doSignOut" title="Sign Out">EC</div></div>';
 }
 
 function nav(active){
   return '<div class="bnav">'
-    +'<button class="ni'+(active==='dash'?' active':'')+'" onclick="goDash()"><span>&#9681;</span>Dashboard</button>'
-    +'<button class="ni'+(active==='cal'?' active':'')+'" onclick="goCal()"><span>&#128197;</span>Schedule</button>'
-    +'<button class="ni'+(active==='clients'?' active':'')+'" onclick="goClients()"><span>&#128100;</span>Clients</button>'
-    +'<button class="ni'+(active==='estates'?' active':'')+'" onclick="goEstates()"><span>&#127968;</span>Estates</button>'
-    +'<button class="ni'+(active==='inspectors'?' active':'')+'" onclick="goInspectors()"><span>&#128203;</span>Inspectors</button>'
+    +'<button class="ni'+(active==='dash'?' active':'')+'" data-action="nav" data-fn="goDash"><span>&#9681;</span>Dashboard</button>'
+    +'<button class="ni'+(active==='cal'?' active':'')+'" data-action="nav" data-fn="goCal"><span>&#128197;</span>Schedule</button>'
+    +'<button class="ni'+(active==='clients'?' active':'')+'" data-action="nav" data-fn="goClients"><span>&#128100;</span>Clients</button>'
+    +'<button class="ni'+(active==='estates'?' active':'')+'" data-action="nav" data-fn="goEstates"><span>&#127968;</span>Estates</button>'
+    +'<button class="ni'+(active==='inspectors'?' active':'')+'" data-action="nav" data-fn="goInspectors"><span>&#128203;</span>Inspectors</button>'
+    +'<button class="ni'+(active==='invoices'?' active':'')+'" data-action="nav" data-fn="goInvoices"><span>&#128181;</span>Invoices</button>'
     +'</div>';
 }
 

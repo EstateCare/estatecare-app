@@ -81,6 +81,15 @@ if(!currentUser||currentUser.role!=='client'){
 
 function mkPt(id,name,status,notes){return{id:id,name:name,status:status,notes:notes,photos:[]};}
 
+var clientInvoices=[
+  {id:'ci001',amount:59.95,period:'Weekly',dueDate:new Date('2026-06-15'),status:'upcoming',notes:'Premium plan'},
+  {id:'ci002',amount:59.95,period:'Weekly',dueDate:new Date('2026-06-08'),status:'unpaid',notes:'Premium plan'},
+  {id:'ci003',amount:239.80,period:'Monthly',dueDate:new Date('2026-05-01'),status:'paid',paidDate:new Date('2026-05-01'),notes:'Premium plan - May'},
+  {id:'ci004',amount:239.80,period:'Monthly',dueDate:new Date('2026-04-01'),status:'paid',paidDate:new Date('2026-04-02'),notes:'Premium plan - April'},
+  {id:'ci005',amount:69.95,period:'Weekly',dueDate:new Date('2026-06-15'),status:'upcoming',notes:'Luxury plan'},
+  {id:'ci006',amount:69.95,period:'Weekly',dueDate:new Date('2026-06-08'),status:'paid',paidDate:new Date('2026-06-08'),notes:'Luxury plan'}
+];
+
 var estates=[
   {id:'vs',name:'Hartwell Estate',address:'1402 Pelican Bay Drive, Naples FL 34108',icon:'&#127969;',
    clientEmail:'client1@estatecare.com',
@@ -112,17 +121,30 @@ function CE(){return estates.find(function(e){return e.id===curEstateId;});}
 function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.status==='green')g++;else if(p.status==='yellow')y++;else if(p.status==='red')r++;});return{score:t>0?Math.round(((g*2+y)/(t*2))*100):0,green:g,yellow:y,red:r,total:t};}
 function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});return scoreOf(all);}
 
+function clientNav(active){
+  return '<div class="bnav">'
+    +'<button class="ni'+(active==='home'?' active':'')+'" data-action="cnav" data-fn="goDashboard"><span>&#127968;</span>My Home</button>'
+    +'<button class="ni'+(active==='inspections'?' active':'')+'" data-action="cnav" data-fn="goInspectionHistory"><span>&#128203;</span>Inspections</button>'
+    +'<button class="ni'+(active==='invoices'?' active':'')+'" data-action="cnav" data-fn="goClientInvoices"><span>&#128181;</span>Invoices</button>'
+    +'<button class="ni'+(active==='contact'?' active':'')+'" data-action="cnav" data-fn="goContact"><span>&#128222;</span>Contact</button>'
+    +'</div>';
+}
+
 function render(html){
   document.getElementById('screen').innerHTML=html;
-  document.querySelectorAll('[data-action]').forEach(function(el){
-    el.addEventListener('click',function(){
-      var a=this.getAttribute('data-action');
-      if(a==='openEstate'){curEstateId=this.getAttribute('data-id');goDashboard();}
-      else if(a==='openDetail'){openDateDetail(this.getAttribute('data-key'));}
-      else if(a==='openCat'){openCat(this.getAttribute('data-cat'),this.getAttribute('data-key'));}
-      else if(a==='openPD'){openPD(parseInt(this.getAttribute('data-idx')));}
-    });
+  document.querySelectorAll('[data-action="cnav"]').forEach(function(el){
+    el.addEventListener('click',function(){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();});
   });
+  document.querySelectorAll('[data-action="openDetail"]').forEach(function(el){
+    el.addEventListener('click',function(){openDateDetail(this.getAttribute('data-key'));});
+  });
+  document.querySelectorAll('[data-action="openCat"]').forEach(function(el){
+    el.addEventListener('click',function(){openCat(this.getAttribute('data-cat'),this.getAttribute('data-key'));});
+  });
+  document.querySelectorAll('[data-action="openPD"]').forEach(function(el){
+    el.addEventListener('click',function(){openPD(parseInt(this.getAttribute('data-idx')));});
+  });
+
 }
 
 function ringHtml(sc,sz){sz=sz||90;var off=226-(226*sc.score/100);return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 90 90"><circle class="ring-bg" cx="45" cy="45" r="36"/><circle class="ring-fill" cx="45" cy="45" r="36" stroke="#c9a84c" stroke-dasharray="226" stroke-dashoffset="'+off+'" transform="rotate(-90 45 45)"/><text class="ring-score" x="45" y="50" text-anchor="middle">'+sc.score+'%</text></svg>';}
@@ -407,6 +429,102 @@ function openPointDetail(p){
   document.getElementById('pdModal').classList.add('open');
 }
 function closePD(){document.getElementById('pdModal').classList.remove('open');}
+function goClientInvoices(){
+  var myInvoices=clientInvoices.filter(function(i){return i.notes.indexOf(CE()&&CE().contract?CE().contract.tier:'')>=0||true;});
+  var unpaidTotal=myInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goDashboard">&#8592;</button><div><div class="topbar-title">Invoices</div><div class="topbar-sub">Billing History</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+  if(unpaidTotal>0){
+    html+='<div class="card" style="border-color:var(--red);margin-bottom:16px;text-align:center">'
+      +'<div style="font-size:9px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">&#9888; Payment Due</div>'
+      +'<div style="font-family:var(--ff);font-size:28px;color:var(--red)">$'+unpaidTotal.toFixed(2)+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:4px">Please contact us to arrange payment</div>'
+      +'<div style="margin-top:12px;font-size:10px;color:var(--gold)">E-Transfer &nbsp;&#183;&nbsp; Credit Card &nbsp;&#183;&nbsp; Apple Pay &nbsp;&#183;&nbsp; Google Pay</div>'
+      +'</div>';
+  }
+  html+='<div class="sec">Invoice History</div>';
+  myInvoices.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:12px;font-weight:500">'+inv.notes+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; '+dueStr+'</div>'
+      +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right">'
+      +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px">'+inv.status+'</div>'
+      +'</div></div></div>';
+  });
+  html+='</div>'+clientNav('invoices');
+  render(html);
+}
+
+function goInspectionHistory(){
+  var e=CE();if(!e)return;
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goDashboard">&#8592;</button><div><div class="topbar-title">Inspections</div><div class="topbar-sub">'+e.name+'</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc"><div class="sec">All Inspections</div>';
+  if(e.contract&&e.contract.nextInspection){
+    var nd=new Date(e.contract.nextInspection).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    html+='<div class="card" style="border-color:var(--gold);margin-bottom:16px">'
+      +'<div style="font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Next Scheduled</div>'
+      +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+nd+'</div>'
+      +'</div>';
+  }
+  if(e.completedAt){
+    var sc=liveScore(e);
+    var ds=new Date(e.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'});
+    html+=dateCard('live',ds,'&#10003; Completed',sc,false);
+  }
+  e.pastInspections.slice().reverse().forEach(function(insp,i){
+    var idx=e.pastInspections.length-1-i;
+    var ds2=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
+    var sc2=insp.snapshot?scoreOf(Object.values(insp.snapshot).reduce(function(a,cc){return a.concat(cc.points);},[])):scoreOf([]);
+    html+=dateCard(idx,ds2,'&#10003; Completed',sc2,false);
+  });
+  html+='</div>'+clientNav('inspections');
+  render(html);
+}
+
+function goContact(){
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goDashboard">&#8592;</button><div><div class="topbar-title">Contact Us</div><div class="topbar-sub">EstateCare Team</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div class="card" style="text-align:center;padding:28px 20px;margin-bottom:12px">'
+    +'<div style="font-size:36px;margin-bottom:12px">&#127968;</div>'
+    +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl);margin-bottom:6px">EstateCare</div>'
+    +'<div style="font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase">Luxury Home Maintenance</div>'
+    +'</div>'
+    +'<div class="sec">Get In Touch</div>'
+    +'<div class="card" style="margin-bottom:10px">'
+    +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">'
+    +'<div style="font-size:22px">&#128222;</div>'
+    +'<div><div style="font-size:12px;font-weight:500">Phone</div>'
+    +'<div style="font-size:13px;color:var(--gold);margin-top:2px">1-800-ESTCARE</div></div></div>'
+    +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">'
+    +'<div style="font-size:22px">&#128140;</div>'
+    +'<div><div style="font-size:12px;font-weight:500">Email</div>'
+    +'<div style="font-size:13px;color:var(--gold);margin-top:2px">hello@myestatecare.ca</div></div></div>'
+    +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0">'
+    +'<div style="font-size:22px">&#127760;</div>'
+    +'<div><div style="font-size:12px;font-weight:500">Website</div>'
+    +'<div style="font-size:13px;color:var(--gold);margin-top:2px">myestatecare.ca</div></div></div>'
+    +'</div>'
+    +'<div class="sec" style="margin-top:4px">Your Account Manager</div>'
+    +'<div class="card">'
+    +'<div style="font-size:13px;font-weight:500;margin-bottom:4px">Justin</div>'
+    +'<div style="font-size:11px;color:var(--dim);line-height:1.7">Your dedicated EstateCare account manager. Available Mon–Fri 8am–6pm EST.</div>'
+    +'</div>'
+    +'<div class="sec" style="margin-top:4px">Urgent Issues</div>'
+    +'<div class="card" style="border-color:var(--red)">'
+    +'<div style="font-size:10px;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">&#9888; Property Emergency</div>'
+    +'<div style="font-size:11px;color:var(--dim);line-height:1.7">For urgent property issues found during inspection, your inspector will contact you directly via phone. Ensure your contact information is up to date.</div>'
+    +'</div>'
+    +'<button class="btn-ghost" onclick="doSignOut()">Sign Out</button>'
+    +'</div>'+clientNav('contact');
+  render(html);
+}
+
 function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('client.html','');window.location.href=base+'index.html';}
 goHome();
 </script>
