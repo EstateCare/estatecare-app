@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <!-- Background -->
+  <rect width="200" height="220" fill="#1a2035" rx="8"/>
+  
+  <!-- House outline -->
+  <polyline points="100,28 148,68 148,108 52,108 52,68" 
+    fill="none" stroke="#c9a84c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Roof peak -->
+  <polyline points="44,72 100,28 156,72"
+    fill="none" stroke="#c9a84c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Door/window in house -->
+  <rect x="84" y="80" width="32" height="28" fill="none" stroke="#c9a84c" stroke-width="2.5"/>
+  <line x1="100" y1="80" x2="100" y2="108" stroke="#c9a84c" stroke-width="1.5"/>
+  <line x1="84" y1="94" x2="116" y2="94" stroke="#c9a84c" stroke-width="1.5"/>
+  
+  <!-- Key stem -->
+  <line x1="100" y1="108" x2="100" y2="140" stroke="#c9a84c" stroke-width="4" stroke-linecap="round"/>
+  <!-- Key bow (circle) -->
+  <circle cx="100" cy="124" r="10" fill="none" stroke="#c9a84c" stroke-width="3.5"/>
+  <!-- Key teeth -->
+  <line x1="106" y1="135" x2="106" y2="142" stroke="#c9a84c" stroke-width="3" stroke-linecap="round"/>
+  <line x1="112" y1="135" x2="112" y2="140" stroke="#c9a84c" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- ESTATE CARE text -->
+  <text x="100" y="168" 
+    font-family="Georgia, serif" 
+    font-size="22" 
+    font-weight="bold"
+    fill="#c9a84c" 
+    text-anchor="middle" 
+    letter-spacing="4">ESTATE CARE</text>
+  
+  <!-- LUXURY HOME MAINTENANCE -->
+  <text x="100" y="188" 
+    font-family="Arial, sans-serif" 
+    font-size="8.5" 
+    font-weight="normal"
+    fill="#c9a84c" 
+    text-anchor="middle" 
+    letter-spacing="3">LUXURY HOME MAINTENANCE</text>
+</svg>

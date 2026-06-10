@@ -53,7 +53,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .sbtn.y{border-color:var(--yellow);background:rgba(230,184,74,.15);}
 .sbtn.r{border-color:var(--red);background:rgba(224,92,92,.15);}
 .trio{display:flex;gap:6px;}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:flex-end;justify-content:center;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
 .modal-sheet{background:var(--ch);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;padding:24px 20px 36px;width:100%;max-height:85vh;overflow-y:auto;animation:slideUp .25s ease;}
 @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -103,7 +103,7 @@ var clientInvoices=[
 ];
 
 var estates=[
-  {id:'vs',name:'Hartwell Estate',address:'1402 Pelican Bay Drive, Naples FL 34108',icon:'&#127969;',
+  {id:'vs',name:'Hartwell Estate',address:'1402 Pelican Bay Drive, Naples FL 34108',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',
    clientEmail:'client1@estatecare.com',
    contract:{tier:'Premium',weeklyRate:59.95,inspectionsPerWeek:2,
      startDate:new Date('2025-11-01'),endDate:new Date('2026-05-29'),returnDate:new Date('2026-05-31'),
@@ -111,10 +111,10 @@ var estates=[
      nextInspection:new Date('2026-06-15')},
    completedAt:new Date('2026-06-01'),pastInspections:[],
    data:{
-    exterior:{label:'Exterior',icon:'&#127969;',points:[mkPt('e1','Front Entry & Door','green',''),mkPt('e2','Roof & Gutters','green',''),mkPt('e3','Windows & Seals','yellow','West window seal has slight gap.'),mkPt('e4','Driveway & Walkways','green',''),mkPt('e5','Garage Door','green',''),mkPt('e6','Exterior Lighting','yellow','Two path lights on north side not working.')]},
-    interior:{label:'Interior',icon:'&#128715;',points:[mkPt('i1','HVAC System','green',''),mkPt('i2','Water Heater','green',''),mkPt('i3','Kitchen Appliances','green',''),mkPt('i4','Plumbing & Fixtures','red','Active leak under guest bath vanity. Shut-off valve closed.'),mkPt('i5','Electrical Panel','green',''),mkPt('i6','Security System','yellow','Battery backup showing low charge.')]},
-    grounds:{label:'Grounds',icon:'&#127807;',points:[mkPt('g1','Lawn & Landscaping','green',''),mkPt('g2','Irrigation System','yellow','Zone 4 head blocked, uneven coverage.'),mkPt('g3','Pool & Equipment','green',''),mkPt('g4','Outdoor Furniture','green','')]}}},
-  {id:'mh',name:'Beaumont Residence',address:'880 Gulf Shore Blvd N, Naples FL 34102',icon:'&#127963;',
+    exterior:{label:'Exterior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',points:[mkPt('e1','Front Entry & Door','green',''),mkPt('e2','Roof & Gutters','green',''),mkPt('e3','Windows & Seals','yellow','West window seal has slight gap.'),mkPt('e4','Driveway & Walkways','green',''),mkPt('e5','Garage Door','green',''),mkPt('e6','Exterior Lighting','yellow','Two path lights on north side not working.')]},
+    interior:{label:'Interior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',points:[mkPt('i1','HVAC System','green',''),mkPt('i2','Water Heater','green',''),mkPt('i3','Kitchen Appliances','green',''),mkPt('i4','Plumbing & Fixtures','red','Active leak under guest bath vanity. Shut-off valve closed.'),mkPt('i5','Electrical Panel','green',''),mkPt('i6','Security System','yellow','Battery backup showing low charge.')]},
+    grounds:{label:'Grounds',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0020 0h-3"/><path d="M12 12a5 5 0 000-10 5 5 0 000 10z"/></svg>',points:[mkPt('g1','Lawn & Landscaping','green',''),mkPt('g2','Irrigation System','yellow','Zone 4 head blocked, uneven coverage.'),mkPt('g3','Pool & Equipment','green',''),mkPt('g4','Outdoor Furniture','green','')]}}},
+  {id:'mh',name:'Beaumont Residence',address:'880 Gulf Shore Blvd N, Naples FL 34102',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><line x1="8" y1="21" x2="8" y2="12"/><line x1="16" y1="21" x2="16" y2="12"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
    clientEmail:'client2@estatecare.com',
    contract:{tier:'Luxury',weeklyRate:69.95,inspectionsPerWeek:2.33,
      startDate:new Date('2025-10-15'),endDate:new Date('2026-04-28'),returnDate:new Date('2026-04-30'),
@@ -122,9 +122,9 @@ var estates=[
      nextInspection:new Date('2026-06-11')},
    completedAt:new Date('2026-05-28'),pastInspections:[],
    data:{
-    exterior:{label:'Exterior',icon:'&#127969;',points:[mkPt('me1','Front Entry & Door','green',''),mkPt('me2','Roof & Gutters','yellow','Debris in north valley gutter, cleaning needed.'),mkPt('me3','Windows & Seals','green',''),mkPt('me4','Driveway & Walkways','green',''),mkPt('me5','Garage Door','red','Auto-reverse sensor failed. Do not use until repaired.'),mkPt('me6','Exterior Lighting','green','')]},
-    interior:{label:'Interior',icon:'&#128715;',points:[mkPt('mi1','HVAC System','green',''),mkPt('mi2','Water Heater','green',''),mkPt('mi3','Kitchen Appliances','green',''),mkPt('mi4','Plumbing & Fixtures','green',''),mkPt('mi5','Electrical Panel','yellow','Outdoor circuit breaker warm to touch.'),mkPt('mi6','Security System','green','')]},
-    grounds:{label:'Grounds',icon:'&#127807;',points:[mkPt('mg1','Lawn & Landscaping','green',''),mkPt('mg2','Irrigation System','yellow','Zone 3 head clogged, reduced flow.'),mkPt('mg3','Pool & Equipment','green',''),mkPt('mg4','Outdoor Furniture','green','')]}}}
+    exterior:{label:'Exterior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',points:[mkPt('me1','Front Entry & Door','green',''),mkPt('me2','Roof & Gutters','yellow','Debris in north valley gutter, cleaning needed.'),mkPt('me3','Windows & Seals','green',''),mkPt('me4','Driveway & Walkways','green',''),mkPt('me5','Garage Door','red','Auto-reverse sensor failed. Do not use until repaired.'),mkPt('me6','Exterior Lighting','green','')]},
+    interior:{label:'Interior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',points:[mkPt('mi1','HVAC System','green',''),mkPt('mi2','Water Heater','green',''),mkPt('mi3','Kitchen Appliances','green',''),mkPt('mi4','Plumbing & Fixtures','green',''),mkPt('mi5','Electrical Panel','yellow','Outdoor circuit breaker warm to touch.'),mkPt('mi6','Security System','green','')]},
+    grounds:{label:'Grounds',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0020 0h-3"/><path d="M12 12a5 5 0 000-10 5 5 0 000 10z"/></svg>',points:[mkPt('mg1','Lawn & Landscaping','green',''),mkPt('mg2','Irrigation System','yellow','Zone 3 head clogged, reduced flow.'),mkPt('mg3','Pool & Equipment','green',''),mkPt('mg4','Outdoor Furniture','green','')]}}}
 ];
 
 var curEstateId=null,selKey=null;
@@ -135,10 +135,10 @@ function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=a
 
 function clientNav(active){
   return '<div class="bnav">'
-    +'<button class="ni'+(active==='home'?' active':'')+'" data-action="cnav" data-fn="goDashboard"><span>&#127968;</span>My Home</button>'
-    +'<button class="ni'+(active==='inspections'?' active':'')+'" data-action="cnav" data-fn="goInspectionHistory"><span>&#128203;</span>Inspections</button>'
-    +'<button class="ni'+(active==='invoices'?' active':'')+'" data-action="cnav" data-fn="goClientInvoices"><span>&#128181;</span>Invoices</button>'
-    +'<button class="ni'+(active==='contact'?' active':'')+'" data-action="cnav" data-fn="goContact"><span>&#128222;</span>Contact</button>'
+    +'<button class="ni'+(active==='home'?' active':'')+'" data-action="cnav" data-fn="goDashboard"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span>My Home</button>'
+    +'<button class="ni'+(active==='inspections'?' active':'')+'" data-action="cnav" data-fn="goInspectionHistory"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Inspections</button>'
+    +'<button class="ni'+(active==='invoices'?' active':'')+'" data-action="cnav" data-fn="goClientInvoices"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>Invoices</button>'
+    +'<button class="ni'+(active==='contact'?' active':'')+'" data-action="cnav" data-fn="goContact"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.09-1.09a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></span>Contact</button>'
     +'</div>';
 }
 
@@ -206,7 +206,7 @@ function showNewClientDash(e){
   var html='<div class="topbar"><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">My Property</div></div><div class="avatar" onclick="doSignOut()">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div class="card" style="text-align:center;padding:32px 20px;border-color:var(--gold)">'
-    +'<div style="font-size:32px;margin-bottom:12px">&#127968;</div>'
+    +'<div style="font-size:32px;margin-bottom:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div>'
     +'<div style="font-family:var(--ff);font-size:24px;color:var(--gl);margin-bottom:8px">Welcome to EstateCare</div>'
     +'<div style="font-size:11px;color:var(--dim);line-height:1.8">Your account is active.<br>Service begins after your Property Walk-Through.</div>'
     +'</div>'
@@ -339,7 +339,7 @@ function openDateDetail(key){
     +'<div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:16px">'+ringHtml(sc,70)+statsHtml(sc)+'</div>'
     +'<div class="sec">Categories</div>';
 
-  var cats=[{k:'exterior',ico:'&#127969;'},{k:'interior',ico:'&#128715;'},{k:'grounds',ico:'&#127807;'}];
+  var cats=[{k:'exterior',ico:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>'},{k:'interior',ico:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'},{k:'grounds',ico:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0020 0h-3"/><path d="M12 12a5 5 0 000-10 5 5 0 000 10z"/></svg>'}];
   cats.forEach(function(cat){
     var pts,label,cs;
     if(isLive){
@@ -355,7 +355,7 @@ function openDateDetail(key){
       +'<div style="display:flex;align-items:center;gap:14px">'
       +'<div class="cat-ico">'+cat.ico+'</div>'
       +'<div style="flex:1"><div style="font-size:13px;font-weight:500;letter-spacing:1px;margin-bottom:4px">'+label+'</div>'
-      +'<div style="font-size:10px;color:var(--dim)">'+(hasR?'&#9888; Attention required':hasY?'&#9679; Monitor items':'&#10003; All clear')+'</div>'
+      +'<div style="font-size:10px;color:var(--dim)">'+(hasR?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Attention required':hasY?'&#9679; Monitor items':'&#10003; All clear')+'</div>'
       +'<div style="font-size:9px;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px">&#10003; Signed &amp; Locked</div>'
       +'</div><div class="cstat '+cs+'"></div></div></div>';
   });
@@ -373,7 +373,7 @@ function openCat(cat,key){
 
   var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="openDateDetail(\''+key+'\')">&#8592;</button><div><div class="topbar-title">'+label+'</div><div class="topbar-sub">'+e.name+'</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
-    +'<div class="locked-banner">&#128274; View only &mdash; your property report</div>';
+    +'<div class="locked-banner"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> View only &mdash; your property report</div>';
 
   window._viewPts=pts;
   pts.forEach(function(p,idx){
@@ -444,15 +444,49 @@ function openPD(issueIdx){
   openPointDetail({name:iss.name,status:iss.status,notes:iss.notes,photos:[]});
 }
 function openPointDetail(p){
-  var sc=p.status==='red'?'var(--red)':p.status==='yellow'?'var(--yellow)':'var(--green)';
-  var sl=p.status==='red'?'Attention Required':p.status==='yellow'?'Monitor':'Healthy';
-  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-    +'<div class="modal-title">'+p.name+'</div>'
-    +'<button onclick="closePD()" style="background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer">&#215;</button></div>'
-    +'<span class="pd-status" style="background:'+sc+'22;border:1px solid '+sc+';color:'+sc+'">&#9679; '+sl+'</span>';
-  if(p.notes)html+='<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Inspector Note</div><div style="background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:13px;font-style:italic;line-height:1.7;margin-bottom:12px">&ldquo;'+p.notes+'&rdquo;</div>';
-  else html+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">No notes added.</div>';
-  html+='<button class="btn-ghost" style="margin:0" onclick="closePD()">Close</button>';
+  var isRed=p.status==='red';
+  var isYellow=p.status==='yellow';
+  var sc=isRed?'var(--red)':isYellow?'var(--yellow)':'var(--green)';
+  var scHex=isRed?'#e05c5c':isYellow?'#e6b84a':'#4caf7d';
+  var sl=isRed?'Attention Required':isYellow?'Monitor — Action Needed':'Healthy';
+  var icon=isRed?'&#9888;':isYellow?'&#9650;':'&#10003;';
+
+  var html=''
+    // Status banner - full width colored bar at top
+    +'<div style="background:'+scHex+'22;border-bottom:2px solid '+scHex+';padding:16px 20px;margin:-24px -20px 20px;display:flex;align-items:center;gap:12px">'
+    +'<div style="font-size:24px;color:'+scHex+'">'+icon+'</div>'
+    +'<div style="flex:1">'
+    +'<div style="font-size:16px;font-weight:600;color:#ffffff;letter-spacing:0.5px">'+p.name+'</div>'
+    +'<div style="font-size:11px;color:'+scHex+';letter-spacing:1px;text-transform:uppercase;margin-top:3px">'+sl+'</div>'
+    +'</div>'
+    +'<button onclick="closePD()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:32px;height:32px;color:#ffffff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#215;</button>'
+    +'</div>';
+
+  if(p.notes){
+    html+=''
+      +'<div style="font-size:10px;letter-spacing:2px;color:#9a9488;text-transform:uppercase;margin-bottom:10px">Inspector Note</div>'
+      +'<div style="background:#242424;border-left:3px solid '+scHex+';border-radius:0 4px 4px 0;padding:16px;margin-bottom:20px">'
+      +'<div style="font-size:15px;color:#f0ece4;line-height:1.8;font-style:italic">&ldquo;'+p.notes+'&rdquo;</div>'
+      +'</div>';
+  } else {
+    html+='<div style="font-size:13px;color:#9a9488;margin-bottom:20px;font-style:italic">No additional notes from inspector.</div>';
+  }
+
+  // What this means section
+  html+=''
+    +'<div style="background:#1c1c1c;border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:14px;margin-bottom:20px">'
+    +'<div style="font-size:10px;letter-spacing:2px;color:#9a9488;text-transform:uppercase;margin-bottom:8px">What This Means</div>'
+    +(isRed
+      ?'<div style="font-size:13px;color:#f0ece4;line-height:1.8">This item requires <strong style="color:#e05c5c">immediate attention</strong>. Your inspector has flagged this as urgent. Please contact EstateCare as soon as possible.</div>'
+      :'<div style="font-size:13px;color:#f0ece4;line-height:1.8">This item is being <strong style="color:#e6b84a">monitored closely</strong>. Your inspector will check this on the next visit. No immediate action required.</div>')
+    +'</div>';
+
+  html+=''
+    +'<div style="display:flex;gap:10px">'
+    +'<button onclick="closePD()" style="flex:1;background:transparent;border:1px solid rgba(201,168,76,0.3);border-radius:2px;color:#9a9488;font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer">Close</button>'
+    +(isRed?'<a href="mailto:hello@myestatecare.ca?subject=Urgent: '+encodeURIComponent(p.name)+'" style="flex:1;background:linear-gradient(135deg,#e05c5c,#ff7070);border:none;border-radius:2px;color:#fff;font-family:Montserrat,sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center">Contact Us</a>':'')
+    +'</div>';
+
   document.getElementById('pdContent').innerHTML=html;
   document.getElementById('pdModal').classList.add('open');
 }
@@ -482,7 +516,7 @@ function goClientInvoices(){
       +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:3px">'+inv.invoiceNum+'</div>'
       +'<div style="font-size:13px;font-weight:500">'+inv.notes+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; Due '+dueStr+'</div>'
-      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px">&#9654; Auto-Pay</div>':'')
+      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Auto-Pay</div>':'')
       +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid '+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
       +'</div>'
       +'<div style="text-align:right;margin-left:12px">'
@@ -514,7 +548,7 @@ function filterClientInvoices(v){
       +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:3px">'+inv.invoiceNum+'</div>'
       +'<div style="font-size:13px;font-weight:500">'+inv.notes+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; Due '+dueStr+'</div>'
-      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px">&#9654; Auto-Pay</div>':'')
+      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Auto-Pay</div>':'')
       +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
       +'</div>'
       +'<div style="text-align:right;margin-left:12px">'
@@ -557,22 +591,22 @@ function goContact(){
   var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goDashboard">&#8592;</button><div><div class="topbar-title">Contact Us</div><div class="topbar-sub">EstateCare Team</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div class="card" style="text-align:center;padding:28px 20px;margin-bottom:12px">'
-    +'<div style="font-size:36px;margin-bottom:12px">&#127968;</div>'
+    +'<div style="font-size:36px;margin-bottom:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div>'
     +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl);margin-bottom:6px">EstateCare</div>'
     +'<div style="font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase">Luxury Home Maintenance</div>'
     +'</div>'
     +'<div class="sec">Get In Touch</div>'
     +'<div class="card" style="margin-bottom:10px">'
     +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">'
-    +'<div style="font-size:22px">&#128222;</div>'
+    +'<div style="font-size:22px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.09-1.09a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>'
     +'<div><div style="font-size:12px;font-weight:500">Phone</div>'
     +'<div style="font-size:13px;color:var(--gold);margin-top:2px">1-800-ESTCARE</div></div></div>'
     +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">'
-    +'<div style="font-size:22px">&#128140;</div>'
+    +'<div style="font-size:22px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>'
     +'<div><div style="font-size:12px;font-weight:500">Email</div>'
     +'<div style="font-size:13px;color:var(--gold);margin-top:2px">hello@myestatecare.ca</div></div></div>'
     +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0">'
-    +'<div style="font-size:22px">&#127760;</div>'
+    +'<div style="font-size:22px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>'
     +'<div><div style="font-size:12px;font-weight:500">Website</div>'
     +'<div style="font-size:13px;color:var(--gold);margin-top:2px">myestatecare.ca</div></div></div>'
     +'</div>'
@@ -583,7 +617,7 @@ function goContact(){
     +'</div>'
     +'<div class="sec" style="margin-top:4px">Urgent Issues</div>'
     +'<div class="card" style="border-color:var(--red)">'
-    +'<div style="font-size:10px;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">&#9888; Property Emergency</div>'
+    +'<div style="font-size:10px;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Property Emergency</div>'
     +'<div style="font-size:11px;color:var(--dim);line-height:1.7">For urgent property issues found during inspection, your inspector will contact you directly via phone. Ensure your contact information is up to date.</div>'
     +'</div>'
     +'<button class="btn-ghost" onclick="doSignOut()">Sign Out</button>'
@@ -596,60 +630,127 @@ function openInvoice(invId){
   if(!inv) return;
   var e=CE();
   var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--gold)';
-  var statusLabel=inv.status==='paid'?'&#10003; Paid':inv.status==='unpaid'?'&#9888; Payment Required':'&#128197; Upcoming';
-  var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  var statusLabel=inv.status==='paid'?'PAID':inv.status==='unpaid'?'PAYMENT DUE':'UPCOMING';
+  var statusColor=inv.status==='paid'?'#4caf7d':inv.status==='unpaid'?'#e05c5c':'#c9a84c';
+  var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  var issuedStr=new Date(inv.dueDate.getTime()-7*24*60*60*1000).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 
-  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goClientInvoices">&#8592;</button><div><div class="topbar-title">'+inv.invoiceNum+'</div><div class="topbar-sub">Invoice Detail</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
-    +'<div class="sc">'
-    // Invoice header card
-    +'<div class="card" style="border-color:'+col+';margin-bottom:16px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
-    +'<div>'
-    +'<div style="font-family:var(--ff);font-size:28px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
-    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' billing</div>'
+  // Build print-friendly invoice
+  var html='<div class="topbar"><div style="display:flex;align-items:center">'
+    +'<button class="back-btn" data-action="cnav" data-fn="goClientInvoices">&#8592;</button>'
+    +'<div><div class="topbar-title">Invoice</div><div class="topbar-sub">'+inv.invoiceNum+'</div></div></div>'
+    +'<button onclick="printInvoice()" style="background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;cursor:pointer;margin-right:8px">Print / Save PDF</button>'
     +'</div>'
-    +'<div style="background:'+col+'22;border:1px solid '+col+';border-radius:20px;padding:4px 14px;font-size:10px;color:'+col+';letter-spacing:1px;text-transform:uppercase">'+statusLabel+'</div>'
+    // Invoice document
+    +'<div class="sc" id="invoiceDoc">'
+    +'<div style="background:var(--ch);border:1px solid var(--border);border-radius:2px;padding:28px;margin-bottom:12px">'
+    // Header
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:20px;border-bottom:2px solid var(--gold)">'
+    +'<div style="display:flex;align-items:center;gap:14px">'+LOGO_FULL.replace('"','\"')
+    +'+'+'<div><div style="font-family:var(--ff);font-size:22px;letter-spacing:3px;color:var(--gl)">ESTATE CARE</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase">Luxury Home Maintenance</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.7">hello@myestatecare.ca<br>myestatecare.ca</div>'
+    +'</div></div>'
+    +'<div style="text-align:right">'
+    +'<div style="font-family:var(--ff);font-size:28px;color:var(--gl)">INVOICE</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+inv.invoiceNum+'</div>'
+    +'<div style="display:inline-block;margin-top:8px;background:'+statusColor+'22;border:1px solid '+statusColor+';border-radius:20px;padding:4px 14px;font-size:9px;font-weight:600;letter-spacing:2px;color:'+statusColor+';text-transform:uppercase">'+statusLabel+'</div>'
+    +'</div></div>'
+    // Bill to + details
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:24px">'
+    +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Bill To</div>'
+    +'<div style="font-size:14px;font-weight:500">'+currentUser.name+'</div>'
+    +(e?'<div style="font-size:12px;color:var(--dim);margin-top:3px">'+e.name+'</div>':'')
+    +(e?'<div style="font-size:11px;color:var(--dim);margin-top:2px">'+e.address+'</div>':'')
+    +'<div style="font-size:11px;color:var(--dim);margin-top:2px">'+currentUser.email+'</div>'
     +'</div>'
-    +'<div style="border-top:1px solid var(--border);padding-top:12px">'
-    +invRow('Invoice #',inv.invoiceNum)
-    +invRow('Description',inv.notes)
-    +invRow('Period',inv.period)
-    +invRow('Due Date',dueStr)
-    +(inv.status==='paid'?invRow('Paid On',new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})):'')
-    +(inv.paymentMethod?invRow('Payment Method',inv.paymentMethod):'')
-    +(e&&e.contract?invRow('Property',e.name):'')
-    +(e&&e.contract?invRow('Service Tier',e.contract.tier):'')
-    +(inv.autoPay?'<div style="margin-top:8px;padding:8px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px"><div style="font-size:11px;color:var(--green)">&#9654; Auto-Pay Enabled</div><div style="font-size:10px;color:var(--dim)">Charged automatically on due date</div></div>':'')
-    +'</div></div>';
-
-  // Payment options for unpaid invoices
-  if(inv.status==='unpaid'||inv.status==='upcoming'){
-    html+='<div class="sec">Payment Options</div>'
-      +'<div class="card" style="margin-bottom:10px">'
-      +'<div style="font-size:10px;color:var(--dim);line-height:1.8;margin-bottom:14px">Choose your preferred payment method. Contact us to complete your payment or set up auto-pay.</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
-      +payOption('&#128179;','E-Transfer','hello@myestatecare.ca','Instant')
-      +payOption('&#127758;','Credit Card','Secure online','Processing fee may apply')
-      +payOption('&#63743;','Apple Pay','Tap to pay','Quick & secure')
-      +payOption('&#9684;','Google Pay','Tap to pay','Quick & secure')
-      +'</div>'
-      +'<div style="background:var(--ch3);border-radius:2px;padding:12px;font-size:10px;color:var(--dim);line-height:1.7">'
-      +'To pay via e-transfer, send to <span style="color:var(--gold)">hello@myestatecare.ca</span> with invoice number <span style="color:var(--gl)">'+inv.invoiceNum+'</span> in the message.'
-      +'</div></div>'
-      +'<div class="sec">Auto-Pay</div>'
-      +'<div class="card">'
-      +'<div style="font-size:11px;color:var(--dim);line-height:1.7;margin-bottom:12px">Set up automatic payments so you never miss an invoice. Contact us to enable auto-pay on your account.</div>'
-      +'<button data-action="payopt" data-paymethod="AutoPay" style="width:100%;background:var(--gd);border:1px solid var(--gold);border-radius:1px;color:var(--gl);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer">Set Up Auto-Pay</button>'
-      +'</div>';
-  }
-
-  html+='<div class="sec" style="margin-top:4px">Questions?</div>'
-    +'<div class="card">'
-    +'<div style="font-size:11px;color:var(--dim);line-height:1.8">Contact your account manager for any billing questions.<br>'
-    +'<span style="color:var(--gold)">hello@myestatecare.ca</span></div>'
+    +'<div style="text-align:right">'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Invoice Details</div>'
+    +invRow2('Invoice #',inv.invoiceNum)
+    +invRow2('Issued',issuedStr)
+    +invRow2('Due Date',dueStr)
+    +(inv.paidDate?invRow2('Paid On',new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})):'')
+    +'</div></div>'
+    // Line items
+    +'<table style="width:100%;border-collapse:collapse;margin-bottom:20px">'
+    +'<thead><tr style="border-bottom:1px solid var(--gold)">'
+    +'<th style="text-align:left;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;padding:8px 0">Description</th>'
+    +'<th style="text-align:right;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;padding:8px 0">Amount</th>'
+    +'</tr></thead>'
+    +'<tbody>'
+    +'<tr style="border-bottom:1px solid rgba(201,168,76,0.1)">'
+    +'<td style="padding:14px 0"><div style="font-size:13px;font-weight:500">'+inv.notes+'</div>'
+    +(e&&e.contract?'<div style="font-size:11px;color:var(--dim);margin-top:3px">'+e.contract.tier+' Plan &nbsp;&#183;&nbsp; '+inv.period+' Billing</div>':'')
+    +'<div style="font-size:11px;color:var(--dim);margin-top:3px">Service Period: '+dueStr+'</div>'
+    +'</td>'
+    +'<td style="padding:14px 0;text-align:right;font-family:var(--ff);font-size:18px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</td>'
+    +'</tr></tbody>'
+    +'<tfoot>'
+    +'<tr><td colspan="2" style="padding-top:12px;border-top:2px solid var(--gold)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase">Total Due</div>'
+    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl)">$'+inv.amount.toFixed(2)+' CAD</div>'
+    +'</div></td></tr>'
+    +'</tfoot></table>'
+    // Payment section
+    +(inv.status!=='paid'?
+    '<div style="background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:16px">'
+    +'<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">Payment Methods Accepted</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
+    +'<div style="background:var(--ch3);border-radius:2px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:500">E-Transfer</div><div style="font-size:9px;color:var(--gold);margin-top:2px">hello@myestatecare.ca</div></div>'
+    +'<div style="background:var(--ch3);border-radius:2px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:500">Credit Card</div><div style="font-size:9px;color:var(--dim);margin-top:2px">Via secure link</div></div>'
+    +'<div style="background:var(--ch3);border-radius:2px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:500">Apple Pay</div><div style="font-size:9px;color:var(--dim);margin-top:2px">Via secure link</div></div>'
+    +'<div style="background:var(--ch3);border-radius:2px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:500">Google Pay</div><div style="font-size:9px;color:var(--dim);margin-top:2px">Via secure link</div></div>'
     +'</div>'
+    +'<div style="font-size:10px;color:var(--dim);line-height:1.8">For e-transfer, please include invoice number <strong style="color:var(--gl)">'+inv.invoiceNum+'</strong> in the message field. Send to <strong style="color:var(--gold)">hello@myestatecare.ca</strong></div>'
+    +'</div>'
+    :'<div style="background:rgba(76,175,125,0.08);border:1px solid var(--green);border-radius:2px;padding:14px;margin-bottom:16px;text-align:center">'
+    +'<div style="font-size:12px;color:var(--green)">&#10003; &nbsp; Payment received '+(inv.paidDate?'on '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'')+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>'
+    +'</div>')
+    // Footer
+    +'<div style="border-top:1px solid var(--border);padding-top:14px;text-align:center">'
+    +'<div style="font-size:10px;color:var(--dim);line-height:1.8">Thank you for choosing EstateCare.<br>Questions? Contact us at <span style="color:var(--gold)">hello@myestatecare.ca</span> or visit <span style="color:var(--gold)">myestatecare.ca</span></div>'
+    +'</div>'
+    +'</div>'  // end invoice doc card
+    +(inv.status!=='paid'?'<button onclick="printInvoice()" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:14px;cursor:pointer;margin-bottom:8px">Print / Save as PDF</button>':'')
+    +'<button onclick="printInvoice()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer">Save PDF</button>'
     +'</div>'+clientNav('invoices');
   render(html);
+}
+
+function invRow2(label,val){
+  return '<div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:4px">'
+    +'<span style="font-size:10px;color:var(--dim)">'+label+':</span>'
+    +'<span style="font-size:11px">'+val+'</span></div>';
+}
+
+function printInvoice(){
+  var doc=document.getElementById('invoiceDoc');
+  if(!doc)return;
+  var w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>EstateCare Invoice</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box;}body{background:#fff;color:#1a1a1a;font-family:Georgia,serif;padding:40px;}'
+    +'table{width:100%;border-collapse:collapse;}'
+    +'</style></head><body>');
+  // Build clean print version
+  w.document.write('<div style="max-width:700px;margin:0 auto">');
+  w.document.write(doc.innerHTML
+    .replace(/background:[^;]+;/g,'background:#f9f9f9;')
+    .replace(/color:var\(--gl\)/g,'color:#8b6914')
+    .replace(/color:var\(--gold\)/g,'color:#8b6914')
+    .replace(/color:var\(--dim\)/g,'color:#666')
+    .replace(/color:var\(--text\)/g,'color:#1a1a1a')
+    .replace(/color:var\(--green\)/g,'color:#2e7d32')
+    .replace(/color:var\(--red\)/g,'color:#c62828')
+    .replace(/border:[^;]*var\(--border\)[^;]*/g,'border:1px solid #ddd')
+    .replace(/border:[^;]*var\(--gold\)[^;]*/g,'border:2px solid #c9a84c')
+    .replace(/var\(--ch\)/g,'#ffffff')
+    .replace(/var\(--ch2\)/g,'#f5f5f5')
+    .replace(/var\(--ch3\)/g,'#eeeeee')
+  );
+  w.document.write('</div></body></html>');
+  w.document.close();
+  w.print();
 }
 
 function invRow(label,val){
@@ -688,7 +789,7 @@ if('serviceWorker' in navigator){
 
 <div id="pwaBanner" style="display:none;position:fixed;bottom:70px;left:12px;right:12px;background:var(--ch);border:1px solid var(--gold);border-radius:4px;padding:12px 16px;z-index:300;box-shadow:0 4px 24px rgba(0,0,0,.6)">
   <div style="display:flex;align-items:center;gap:10px">
-    <div style="font-size:20px;flex-shrink:0">&#128241;</div>
+    <div style="font-size:20px;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
     <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--gl);margin-bottom:2px">Add EstateCare to Home Screen</div><div style="font-size:10px;color:var(--dim)">One tap access — no app store needed</div></div>
     <button onclick="showPWASteps()" style="background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:2px;color:#000;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:8px 12px;cursor:pointer;white-space:nowrap">How To</button>
     <button onclick="dismissPWA()" style="background:transparent;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:4px">&#215;</button>
@@ -713,7 +814,7 @@ function showPWASteps(){
   var steps=document.getElementById('pwaStepsInner');
   if(!steps) return;
   var s=isIOS
-    ?'<div style="font-size:11px;color:var(--text);line-height:2">1. Tap the <b style="color:var(--gold)">Share button</b> &#9650; at the bottom of Safari<br>2. Tap <b style="color:var(--gold)">Add to Home Screen</b><br>3. Tap <b style="color:var(--gold)">Add</b></div>'
+    ?'<div style="font-size:11px;color:var(--text);line-height:2">1. Tap the <b style="color:var(--gold)">Share button</b> <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20"/></svg> at the bottom of Safari<br>2. Tap <b style="color:var(--gold)">Add to Home Screen</b><br>3. Tap <b style="color:var(--gold)">Add</b></div>'
     :'<div style="font-size:11px;color:var(--text);line-height:2">1. Tap the <b style="color:var(--gold)">three dots menu</b> in Chrome<br>2. Tap <b style="color:var(--gold)">Add to Home Screen</b><br>3. Tap <b style="color:var(--gold)">Add</b></div>';
   steps.innerHTML=s;
   steps.style.display='block';
