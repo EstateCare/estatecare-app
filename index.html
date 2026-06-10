@@ -94,9 +94,10 @@ if(base==='/')base='/';
 var signup={
   step:1,
   tier:null,
+  billing:'monthly',
   name:'',email:'',password:'',phone:'',
   secName:'',secPhone:'',secAddr:'',
-  propName:'',propAddr:'',propPostal:'',propType:'Single Family',features:[],
+  propName:'',propAddr:'',propPostal:'',propType:'Single Family',features:[],security:[],
   walkDate:null,walkTime:null
 };
 
@@ -154,6 +155,15 @@ function showWelcome(){
 }
 
 // ── TIERS ─────────────────────────────────────────────────────────────────
+function billBtn(val,label,sub){
+  var sel=signup.billing===val;
+  return '<div onclick="signup.billing=\''+val+'\';showTiers()" style="background:var(--ch2);border:2px solid '+(sel?'var(--gold)':'var(--border)')+';border-radius:2px;padding:12px 8px;text-align:center;cursor:pointer">'
+    +'<div style="font-size:11px;font-weight:500;color:'+(sel?'var(--gl)':'var(--text)')+'">'+label+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:3px">'+sub+'</div>'
+    +(sel?'<div style="font-size:9px;color:var(--gold);margin-top:4px">&#10003;</div>':'')
+    +'</div>';
+}
+
 function showTiers(){
   var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="showWelcome()">&#8592;</button><div><div class="topbar-title">Our Services</div><div class="topbar-sub">Choose your level of care</div></div></div></div>'
     +'<div class="sc">'
@@ -176,6 +186,12 @@ function showTiers(){
       +'</div></div>';
   });
 
+  html+='<div class="sec" style="margin-top:4px">Billing Preference</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">'
+    +billBtn('weekly','Weekly','Pay each week')
+    +billBtn('monthly','Monthly','Save with monthly billing')
+    +billBtn('annual','Annual','Best value — save 10%')
+    +'</div>';
   html+='<div class="disclaimer">EstateCare provides professional home watch and inspection services. Inspection reports include date, time, observations and photographic documentation. Insurance requirements vary by insurer and policy. Clients are responsible for confirming any specific inspection or vacancy requirements with their insurance broker or provider.</div>'
     +'<button class="btn-gold" style="margin-top:20px" onclick="goToSignup()">Continue'+(signup.tier?' with '+TIERS.find(function(t){return t.id===signup.tier;}).name:' — Select a Plan or Skip')+'</button>'
     +'<button class="btn-ghost" onclick="goToSignup()">Skip for now — decide after walk-through</button>'
@@ -382,6 +398,7 @@ function confirmSignup(){
       grounds:{label:'Grounds',icon:'&#127807;',points:[]}}
   };
 
+  clientData.billing=signup.billing;
   localStorage.setItem('ec_user',JSON.stringify(clientData));
   localStorage.setItem('ec_new_estate',JSON.stringify(estateData));
 

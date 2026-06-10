@@ -442,7 +442,9 @@ function goClientInvoices(){
       +'<div style="margin-top:12px;font-size:10px;color:var(--gold)">E-Transfer &nbsp;&#183;&nbsp; Credit Card &nbsp;&#183;&nbsp; Apple Pay &nbsp;&#183;&nbsp; Google Pay</div>'
       +'</div>';
   }
-  html+='<div class="sec">Invoice History</div>';
+  html+='<input oninput="filterClientInvoices(this.value)" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;padding:10px 14px;outline:none;margin-bottom:16px" placeholder="Search invoices…">'
+    +'<div class="sec">Invoice History</div>'
+    +'<div id="clientInvList">';
   myInvoices.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
     var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
@@ -457,8 +459,35 @@ function goClientInvoices(){
       +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px">'+inv.status+'</div>'
       +'</div></div></div>';
   });
-  html+='</div>'+clientNav('invoices');
+  html+='</div></div>'+clientNav('invoices');
   render(html);
+}
+
+function filterClientInvoices(v){
+  var e=CE();
+  var filtered=clientInvoices.filter(function(i){
+    return i.notes.toLowerCase().indexOf(v.toLowerCase())>=0
+      ||i.status.toLowerCase().indexOf(v.toLowerCase())>=0
+      ||i.period.toLowerCase().indexOf(v.toLowerCase())>=0
+      ||new Date(i.dueDate).toLocaleDateString('en-US',{month:'long',year:'numeric'}).toLowerCase().indexOf(v.toLowerCase())>=0;
+  });
+  var html='';
+  filtered.sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:12px;font-weight:500">'+inv.notes+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; '+dueStr+'</div>'
+      +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right">'
+      +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px">'+inv.status+'</div>'
+      +'</div></div></div>';
+  });
+  var el=document.getElementById('clientInvList');
+  if(el) el.innerHTML=html||'<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px">No invoices found</div>';
 }
 
 function goInspectionHistory(){
