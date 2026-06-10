@@ -72,8 +72,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 <div class="modal-overlay" id="pdModal">
   <div class="modal-sheet" id="pdContent"></div>
 </div>
-<script>
-var currentUser=JSON.parse(localStorage.getItem('ec_user')||'null');
+<script>var currentUser=JSON.parse(localStorage.getItem('ec_user')||'null');
 // If no valid client session, redirect to login
 if(!currentUser||currentUser.role!=='client'){
   var base=window.location.pathname.replace('client.html','');
@@ -385,8 +384,10 @@ function openPointDetail(p){
   html+='<button class="btn-ghost" style="margin:0" onclick="closePD()">Close</button>';
   document.getElementById('pdContent').innerHTML=html;
   document.querySelectorAll('[data-pi]').forEach(function(img){
-    img.addEventListener('click',function(){var s=window['_pdp'+this.getAttribute('data-pidx')];if(s){var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';var im=document.createElement('img');im.src=s;im.style.cssText='max-width:100%;max-height:100%;object-fit:contain';ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};document.body.appendChild(ov);}});
+    img.addEventListener('click',function(){var s=window['_pp'+this.getAttribute('data-pi')];if(s){var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';var im=document.createElement('img');im.src=s;im.style.cssText='max-width:100%;max-height:100%;object-fit:contain';ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};document.body.appendChild(ov);}});
   });
+  document.getElementById('pdModal').classList.add('open');
+}
 
 function openPD(issueIdx){
   var iss=window['_issue_'+issueIdx];if(!iss)return;
@@ -408,8 +409,7 @@ function openPointDetail(p){
 function closePD(){document.getElementById('pdModal').classList.remove('open');}
 function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('client.html','');window.location.href=base+'index.html';}
 goHome();
-
-}</script>
+</script>
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
