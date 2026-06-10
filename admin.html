@@ -219,10 +219,10 @@ function goDash(){
   var html=topBar('EstateCare','Admin Dashboard')
     +'<div class="sc">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
-    +statBox('Estates',estates.length,'&#127968;')
-    +statBox('Inspectors',inspectors.length,'&#128203;')
-    +statBox('Active Issues',issues,'&#9888;','var(--yellow)')
-    +statBox('Contract Value','$'+value.toLocaleString('en',{maximumFractionDigits:0}),'&#128181;','var(--green)')
+    +statBox('Estates',estates.length,'&#127968;',null,'goEstates()')
+    +statBox('Inspectors',inspectors.length,'&#128203;',null,'goInspectors()')
+    +statBox('Active Issues',issues,'&#9888;','var(--yellow)','goEstates()')
+    +statBox('Contract Value','$'+value.toLocaleString('en',{maximumFractionDigits:0}),'&#128181;','var(--green)','goEstates()')
     +'</div>'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
     +'<div class="sec" style="margin:0">Active Contracts</div>'
@@ -272,11 +272,14 @@ function goDash(){
   render(html);
 }
 
-function statBox(label,val,icon,color){
-  return '<div class="card" style="text-align:center;padding:14px">'
+function statBox(label,val,icon,color,fn){
+  var cls=fn?'card tap':'card';
+  var click=fn?' onclick="'+fn+'"':'';
+  return '<div class="'+cls+'"'+click+' style="text-align:center;padding:14px">'
     +'<div style="font-size:20px">'+icon+'</div>'
     +'<div style="font-family:var(--ff);font-size:22px;color:'+(color||'var(--gl)')+';margin:4px 0">'+val+'</div>'
     +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">'+label+'</div>'
+    +(fn?'<div style="font-size:9px;color:var(--gold);margin-top:4px">View &#8250;</div>':'')
     +'</div>';
 }
 
@@ -376,7 +379,11 @@ function goClients(){
   var clients=users.filter(function(u){return u.role==='client';});
   var html=topBar('Clients',clients.length+' Active')
     +'<div class="sc">'
-    +'<button class="btn-sm" onclick="goAddClient()" style="margin-bottom:16px">+ Add Client</button>';
+    +'<div style="display:flex;gap:10px;margin-bottom:16px">'
+    +'<input id="clientSearch" oninput="filterClients(this.value)" style="flex:1;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;padding:10px 14px;outline:none" placeholder="Search clients…">'
+    +'<button class="btn-sm" onclick="goAddClient()">+ Add</button>'
+    +'</div>'
+    +'<div id="clientList">';
   clients.forEach(function(u){
     var myE=estates.filter(function(e){return e.clientEmail===u.email;});
     html+='<div class="card tap" data-action="client" data-id="'+u.email+'" style="display:flex;align-items:center;gap:12px">'
@@ -387,8 +394,26 @@ function goClients(){
       +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+myE.length+' propert'+(myE.length===1?'y':'ies')+'</div>'
       +'</div><div style="color:var(--dim);font-size:18px">&#8250;</div></div>';
   });
-  html+='</div>'+nav('clients');
+  html+='</div></div>'+nav('clients');
   render(html);
+}
+
+function filterClients(v){
+  var clients=users.filter(function(u){return u.role==='client';});
+  var filtered=clients.filter(function(u){
+    return u.name.toLowerCase().indexOf(v.toLowerCase())>=0||u.email.toLowerCase().indexOf(v.toLowerCase())>=0||(u.phone&&u.phone.indexOf(v)>=0);
+  });
+  var html='';
+  filtered.forEach(function(u){
+    var myE=estates.filter(function(e){return e.clientEmail===u.email;});
+    html+='<div class="card tap" data-action="client" data-id="'+u.email+'" style="display:flex;align-items:center;gap:12px">'
+      +'<div class="avatar">'+u.initials+'</div>'
+      +'<div style="flex:1"><div style="font-size:14px;font-weight:500">'+u.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+u.email+'</div>'
+      +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+myE.length+' propert'+(myE.length===1?'y':'ies')+'</div>'
+      +'</div><div style="color:var(--dim);font-size:18px">&#8250;</div></div>';
+  });
+  document.getElementById('clientList').innerHTML=html;
 }
 
 function goClientDetail(email){
@@ -438,7 +463,12 @@ function saveClient(){
 // ── ESTATES ───────────────────────────────────────────────────────────────
 function goEstates(){
   var html=topBar('Estates',estates.length+' Properties')
-    +'<div class="sc"><button class="btn-sm" onclick="goAddEstate()" style="margin-bottom:16px">+ Add Estate</button>';
+    +'<div class="sc">'
+    +'<div style="display:flex;gap:10px;margin-bottom:16px">'
+    +'<input id="estateSearch" oninput="filterEstates(this.value)" style="flex:1;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;padding:10px 14px;outline:none" placeholder="Search estates…">'
+    +'<button class="btn-sm" onclick="goAddEstate()">+ Add</button>'
+    +'</div>'
+    +'<div id="estateList">';
   estates.forEach(function(e){
     var sc=liveScore(e);var con=e.contract;
     var completed=e.pastInspections.length+(e.completedAt?1:0);
@@ -454,8 +484,34 @@ function goEstates(){
         +'<div class="pbar-wrap"><div class="pbar" style="width:'+pct+'%"></div></div>':'')
       +'</div>';
   });
-  html+='</div>'+nav('estates');
+  html+='</div></div>'+nav('estates');
   render(html);
+}
+
+function filterEstates(v){
+  var filtered=estates.filter(function(e){
+    return e.name.toLowerCase().indexOf(v.toLowerCase())>=0
+      ||e.address.toLowerCase().indexOf(v.toLowerCase())>=0
+      ||(e.clientName&&e.clientName.toLowerCase().indexOf(v.toLowerCase())>=0)
+      ||(e.postalCode&&e.postalCode.indexOf(v)>=0);
+  });
+  var html='';
+  filtered.forEach(function(e){
+    var sc=liveScore(e);var con=e.contract;
+    var completed=e.pastInspections.length+(e.completedAt?1:0);
+    var pct=con&&con.totalInspections>0?Math.round(completed/con.totalInspections*100):0;
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+'</div></div>'
+      +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc.score+'%</div></div>'
+      +(con?'<div style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">'+con.tier+' &nbsp;&#183;&nbsp; $'+con.contractValue.toLocaleString('en',{maximumFractionDigits:0})+' total</div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:4px"><span>'+completed+' / '+con.totalInspections+'</span><span>'+pct+'%</span></div>'
+        +'<div class="pbar-wrap"><div class="pbar" style="width:'+pct+'%"></div></div>':'')
+      +'</div>';
+  });
+  document.getElementById('estateList').innerHTML=html;
 }
 
 function goEstateDetail(id){
@@ -606,7 +662,12 @@ function saveEstate(){
 // ── INSPECTORS ────────────────────────────────────────────────────────────
 function goInspectors(){
   var html=topBar('Inspectors',inspectors.length+' Active')
-    +'<div class="sc"><button class="btn-sm" onclick="goAddInspector()" style="margin-bottom:16px">+ Add Inspector</button>';
+    +'<div class="sc">'
+    +'<div style="display:flex;gap:10px;margin-bottom:16px">'
+    +'<input id="inspSearch" oninput="filterInspectors(this.value)" style="flex:1;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;padding:10px 14px;outline:none" placeholder="Search inspectors…">'
+    +'<button class="btn-sm" onclick="goAddInspector()">+ Add</button>'
+    +'</div>'
+    +'<div id="inspList">';
   inspectors.forEach(function(insp){
     var assigned=estates.filter(function(e){return e.contract&&e.contract.assignedInspector===insp.id;});
     html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
@@ -617,8 +678,29 @@ function goInspectors(){
       +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+assigned.length+' assigned &nbsp;&#183;&nbsp; Postal: '+insp.postalCode+'</div>'
       +'</div></div>';
   });
-  html+='</div>'+nav('inspectors');
+  html+='</div></div>'+nav('inspectors');
   render(html);
+}
+
+function filterInspectors(v){
+  var filtered=inspectors.filter(function(i){
+    return i.name.toLowerCase().indexOf(v.toLowerCase())>=0
+      ||i.email.toLowerCase().indexOf(v.toLowerCase())>=0
+      ||(i.phone&&i.phone.indexOf(v)>=0)
+      ||(i.postalCode&&i.postalCode.indexOf(v)>=0);
+  });
+  var html='';
+  filtered.forEach(function(insp){
+    var assigned=estates.filter(function(e){return e.contract&&e.contract.assignedInspector===insp.id;});
+    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="avatar">'+insp.initials+'</div>'
+      +'<div style="flex:1"><div style="font-size:14px;font-weight:500">'+insp.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+insp.email+'</div>'
+      +'<div style="font-size:10px;color:var(--dim)">'+insp.phone+'</div>'
+      +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+assigned.length+' assigned &nbsp;&#183;&nbsp; Postal: '+insp.postalCode+'</div>'
+      +'</div></div>';
+  });
+  document.getElementById('inspList').innerHTML=html;
 }
 
 function goAddInspector(){
