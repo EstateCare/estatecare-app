@@ -206,9 +206,11 @@ function showNewClientDash(e){
     +'<div style="font-size:14px;color:var(--text)">'+e.name+'</div>'
     +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+e.address+'</div>'
     +'</div>'
-    +'<button class="btn-ghost" onclick="doSignOut()">Sign Out</button>'
-    +'</div>';
+    +'</div>'+clientNav('home');
   document.getElementById('screen').innerHTML=html;
+  document.querySelectorAll('[data-action="cnav"]').forEach(function(el){
+    el.addEventListener('click',function(){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();});
+  });
 }
 function showFullDashboard(){
   var e=CE();if(!e)return;
@@ -278,7 +280,7 @@ function showFullDashboard(){
     html+=dateCard(idx,ds2,'&#10003; Completed',sc2,false);
   });
 
-  html+='<button class="btn-ghost" onclick="doSignOut()" style="margin-top:8px">Sign Out</button></div>';
+  html+='</div>'+clientNav('home');
   render(html);
 }
 
