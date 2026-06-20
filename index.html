@@ -105,12 +105,12 @@ var signup={
 var existingBookings=[]; // {date:'Mon Jun 09 2026', time:'9:00 AM'}
 
 var TIERS=[
-  {id:'essential',name:'Essential',price:59.95,freq:'1 inspection per week',popular:false,
+  {id:'essential',name:'Essential',price:69.95,freq:'1 inspection per week',popular:false,
    features:['Weekly property inspection','Interior & exterior walkthrough','Water leak check','HVAC check','Security check','Timestamped photo report','Email notification of issues']},
   {id:'preferred',name:'Preferred',price:79.95,freq:'Inspection every 3–4 days',popular:true,
-   features:['Inspection every 3–4 days','Interior & exterior walkthrough','Water leak check','HVAC check','Security check','Detailed photo report','Timestamped inspection history','Priority issue notification','Insurance-friendly documentation']},
-  {id:'estate',name:'Estate Protection',price:99.95,freq:'Inspection every 3 days',popular:false,
-   features:['Inspection every 3 days','Everything in Preferred','Priority scheduling','Immediate phone notification of urgent findings','Emergency contact notification if owner unreachable','Additional weather & storm response checks','Enhanced inspection documentation']}
+   features:['Everything in Essential','Inspection every 3–4 days','Detailed photo report','Timestamped inspection history','Priority issue notification','Insurance-friendly documentation']},
+  {id:'estate',name:'Total Estate Protection',price:99.95,freq:'Inspection frequency based on your home insurance requirements, up to every 3 days',popular:false,
+   features:['Everything in Preferred','Inspection frequency based on insurance requirements, up to every 3 days','Priority scheduling','Immediate phone notification of urgent findings','Emergency contact notification if owner unreachable','Additional weather & storm response checks','Enhanced inspection documentation']}
 ];
 
 function render(html){document.getElementById('screen').innerHTML=html;}

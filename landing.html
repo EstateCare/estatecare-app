@@ -9,7 +9,7 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--black:#0a0a0a;--ch:#141414;--ch2:#1c1c1c;--gold:#c9a84c;--gl:#e2c97e;--gd:rgba(201,168,76,0.12);--green:#4caf7d;--text:#f0ece4;--dim:#9a9488;--border:rgba(201,168,76,0.2);--ff:"Cormorant Garamond",serif;}
 html{scroll-behavior:smooth;}
-body{background:var(--black);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:300;}
+body{background:var(--black);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:400;}
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;}
@@ -25,7 +25,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.9
 .hero-title{font-family:var(--ff);font-size:clamp(42px,7vw,88px);font-weight:400;line-height:1.1;color:var(--gl);margin-bottom:24px;letter-spacing:2px;}
 .hero-title span{color:var(--text);}
 .gold-line{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 28px;}
-.hero-sub{font-size:14px;color:var(--dim);line-height:1.9;max-width:560px;margin:0 auto 48px;}
+.hero-sub{font-size:15px;color:#c4beb2;line-height:1.9;max-width:560px;margin:0 auto 48px;font-weight:400;}
 .hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
 .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:16px 36px;cursor:pointer;text-decoration:none;display:inline-block;}
 .btn-secondary{background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gl);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;padding:16px 36px;cursor:pointer;text-decoration:none;display:inline-block;transition:background .2s;}
@@ -33,14 +33,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.9
 
 /* TRUST BAR */
 .trust-bar{background:var(--ch);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:20px 40px;display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;}
-.trust-item{display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.trust-item{display:flex;align-items:center;gap:10px;font-size:10.5px;letter-spacing:1.5px;color:#c4beb2;text-transform:uppercase;font-weight:500;}
 .trust-item svg{flex-shrink:0;margin-right:2px;}
 
 /* VIDEO */
 .video-section{padding:100px 40px;text-align:center;background:var(--black);}
 .section-label{font-size:10px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
 .section-title{font-family:var(--ff);font-size:clamp(32px,5vw,52px);color:var(--gl);margin-bottom:16px;}
-.section-sub{font-size:13px;color:var(--dim);line-height:1.9;max-width:520px;margin:0 auto 48px;}
+.section-sub{font-size:14px;color:#b8b2a6;line-height:1.9;max-width:520px;margin:0 auto 48px;font-weight:400;}
 .video-frame{max-width:800px;margin:0 auto;border:1px solid var(--border);border-radius:2px;overflow:hidden;background:var(--ch2);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;}
 .video-placeholder{text-align:center;padding:40px;}
 .video-placeholder .play{width:72px;height:72px;border-radius:50%;background:var(--gd);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;cursor:pointer;}
@@ -53,7 +53,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.9
 .service-card:hover{border-color:var(--gold);}
 .service-icon{margin-bottom:20px;}
 .service-name{font-family:var(--ff);font-size:22px;color:var(--gl);margin-bottom:10px;letter-spacing:1px;}
-.service-desc{font-size:12px;color:var(--dim);line-height:1.9;}
+.service-desc{font-size:13px;color:#b8b2a6;line-height:1.9;font-weight:400;}
 .service-features{margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
 .service-feature{font-size:11px;color:var(--text);padding:5px 0;display:flex;align-items:center;gap:8px;}
 .sf-check{display:flex;align-items:center;flex-shrink:0;}
@@ -64,7 +64,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.9
 .how-step{text-align:center;}
 .step-num{font-family:var(--ff);font-size:48px;color:var(--gold);opacity:.4;line-height:1;}
 .step-title{font-family:var(--ff);font-size:20px;color:var(--gl);margin:8px 0;}
-.step-desc{font-size:12px;color:var(--dim);line-height:1.9;}
+.step-desc{font-size:13px;color:#b8b2a6;line-height:1.9;font-weight:400;}
 
 /* WHO */
 .who{padding:100px 40px;text-align:center;background:var(--black);}
@@ -72,27 +72,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.9
 .who-card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:24px 20px;text-align:center;}
 .who-icon{margin-bottom:12px;display:flex;justify-content:center;}
 .who-title{font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--gl);margin-bottom:8px;}
-.who-desc{font-size:11px;color:var(--dim);line-height:1.8;}
+.who-desc{font-size:12px;color:#b8b2a6;line-height:1.8;font-weight:400;}
 
 /* WAITLIST */
 .waitlist{padding:100px 40px;text-align:center;background:radial-gradient(ellipse at 50% 0%,#1e1608,var(--black));}
 .waitlist-box{max-width:560px;margin:0 auto;}
 .waitlist-form{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap;justify-content:center;}
-.waitlist-input{flex:1;min-width:260px;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:16px;font-weight:300;padding:14px 18px;outline:none;transition:border-color .2s;}
-.waitlist-input:focus{border-color:var(--gold);}
+.waitlist-input{flex:1;min-width:260px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.25);border-radius:2px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:15px;font-weight:400;padding:14px 18px;outline:none;transition:all .2s;}
+.waitlist-input::placeholder{color:#7a7468;font-weight:400;}
+.waitlist-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.06);}
+.waitlist-input:-webkit-autofill,.waitlist-input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px rgba(255,255,255,0.04) inset;-webkit-text-fill-color:#f0ece4;transition:background-color 9999s ease-in-out 0s;}
 .waitlist-submit{background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:14px 28px;cursor:pointer;white-space:nowrap;}
-.waitlist-note{font-size:10px;color:var(--dim);margin-top:14px;letter-spacing:1px;}
+.waitlist-note{font-size:11px;color:#b8b2a6;margin-top:14px;letter-spacing:0.5px;font-weight:400;}
 .success-msg{display:none;background:rgba(76,175,125,.1);border:1px solid var(--green);border-radius:2px;padding:16px;margin-top:16px;font-size:12px;color:var(--green);letter-spacing:1px;}
 .success-msg.show{display:block;}
 
 /* FOOTER */
 footer{background:var(--ch);border-top:1px solid var(--border);padding:48px 40px;text-align:center;}
 .footer-logo{font-family:var(--ff);font-size:24px;letter-spacing:4px;color:var(--gl);margin-bottom:8px;}
-.footer-tagline{font-size:10px;letter-spacing:4px;color:var(--dim);text-transform:uppercase;margin-bottom:24px;}
+.footer-tagline{font-size:10.5px;letter-spacing:3px;color:#c4beb2;text-transform:uppercase;margin-bottom:24px;font-weight:500;}
 .footer-links{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;}
 .footer-links a{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;text-transform:uppercase;}
 .footer-links a:hover{color:var(--gold);}
-.footer-copy{font-size:10px;color:var(--dim);letter-spacing:1px;}
+.footer-copy{font-size:10.5px;color:#b8b2a6;letter-spacing:0.5px;font-weight:400;}
 
 /* RESPONSIVE */
 @media(max-width:768px){
@@ -135,7 +137,6 @@ footer{background:var(--ch);border-top:1px solid var(--border);padding:48px 40px
 
 <!-- TRUST BAR -->
 <div class="trust-bar">
-  <div class="trust-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> Licensed Home Watch Professionals</div>
   <div class="trust-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Timestamped Photo Reports</div>
   <div class="trust-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.09-1.09a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Direct Inspector Communication</div>
   <div class="trust-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Insurance-Friendly Documentation</div>
@@ -183,8 +184,8 @@ footer{background:var(--ch);border-top:1px solid var(--border);padding:48px 40px
       <div class="service-name">Preferred</div>
       <div class="service-desc">More frequent visits mean faster issue detection and greater peace of mind throughout your absence.</div>
       <div class="service-features">
-        <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Inspection every 3–4 days</div>
         <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Everything in Essential</div>
+        <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Inspection every 3–4 days</div>
         <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Priority issue response</div>
         <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Detailed photo documentation</div>
         <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Timestamped inspection history</div>
@@ -194,11 +195,11 @@ footer{background:var(--ch);border-top:1px solid var(--border);padding:48px 40px
 
     <div class="service-card">
       <div class="service-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-      <div class="service-name">Estate Protection</div>
+      <div class="service-name">Total Estate Protection</div>
       <div class="service-desc">Maximum frequency and enhanced documentation for high-value properties and demanding insurance requirements.</div>
       <div class="service-features">
-        <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Inspection every 3 days</div>
         <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Everything in Preferred</div>
+        <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Inspection frequency based on your home insurance requirements, up to every 3 days</div>
         <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Priority scheduling</div>
         <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Immediate phone notification</div>
         <div class="service-feature"><span class="sf-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf7d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Emergency contact escalation</div>
@@ -208,7 +209,7 @@ footer{background:var(--ch);border-top:1px solid var(--border);padding:48px 40px
     </div>
 
   </div>
-  <p style="text-align:center;font-size:10px;color:var(--dim);max-width:600px;margin:32px auto 0;line-height:1.8;">EstateCare provides professional home watch and inspection services. Inspection reports include date, time, observations and photographic documentation. Insurance requirements vary by insurer and policy. Clients are responsible for confirming any specific inspection or vacancy requirements with their insurance broker or provider.</p>
+  <p style="text-align:center;font-size:11px;color:#b8b2a6;font-weight:400;max-width:600px;margin:32px auto 0;line-height:1.8;">EstateCare provides professional home watch and inspection services. Inspection reports include date, time, observations and photographic documentation. Insurance requirements vary by insurer and policy. Clients are responsible for confirming any specific inspection or vacancy requirements with their insurance broker or provider.</p>
 </section>
 
 <!-- HOW IT WORKS -->
@@ -266,7 +267,7 @@ footer{background:var(--ch);border-top:1px solid var(--border);padding:48px 40px
     <div class="who-card">
       <div class="who-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
       <div class="who-title">Insurance-Conscious</div>
-      <div class="who-desc">Many policies require regular checks during extended absences. Our documentation supports your coverage needs.</div>
+      <div class="who-desc">Many policies require regular checks during extended absences. We tailor inspection frequency to your policy's requirements and provide timestamped documentation for your records.</div>
     </div>
   </div>
 </section>
@@ -278,9 +279,12 @@ footer{background:var(--ch);border-top:1px solid var(--border);padding:48px 40px
     <h2 class="section-title">Be First to Know</h2>
     <div class="gold-line"></div>
     <p class="section-sub">EstateCare is launching soon in select markets. Join the waitlist to be notified when service is available in your area — and receive a complimentary free property walk-through when we launch.</p>
-    <div class="waitlist-form">
-      <input class="waitlist-input" type="email" id="waitEmail" placeholder="Your email address">
-      <button class="waitlist-submit" onclick="submitWaitlist()">Join Waitlist</button>
+    <div class="waitlist-form" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <input class="waitlist-input" type="email" id="waitEmail" placeholder="Your email address" style="flex:2;min-width:240px">
+        <input class="waitlist-input" type="text" id="waitPostal" placeholder="Postal Code (A1A 1A1)" maxlength="7" style="flex:1;min-width:160px">
+      </div>
+      <button class="waitlist-submit" onclick="submitWaitlist()" style="margin-top:4px">Join Waitlist</button>
     </div>
     <div class="waitlist-note">No spam. No commitment. Just a heads up when we're ready for you.</div>
     <div class="success-msg" id="successMsg">
@@ -304,23 +308,57 @@ footer{background:var(--ch);border-top:1px solid var(--border);padding:48px 40px
 </footer>
 
 <script>
+function formatPostal(input){
+  // Light formatting only: add space after 3 chars, don't force uppercase while typing
+  var v=input.value.replace(/[^A-Za-z0-9]/g,'');
+  if(v.length>3) v=v.slice(0,3)+' '+v.slice(3,6);
+  input.value=v.slice(0,7);
+}
+
+function validPostal(v){
+  return /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/.test(v.trim());
+}
+
 function submitWaitlist(){
-  var email=document.getElementById('waitEmail').value.trim();
+  var emailEl=document.getElementById('waitEmail');
+  var postalEl=document.getElementById('waitPostal');
+  var email=emailEl.value.trim();
+  var postal=postalEl.value.trim();
+
+  var valid=true;
   if(!email||!email.includes('@')){
-    document.getElementById('waitEmail').style.borderColor='#e05c5c';
-    document.getElementById('waitEmail').placeholder='Please enter a valid email';
-    return;
+    emailEl.style.borderColor='#e05c5c';
+    emailEl.placeholder='Please enter a valid email';
+    valid=false;
+  } else {
+    emailEl.style.borderColor='';
   }
+
+  if(!validPostal(postal)){
+    postalEl.style.borderColor='#e05c5c';
+    postalEl.placeholder='e.g. V6T 1Z3';
+    valid=false;
+  } else {
+    postalEl.style.borderColor='';
+  }
+
+  if(!valid) return;
+
   // Send to info@myestatecare.ca via mailto
-  var subject=encodeURIComponent('EstateCare Waitlist — '+email);
-  var body=encodeURIComponent('New waitlist signup:\n\nEmail: '+email+'\nDate: '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}));
+  var subject=encodeURIComponent('EstateCare Waitlist — '+postal);
+  var body=encodeURIComponent('New waitlist signup:\n\nEmail: '+email+'\nPostal Code: '+postal+'\nDate: '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}));
   window.location.href='mailto:info@myestatecare.ca?subject='+subject+'&body='+body;
   document.getElementById('successMsg').classList.add('show');
-  document.getElementById('waitEmail').value='';
+  emailEl.value='';
+  postalEl.value='';
 }
 
 // Allow Enter key on email input
 document.getElementById('waitEmail').addEventListener('keydown',function(e){
+  if(e.key==='Enter') submitWaitlist();
+});
+document.getElementById('waitPostal').addEventListener('input',function(){formatPostal(this);});
+document.getElementById('waitPostal').addEventListener('keydown',function(e){
   if(e.key==='Enter') submitWaitlist();
 });
 
