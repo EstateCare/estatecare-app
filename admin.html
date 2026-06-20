@@ -222,6 +222,7 @@ function render(html){
       if(a==='estate') goEstateDetail(this.getAttribute('data-id'));
       else if(a==='client') goClientDetail(this.getAttribute('data-id'));
       else if(a==='day') adminDayDetail(this.getAttribute('data-date'));
+      else if(a==='nav'){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();}
     });
   });
 }
