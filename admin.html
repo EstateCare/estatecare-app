@@ -170,6 +170,7 @@ var invoices=[
    amount:279.80,period:'Monthly',dueDate:new Date('2026-05-01'),status:'paid',paidDate:new Date('2026-05-02'),notes:'Luxury plan - May'}
 ];
 var calViewDate=new Date();
+var waitlistCache=null;
 
 // ── HELPERS ────────────────────────────────────────────────────────────────
 function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.status==='green')g++;else if(p.status==='yellow')y++;else if(p.status==='red')r++;});return{score:t>0?Math.round(((g*2+y)/(t*2))*100):0,green:g,yellow:y,red:r,total:t};}
@@ -269,6 +270,7 @@ function goDash(){
   var value=estates.reduce(function(s,e){return s+(e.contract?e.contract.contractValue:0);},0);
   var today=new Date().toDateString();
   var todayCount=getByDate(today).length;
+  var waitlistCount=(waitlistCache&&waitlistCache.length)?waitlistCache.length:'…';
 
   var html=topBar('EstateCare','Admin Dashboard')
     +'<div class="sc">'
@@ -277,6 +279,7 @@ function goDash(){
     +statBox('Inspectors',inspectors.length,'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',null,'goInspectors()')
     +statBox('Active Issues',issues,'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>','var(--yellow)','goEstates()')
     +statBox('Contract Value','$'+value.toLocaleString('en',{maximumFractionDigits:0}),'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>','var(--green)','goEstates()')
+    +statBox('Waitlist',waitlistCount,'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>','var(--gold)','goWaitlist()')
     +'</div>'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
     +'<div class="sec" style="margin:0">Active Contracts</div>'
@@ -781,7 +784,6 @@ function saveInspector(){
 }
 
 // ── WAITLIST ──────────────────────────────────────────────────────────────
-var waitlistCache=null;
 
 function goWaitlist(){
   var html=topBar('Waitlist','Loading…')
@@ -845,6 +847,16 @@ function doSignOut(){localStorage.removeItem('ec_user');var base=window.location
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 goDash();
+
+// Preload waitlist count for the dashboard stat box (loads silently, refreshes once ready)
+if(window._loadWaitlistFromFirestore){
+  window._loadWaitlistFromFirestore().then(function(rows){
+    waitlistCache=rows;
+    if(document.querySelector('.topbar-title')&&document.querySelector('.topbar-title').textContent==='EstateCare'){
+      goDash();
+    }
+  }).catch(function(err){console.error('Waitlist preload error:',err);});
+}
 </script>
 
 <script>
