@@ -51,7 +51,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;}
 #screen::-webkit-scrollbar{width:3px;}
 #screen::-webkit-scrollbar-thumb{background:var(--gd);}
-.topbar{background:var(--ch);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar{background:var(--ch);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50;}
 .topbar-title{font-family:var(--ff);font-size:22px;letter-spacing:2px;color:var(--gl);}
 .topbar-sub{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--gd);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gold);cursor:pointer;flex-shrink:0;font-weight:600;}
@@ -609,8 +609,47 @@ function goEstateDetail(id){
       +'<div style="text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1px">TIER</div><div style="font-size:14px;color:var(--gold);margin-top:4px">'+con.tier+'</div></div>'
       +'</div></div></div>';
   }
+
+  // Invoice history for this estate, grouped by status
+  var estInvoices=invoices.filter(function(i){return i.estateId===e.id;}).slice().sort(function(a,b){return b.dueDate-a.dueDate;});
+  if(estInvoices.length){
+    var upcoming=estInvoices.filter(function(i){return i.status==='upcoming';});
+    var unpaid=estInvoices.filter(function(i){return i.status==='unpaid';});
+    var paid=estInvoices.filter(function(i){return i.status==='paid';});
+
+    html+='<div class="sec" style="margin-top:4px">Invoices</div>';
+
+    if(unpaid.length){
+      html+='<div style="font-size:9px;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin:8px 0 6px">Unpaid</div>';
+      unpaid.forEach(function(inv){html+=invCard(inv);});
+    }
+    if(upcoming.length){
+      html+='<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">Upcoming</div>';
+      upcoming.forEach(function(inv){html+=invCard(inv);});
+    }
+    if(paid.length){
+      html+='<div style="font-size:9px;color:var(--green);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">Payment History</div>';
+      paid.forEach(function(inv,idx){html+=invCard(inv,idx===0);});
+    }
+  }
+
   html+='</div>';
   render(html);
+}
+
+function invCard(inv,isMostRecentPaid){
+  var dueStr=inv.dueDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  var pillStyle=inv.status==='paid'?'background:rgba(76,175,125,.12);border:1px solid var(--green);color:var(--green);'
+    :inv.status==='unpaid'?'background:rgba(224,92,92,.12);border:1px solid var(--red);color:var(--red);'
+    :'background:var(--ch3);border:1px solid var(--border);color:var(--dim);';
+  var label=inv.status==='paid'?(isMostRecentPaid?'Current':'Paid'):inv.status==='unpaid'?'Unpaid':'Upcoming';
+  return '<div class="card" style="margin-bottom:8px;padding:12px 16px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:12px;color:var(--text)">'+inv.notes+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:2px">'+dueStr+(inv.paidDate?' &nbsp;&#183;&nbsp; Paid '+inv.paidDate.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'')+'</div></div>'
+    +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:16px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+    +'<span class="pill" style="'+pillStyle+'margin-top:2px;display:inline-block">'+label+'</span></div>'
+    +'</div></div>';
 }
 
 function goAddEstate(){
@@ -785,30 +824,26 @@ function saveInspector(){
 
 // ── INVOICES ──────────────────────────────────────────────────────────────
 function goInvoices(){
-  var sorted=invoices.slice().sort(function(a,b){return b.dueDate-a.dueDate;});
   var unpaidTotal=invoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
   var paidTotal=invoices.filter(function(i){return i.status==='paid';}).reduce(function(s,i){return s+i.amount;},0);
-  var upcomingCount=invoices.filter(function(i){return i.status==='upcoming';}).length;
 
-  var html=topBar('Invoices',invoices.length+' Total')
+  var html=topBar('Invoices','By Property')
     +'<div class="sc">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
     +statBox('Unpaid','$'+unpaidTotal.toLocaleString('en',{maximumFractionDigits:0}),'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>','var(--red)',null)
     +statBox('Collected','$'+paidTotal.toLocaleString('en',{maximumFractionDigits:0}),'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>','var(--green)',null)
     +'</div>'
-    +'<div class="sec">All Invoices</div>';
+    +'<div class="sec">Select a Property</div>';
 
-  sorted.forEach(function(inv){
-    var dueStr=inv.dueDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    var pillClass=inv.status==='paid'?'pill-g':inv.status==='upcoming'?'pill-d':'';
-    var pillStyle=inv.status==='unpaid'?'background:rgba(224,92,92,.12);border:1px solid var(--red);color:var(--red);':'';
-    html+='<div class="card" style="margin-bottom:10px">'
+  estates.forEach(function(e){
+    var estInv=invoices.filter(function(i){return i.estateId===e.id;});
+    var unpaidCount=estInv.filter(function(i){return i.status==='unpaid';}).length;
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:10px">'
       +'<div style="display:flex;align-items:center;gap:12px">'
-      +'<div class="cat-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>'
-      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+inv.clientName+'</div>'
-      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.notes+' &nbsp;&#183;&nbsp; '+dueStr+'</div></div>'
-      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:18px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
-      +'<span class="pill '+pillClass+'" style="'+pillStyle+'margin-top:4px;display:inline-block">'+inv.status+'</span></div>'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+' &nbsp;&#183;&nbsp; '+estInv.length+' invoice'+(estInv.length===1?'':'s')+'</div></div>'
+      +(unpaidCount?'<span class="pill" style="background:rgba(224,92,92,.12);border:1px solid var(--red);color:var(--red)">'+unpaidCount+' unpaid</span>':'')
       +'</div></div>';
   });
 
