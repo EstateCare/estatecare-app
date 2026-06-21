@@ -130,23 +130,7 @@ function fs(label,id,opts,val){
 // ── WELCOME ───────────────────────────────────────────────────────────────
 function showWelcome(){
   render(
-    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 60px;background:radial-gradient(ellipse at 50% 30%,#2a1e05 0%,#0a0a0a 70%);min-height:100vh">'
-    +'<div style="text-align:center;margin-bottom:40px;padding:0 32px">'
-    +'<svg width="70" height="80" viewBox="0 0 80 90" style="margin-bottom:8px">'
-    +'<polyline points="8,42 40,10 72,42" fill="none" stroke="#c9a84c" stroke-width="2.5" stroke-linejoin="round"/>'
-    +'<rect x="14" y="42" width="52" height="36" fill="none" stroke="#c9a84c" stroke-width="2.5"/>'
-    +'<rect x="30" y="50" width="20" height="16" fill="none" stroke="#c9a84c" stroke-width="1.5"/>'
-    +'<line x1="40" y1="50" x2="40" y2="66" stroke="#c9a84c" stroke-width="1"/>'
-    +'<line x1="30" y1="58" x2="50" y2="58" stroke="#c9a84c" stroke-width="1"/>'
-    +'<line x1="40" y1="78" x2="40" y2="90" stroke="#c9a84c" stroke-width="2.5"/>'
-    +'<circle cx="40" cy="78" r="5" fill="none" stroke="#c9a84c" stroke-width="2"/>'
-    +'<line x1="44" y1="83" x2="48" y2="83" stroke="#c9a84c" stroke-width="1.5"/>'
-    +'<line x1="44" y1="87" x2="47" y2="87" stroke="#c9a84c" stroke-width="1.5"/>'
-    +'</svg>'
-    +'<div style="font-family:var(--ff);font-size:38px;font-weight:600;letter-spacing:6px;color:var(--gl)">ESTATE CARE</div>'
-    +'<div class="gold-line"></div>'
-    +'<div style="font-size:10px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;opacity:.85">Luxury Home Maintenance</div>'
-    +'</div>'
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 60px;background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.35) 60%,rgba(0,0,0,0.85) 100%),url(Mansion%20Logo.png);background-size:cover;background-position:center;min-height:100vh">'
     +'<div style="width:100%;padding:0 32px;display:flex;flex-direction:column;gap:12px">'
     +'<button class="btn-gold" onclick="showTiers()">Get Started</button>'
     +'<button class="btn-outline-gold" onclick="showLogin()">Already a Client? Log In</button>'
@@ -434,7 +418,7 @@ function showLogin(){
   render(
     '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a);min-height:100vh">'
     +'<div style="text-align:center;margin-bottom:32px">'
-    +'<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 220\" width=\"40\" height=\"44\"><rect width=\"200\" height=\"220\" fill=\"none\"/><polyline points=\"100,28 148,68 148,108 52,108 52,68\" fill=\"none\" stroke=\"#c9a84c\" stroke-width=\"4\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"44,72 100,28 156,72\" fill=\"none\" stroke=\"#c9a84c\" stroke-width=\"4\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><rect x=\"84\" y=\"80\" width=\"32\" height=\"28\" fill=\"none\" stroke=\"#c9a84c\" stroke-width=\"2.5\"/><line x1=\"100\" y1=\"80\" x2=\"100\" y2=\"108\" stroke=\"#c9a84c\" stroke-width=\"1.5\"/><line x1=\"84\" y1=\"94\" x2=\"116\" y2=\"94\" stroke=\"#c9a84c\" stroke-width=\"1.5\"/><line x1=\"100\" y1=\"108\" x2=\"100\" y2=\"140\" stroke=\"#c9a84c\" stroke-width=\"4\" stroke-linecap=\"round\"/><circle cx=\"100\" cy=\"124\" r=\"10\" fill=\"none\" stroke=\"#c9a84c\" stroke-width=\"3.5\"/><line x1=\"106\" y1=\"135\" x2=\"106\" y2=\"142\" stroke=\"#c9a84c\" stroke-width=\"3\" stroke-linecap=\"round\"/><line x1=\"112\" y1=\"135\" x2=\"112\" y2=\"140\" stroke=\"#c9a84c\" stroke-width=\"3\" stroke-linecap=\"round\"/></svg>'+'<div style="font-family:var(--ff);font-size:36px;letter-spacing:5px;color:var(--gl)">EstateCare</div></div>'
+    +'<img src="Logo%20(Master).png" alt="EstateCare" style="width:120px;margin-bottom:8px">'
     +'<div class="gold-line"></div>'
     +'<div style="font-size:10px;letter-spacing:4px;color:var(--dim);text-transform:uppercase">Luxury Home Maintenance</div>'
     +'</div>'
