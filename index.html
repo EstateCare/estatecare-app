@@ -82,6 +82,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .pwa-step{font-size:11px;color:var(--text);padding:5px 0;border-bottom:1px solid rgba(201,168,76,0.08);display:flex;align-items:center;gap:10px;}
 .pwa-step:last-child{border-bottom:none;}
 .pwa-step-num{width:20px;height:20px;border-radius:50%;background:var(--gd);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--gold);flex-shrink:0;}
+
+.welcome-bg{
+  background-image:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.35) 60%,rgba(0,0,0,0.85) 100%),url(mansion-bg.jpg);
+  background-color:#0a0a0a;
+  background-size:cover;
+  background-position:center;
+}
+/* On wider screens (laptop/desktop) the low-res source image stretches and blurs with "cover".
+   Switch to "contain" so it stays sharp at native resolution, with the dark background filling the rest. */
+@media (min-width:700px){
+  .welcome-bg{
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center top;
+  }
+}
 </style>
 </head>
 <body>
@@ -130,7 +146,7 @@ function fs(label,id,opts,val){
 // ── WELCOME ───────────────────────────────────────────────────────────────
 function showWelcome(){
   render(
-    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 60px;background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.35) 60%,rgba(0,0,0,0.85) 100%),url(mansion-bg.jpg);background-size:cover;background-position:center;min-height:100vh">'
+    '<div class="welcome-bg" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 60px;min-height:100vh">'
     +'<div style="width:100%;padding:0 32px;display:flex;flex-direction:column;gap:12px">'
     +'<button class="btn-gold" onclick="showTiers()">Get Started</button>'
     +'<button class="btn-outline-gold" onclick="showLogin()">Already a Client? Log In</button>'
