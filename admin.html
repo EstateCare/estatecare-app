@@ -422,7 +422,7 @@ function adminDayDetail(dateStr){
         +'</select></div></div>';
     });
   });
-  html+='</div>';
+  html+='</div>'+nav('cal');
   render(html);
 }
 
@@ -491,7 +491,7 @@ function goClientDetail(email){
       +(e.contract?'<div style="font-size:9px;color:var(--gold);margin-top:3px;letter-spacing:1px">'+e.contract.tier+' &nbsp;&#183;&nbsp; $'+e.contract.weeklyRate+'/wk</div>':'')
       +'</div><div style="color:var(--dim);font-size:18px">&#8250;</div></div>';
   });
-  html+='</div>';
+  html+='</div>'+nav('clients');
   render(html);
 }
 
@@ -633,7 +633,7 @@ function goEstateDetail(id){
     }
   }
 
-  html+='</div>';
+  html+='</div>'+nav('estates');
   render(html);
 }
 
@@ -843,7 +843,7 @@ function goInvoices(){
       +'<div class="cat-ico">'+e.icon+'</div>'
       +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+e.name+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+' &nbsp;&#183;&nbsp; '+estInv.length+' invoice'+(estInv.length===1?'':'s')+'</div></div>'
-      +(unpaidCount?'<span class="pill" style="background:rgba(224,92,92,.12);border:1px solid var(--red);color:var(--red)">'+unpaidCount+' unpaid</span>':'')
+      +(unpaidCount?'<span class="pill" style="background:rgba(224,92,92,.12);border:1px solid var(--red);color:var(--red)">'+unpaidCount+' unpaid</span>':'<span class="pill" style="background:rgba(76,175,125,.12);border:1px solid var(--green);color:var(--green)">Current</span>')
       +'</div></div>';
   });
 
