@@ -919,14 +919,19 @@ function doSignOut(){localStorage.removeItem('ec_user');var base=window.location
 goDash();
 
 // Preload waitlist count for the dashboard stat box (loads silently, refreshes once ready)
-if(window._loadWaitlistFromFirestore){
+function preloadWaitlistCount(retriesLeft){
+  if(!window._loadWaitlistFromFirestore){
+    if(retriesLeft>0) setTimeout(function(){preloadWaitlistCount(retriesLeft-1);},200);
+    return;
+  }
   window._loadWaitlistFromFirestore().then(function(rows){
     waitlistCache=rows;
-    if(document.querySelector('.topbar-title')&&document.querySelector('.topbar-title').textContent==='EstateCare'){
-      goDash();
-    }
+    // Refresh dashboard if currently visible, regardless of how it was detected
+    var titleEl=document.querySelector('.topbar-title');
+    if(titleEl&&titleEl.textContent==='EstateCare') goDash();
   }).catch(function(err){console.error('Waitlist preload error:',err);});
 }
+preloadWaitlistCount(15);
 </script>
 
 <script>
