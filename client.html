@@ -629,9 +629,15 @@ function openInvoice(invId){
   var inv=window['_inv_'+invId]||clientInvoices.find(function(i){return i.id===invId;});
   if(!inv) return;
   var e=CE();
-  var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--gold)';
-  var statusLabel=inv.status==='paid'?'PAID':inv.status==='unpaid'?'PAYMENT DUE':'UPCOMING';
-  var statusColor=inv.status==='paid'?'#4caf7d':inv.status==='unpaid'?'#e05c5c':'#c9a84c';
+
+  // Determine paid status — autoPay covers the full term
+  var isPaid=inv.status==='paid'||inv.autoPay;
+  var isUnpaid=!isPaid&&inv.status==='unpaid';
+  var isUpcoming=!isPaid&&inv.status==='upcoming';
+
+  var col=isPaid?'var(--green)':isUnpaid?'var(--red)':'var(--gold)';
+  var statusColor=isPaid?'#4caf7d':isUnpaid?'#e05c5c':'#c9a84c';
+  var statusLabel=isPaid?'PAID':isUnpaid?'PAYMENT DUE':'UPCOMING';
   var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   var issuedStr=new Date(inv.dueDate.getTime()-7*24*60*60*1000).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 
@@ -639,7 +645,7 @@ function openInvoice(invId){
   var html='<div class="topbar"><div style="display:flex;align-items:center">'
     +'<button class="back-btn" data-action="cnav" data-fn="goClientInvoices">&#8592;</button>'
     +'<div><div class="topbar-title">Invoice</div><div class="topbar-sub">'+inv.invoiceNum+'</div></div></div>'
-    +'<button onclick="printInvoice()" style="background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;cursor:pointer;margin-right:8px">Print / Save PDF</button>'
+    +'<button onclick="printInvoice()" style="background:none;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 12px;cursor:pointer;margin-right:8px">Save PDF</button>'
     +'</div>'
     // Invoice document
     +'<div class="sc" id="invoiceDoc">'
@@ -693,26 +699,34 @@ function openInvoice(invId){
     +'</div></td></tr>'
     +'</tfoot></table>'
     // Payment section
-    +(inv.status!=='paid'?
-    '<div style="background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:16px">'
-    +'<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">Payment Methods Accepted</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
-    +'<div style="background:var(--ch3);border-radius:2px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:500">E-Transfer</div><div style="font-size:9px;color:var(--gold);margin-top:2px">hello@myestatecare.ca</div></div>'
-    +'<div style="background:var(--ch3);border-radius:2px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:500">Credit Card</div><div style="font-size:9px;color:var(--dim);margin-top:2px">Via secure link</div></div>'
-    +'<div style="background:var(--ch3);border-radius:2px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:500">Apple Pay</div><div style="font-size:9px;color:var(--dim);margin-top:2px">Via secure link</div></div>'
-    +'<div style="background:var(--ch3);border-radius:2px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:500">Google Pay</div><div style="font-size:9px;color:var(--dim);margin-top:2px">Via secure link</div></div>'
-    +'</div>'
-    +'<div style="font-size:10px;color:var(--dim);line-height:1.8">For e-transfer, please include invoice number <strong style="color:var(--gl)">'+inv.invoiceNum+'</strong> in the message field. Send to <strong style="color:var(--gold)">hello@myestatecare.ca</strong></div>'
-    +'</div>'
-    :'<div style="background:rgba(76,175,125,0.08);border:1px solid var(--green);border-radius:2px;padding:14px;margin-bottom:16px;text-align:center">'
-    +'<div style="font-size:12px;color:var(--green)">&#10003; &nbsp; Payment received '+(inv.paidDate?'on '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'')+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>'
-    +'</div>')
+    +(isPaid?
+      // ── PAID STAMP ──
+      '<div style="background:rgba(76,175,125,0.08);border:1px solid var(--green);border-radius:2px;padding:20px;margin-bottom:16px;text-align:center">'
+      +'<div style="font-size:28px;font-family:var(--ff);color:var(--green);letter-spacing:4px;border:2px solid var(--green);display:inline-block;padding:6px 20px;transform:rotate(-2deg);margin-bottom:10px">PAID</div>'
+      +(inv.autoPay&&!inv.paidDate
+        ? '<div style="font-size:11px;color:var(--green);margin-top:4px">Covered under pre-authorized '+(inv.period||'recurring')+' payment</div>'
+        : '<div style="font-size:12px;color:var(--green);margin-top:4px">Payment received'+(inv.paidDate?' on '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'')+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>'
+      )
+      +'</div>'
+    :
+      // ── PAYMENT PROMPT ──
+      '<div style="background:rgba(201,168,76,0.06);border:1px solid var(--border);border-radius:2px;padding:14px;margin-bottom:12px">'
+      +'<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Payment Options Available</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+      +'<span style="background:var(--ch3);border-radius:12px;padding:4px 10px;font-size:10px">E-Transfer</span>'
+      +'<span style="background:var(--ch3);border-radius:12px;padding:4px 10px;font-size:10px">Credit Card</span>'
+      +'<span style="background:var(--ch3);border-radius:12px;padding:4px 10px;font-size:10px">Apple Pay</span>'
+      +'<span style="background:var(--ch3);border-radius:12px;padding:4px 10px;font-size:10px">Google Pay</span>'
+      +'</div>'
+      +'</div>'
+    )
     // Footer
     +'<div style="border-top:1px solid var(--border);padding-top:14px;text-align:center">'
     +'<div style="font-size:10px;color:var(--dim);line-height:1.8">Thank you for choosing EstateCare.<br>Questions? Contact us at <span style="color:var(--gold)">hello@myestatecare.ca</span> or visit <span style="color:var(--gold)">myestatecare.ca</span></div>'
     +'</div>'
     +'</div>'  // end invoice doc card
-    +(inv.status!=='paid'?'<button onclick="printInvoice()" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:14px;cursor:pointer;margin-bottom:8px">Print / Save as PDF</button>':'')
+    // ── PAY NOW BUTTON (unpaid/upcoming only) ──
+    +(!isPaid?'<button onclick="goPayment(\''+invId+'\')" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:16px;cursor:pointer;margin-bottom:8px">Pay Now  $'+inv.amount.toFixed(2)+'</button>':'')
     +'<button onclick="printInvoice()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer">Save PDF</button>'
     +'</div>'+clientNav('invoices');
   render(html);
@@ -722,6 +736,169 @@ function invRow2(label,val){
   return '<div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:4px">'
     +'<span style="font-size:10px;color:var(--dim)">'+label+':</span>'
     +'<span style="font-size:11px">'+val+'</span></div>';
+}
+
+// ── PAYMENT PAGE ─────────────────────────────────────────────────────────────
+function goPayment(invId){
+  var inv=window['_inv_'+invId]||clientInvoices.find(function(i){return i.id===invId;});
+  if(!inv) return;
+  var amtStr='$'+inv.amount.toFixed(2)+' CAD';
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center">'
+    +'<button class="back-btn" onclick="openInvoice(\''+invId+'\')">&#8592;</button>'
+    +'<div><div class="topbar-title">Payment</div><div class="topbar-sub">'+inv.invoiceNum+' &nbsp;&#183;&nbsp; '+amtStr+'</div></div></div></div>'
+    +'<div class="sc">'
+
+    // Amount summary bar
+    +'<div style="background:var(--ch2);border:1px solid var(--gold);border-radius:2px;padding:16px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase">Amount Due</div>'
+    +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl);margin-top:2px">'+amtStr+'</div></div>'
+    +'<div style="text-align:right"><div style="font-size:10px;color:var(--dim)">'+inv.invoiceNum+'</div>'
+    +'<div style="font-size:11px;color:var(--text);margin-top:2px">'+inv.notes+'</div></div>'
+    +'</div>'
+
+    // E-Transfer
+    +'<div class="sec">E-Transfer</div>'
+    +'<div class="card" style="margin-bottom:4px">'
+    +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">'
+    +'<div style="width:40px;height:40px;background:var(--gd);border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">⇄</div>'
+    +'<div><div style="font-size:13px;font-weight:500">Interac E-Transfer</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Send directly from your online banking</div></div>'
+    +'</div>'
+    +'<div style="background:var(--ch3);border-radius:2px;padding:12px;margin-bottom:10px">'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Send To</div>'
+    +'<div style="font-size:14px;color:var(--gold);font-weight:500">hello@myestatecare.ca</div>'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-top:10px;margin-bottom:6px">Message / Memo</div>'
+    +'<div style="font-size:13px;color:var(--gl)">'+inv.invoiceNum+'</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:6px">Include your invoice number so we can match your payment</div>'
+    +'</div>'
+    +'<button onclick="copyToClipboard(\'hello@myestatecare.ca\')" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px;cursor:pointer">Copy E-Transfer Email</button>'
+    +'</div>'
+
+    // Credit Card
+    +'<div class="sec" style="margin-top:16px">Credit Card</div>'
+    +'<div class="card" id="ccSection" style="margin-bottom:4px">'
+    +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">'
+    +'<div style="width:40px;height:40px;background:var(--gd);border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+    +'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>'
+    +'</div>'
+    +'<div><div style="font-size:13px;font-weight:500">Credit or Debit Card</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Visa, Mastercard, Amex accepted</div></div>'
+    +'</div>'
+    // Card number
+    +'<div style="margin-bottom:10px">'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Card Number</div>'
+    +'<input id="ccNum" type="tel" inputmode="numeric" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCC(this)" style="width:100%;background:var(--ch3);border:1px solid var(--border);border-radius:2px;padding:11px 12px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;letter-spacing:1px;outline:none">'
+    +'</div>'
+    +'<div style="display:flex;gap:10px;margin-bottom:10px">'
+    +'<div style="flex:1"><div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Expiry</div>'
+    +'<input id="ccExp" type="tel" inputmode="numeric" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)" style="width:100%;background:var(--ch3);border:1px solid var(--border);border-radius:2px;padding:11px 12px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;outline:none"></div>'
+    +'<div style="flex:1"><div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">CVV</div>'
+    +'<input id="ccCvv" type="tel" inputmode="numeric" placeholder="123" maxlength="4" style="width:100%;background:var(--ch3);border:1px solid var(--border);border-radius:2px;padding:11px 12px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;outline:none"></div>'
+    +'</div>'
+    // Save card toggle
+    +'<div style="display:flex;align-items:center;justify-content:space-between;background:var(--ch3);border-radius:2px;padding:12px 14px;margin-bottom:12px">'
+    +'<div><div style="font-size:11px;font-weight:500">Save card for future payments</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Enables one-tap payment &amp; auto-pay</div></div>'
+    +'<div id="saveCardToggle" onclick="toggleSaveCard()" style="width:44px;height:24px;border-radius:12px;background:var(--ch);border:1px solid var(--border);cursor:pointer;position:relative;transition:background .2s">'
+    +'<div id="saveCardThumb" style="position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--dim);transition:transform .2s"></div>'
+    +'</div></div>'
+    +'<div id="saveCardConsent" style="display:none;background:rgba(201,168,76,0.08);border:1px solid var(--border);border-radius:2px;padding:10px 12px;margin-bottom:10px">'
+    +'<div style="font-size:10px;color:var(--dim);line-height:1.7">By saving your card, you authorize EstateCare to charge this card for future invoices. You may remove your card at any time by contacting us at hello@myestatecare.ca.</div>'
+    +'</div>'
+    +'<button onclick="processCardPayment(\''+invId+'\')" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:15px;cursor:pointer">Pay '+amtStr+'</button>'
+    +'</div>'
+
+    // Apple Pay / Google Pay
+    +'<div class="sec" style="margin-top:16px">Express Pay</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">'
+    // Apple Pay
+    +'<div class="card tap" onclick="processExpressPay(\''+invId+'\',\'Apple Pay\')" style="padding:16px;text-align:center;cursor:pointer">'
+    +'<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="margin:0 auto 6px;display:block"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.42c1.42.07 2.4.73 3.22.73.98 0 2.84-.91 4.47-.77 1.8.16 3.16.93 4.04 2.36-3.71 2.22-3.1 7.17.27 8.54zm-2.98-15.52c.97-1.17 1.63-2.8 1.43-4.39-1.38.05-3.04.93-4.02 2.12-.88 1.08-1.59 2.73-1.31 4.34 1.52.12 3.09-.8 3.9-2.07z"/></svg>'
+    +'<div style="font-size:12px;font-weight:600">Apple Pay</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:3px">Touch ID or Face ID</div>'
+    +'</div>'
+    // Google Pay
+    +'<div class="card tap" onclick="processExpressPay(\''+invId+'\',\'Google Pay\')" style="padding:16px;text-align:center;cursor:pointer">'
+    +'<svg width="28" height="28" viewBox="0 0 24 24" style="margin:0 auto 6px;display:block" fill="none"><text y="18" font-size="12" font-weight="700" font-family="Arial" fill="#c9a84c">G</text><text x="11" y="18" font-size="12" font-weight="700" font-family="Arial" fill="#e2c97e">Pay</text></svg>'
+    +'<div style="font-size:12px;font-weight:600">Google Pay</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:3px">Fingerprint or PIN</div>'
+    +'</div>'
+    +'</div>'
+
+    // Auto-pay setup
+    +'<div class="sec" style="margin-top:16px">Recurring Payments</div>'
+    +'<div class="card" style="margin-bottom:20px">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+    +'<div style="width:36px;height:36px;background:var(--gd);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+    +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 009 9 9.75 9.75 0 006.74-2.74M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74M3 12H1m22 0h-2M12 3V1m0 22v-2"/></svg>'
+    +'</div>'
+    +'<div><div style="font-size:12px;font-weight:500">Set Up Auto-Pay</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Never miss a payment — invoices paid automatically</div></div>'
+    +'</div>'
+    +'<div style="font-size:10px;color:var(--dim);line-height:1.7;margin-bottom:12px">Authorize EstateCare to charge your saved card or preferred payment method automatically each billing period. Pre-authorized invoices will show as <strong style="color:var(--green)">PAID</strong> immediately upon issue.</div>'
+    +'<button onclick="showToast(\'Contact hello@myestatecare.ca to set up Auto-Pay\')" style="width:100%;background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gold);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer">Contact Us to Set Up Auto-Pay</button>'
+    +'</div>'
+
+    +'<div style="font-size:10px;color:var(--dim);text-align:center;line-height:1.8;padding-bottom:20px">Payments processed securely. Questions? Email <span style="color:var(--gold)">hello@myestatecare.ca</span></div>'
+    +'</div>'+clientNav('invoices');
+
+  render(html);
+}
+
+var saveCardOn=false;
+function toggleSaveCard(){
+  saveCardOn=!saveCardOn;
+  var tog=document.getElementById('saveCardToggle');
+  var thumb=document.getElementById('saveCardThumb');
+  var consent=document.getElementById('saveCardConsent');
+  if(tog) tog.style.background=saveCardOn?'var(--gold)':'var(--ch)';
+  if(thumb) thumb.style.transform=saveCardOn?'translateX(20px)':'none';
+  if(thumb) thumb.style.background=saveCardOn?'#000':'var(--dim)';
+  if(consent) consent.style.display=saveCardOn?'block':'none';
+}
+
+function fmtCC(input){
+  var v=input.value.replace(/\D/g,'').substring(0,16);
+  input.value=v.replace(/(.{4})/g,'$1 ').trim();
+}
+function fmtExp(input){
+  var v=input.value.replace(/\D/g,'').substring(0,4);
+  if(v.length>2) v=v.slice(0,2)+' / '+v.slice(2);
+  input.value=v;
+}
+
+function copyToClipboard(txt){
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){showToast('Copied: '+txt);});}
+  else{showToast(txt);}
+}
+
+function processCardPayment(invId){
+  var num=document.getElementById('ccNum');
+  var exp=document.getElementById('ccExp');
+  var cvv=document.getElementById('ccCvv');
+  if(!num||num.value.replace(/\s/g,'').length<15){showToast('Please enter a valid card number');return;}
+  if(!exp||exp.value.length<7){showToast('Please enter your card expiry');return;}
+  if(!cvv||cvv.value.length<3){showToast('Please enter your CVV');return;}
+  confirmPayment(invId,'Credit Card');
+}
+
+function processExpressPay(invId,method){
+  confirmPayment(invId,method);
+}
+
+function confirmPayment(invId,method){
+  // Mark the invoice as paid in our local data
+  var inv=clientInvoices.find(function(i){return i.id===invId;});
+  if(inv){inv.status='paid';inv.paidDate=new Date();inv.paymentMethod=method;}
+  // Show confirmation overlay
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;backdrop-filter:blur(6px)';
+  overlay.innerHTML='<div style="width:70px;height:70px;border-radius:50%;background:rgba(76,175,125,.15);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:32px">✓</div>'
+    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl);letter-spacing:2px">Payment Received</div>'
+    +'<div style="font-size:12px;color:var(--dim);text-align:center;line-height:1.8">'+inv.invoiceNum+'<br>'+method+'<br><span style="color:var(--green)">$'+inv.amount.toFixed(2)+' CAD</span></div>'
+    +'<button onclick="this.parentNode.remove();openInvoice(\''+invId+'\')" style="margin-top:8px;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px 32px;cursor:pointer">View Receipt</button>';
+  document.body.appendChild(overlay);
 }
 
 function printInvoice(){
