@@ -655,7 +655,7 @@ function openInvoice(invId){
   var html='<div class="topbar"><div style="display:flex;align-items:center">'
     +'<button class="back-btn" data-action="cnav" data-fn="goClientInvoices">&#8592;</button>'
     +'<div><div class="topbar-title">Invoice</div><div class="topbar-sub">'+inv.invoiceNum+'</div></div></div>'
-    +'<button onclick="printInvoice()" style="background:none;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 12px;cursor:pointer;margin-right:8px">Save PDF</button>'
+    +'<button onclick="printInvoice()" style="background:none;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 12px;cursor:pointer;margin-right:8px">Print</button>'
     +'</div>'
     // Invoice document
     +'<div class="sc" id="invoiceDoc">'
@@ -737,7 +737,7 @@ function openInvoice(invId){
     +'</div>'  // end invoice doc card
     // ── PAY NOW BUTTON (unpaid/upcoming only) ──
     +(!isPaid?'<button onclick="goPayment(\''+invId+'\')" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:16px;cursor:pointer;margin-bottom:8px">Pay Now  $'+inv.amount.toFixed(2)+'</button>':'')
-    +'<button onclick="printInvoice()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer">Save PDF</button>'
+    +'<button onclick="printInvoice()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer">Print / Save as PDF</button>'
     +'</div>'+clientNav('invoices');
   render(html);
 }
