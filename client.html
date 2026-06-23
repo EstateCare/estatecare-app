@@ -163,10 +163,13 @@ function render(html){
   });
 }
 
-// Delegated invoice click — works even when rows are injected after render()
+// Delegated invoice click — manual walk for max compatibility
 document.getElementById('screen').addEventListener('click',function(e){
-  var row=e.target.closest('[data-invid]');
-  if(row) openInvoice(row.getAttribute('data-invid'));
+  var t=e.target;
+  while(t&&t!==document.getElementById('screen')){
+    if(t.getAttribute&&t.getAttribute('data-invid')){openInvoice(t.getAttribute('data-invid'));return;}
+    t=t.parentNode;
+  }
 });
 
 function ringHtml(sc,sz){sz=sz||90;var off=226-(226*sc.score/100);return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 90 90"><circle class="ring-bg" cx="45" cy="45" r="36"/><circle class="ring-fill" cx="45" cy="45" r="36" stroke="#c9a84c" stroke-dasharray="226" stroke-dashoffset="'+off+'" transform="rotate(-90 45 45)"/><text class="ring-score" x="45" y="50" text-anchor="middle">'+sc.score+'%</text></svg>';}
@@ -308,7 +311,8 @@ function showFullDashboard(){
     html+=dateCard(idx,ds2,'&#10003; Completed',sc2,false);
   });
 
-  html+='</div>'+clientNav('home');
+  html+='<button class="btn-ghost" onclick="doSignOut()" style="margin-top:8px;margin-bottom:8px">Sign Out</button>'
+    +'</div>'+clientNav('home');
   render(html);
 }
 
@@ -509,21 +513,23 @@ function goClientInvoices(){
     +'<div class="sec">All Invoices</div>'
     +'<div id="clientInvList">';
   myInvoices.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
-    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    var isPaidRow=(inv.status==='paid'||inv.autoPay);
+    var col=isPaidRow?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    var statusLabel=isPaidRow?'paid':inv.status;
     var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     window['_inv_'+inv.id]=inv;
-    html+='<div class="card tap" data-invid="'+inv.id+'" style="border-left:3px solid '+col+';margin-bottom:8px;cursor:pointer">'
+    html+='<div class="card tap" onclick="openInvoice(\''+inv.id+'\')" style="border-left:3px solid '+col+';margin-bottom:8px;cursor:pointer">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
       +'<div style="flex:1">'
       +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:3px">'+inv.invoiceNum+'</div>'
       +'<div style="font-size:13px;font-weight:500">'+inv.notes+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; Due '+dueStr+'</div>'
-      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Auto-Pay</div>':'')
-      +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid '+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
+      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px">&#10003; Auto-Pay</div>':'')
+      +(inv.paidDate&&!inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid'+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
       +'</div>'
       +'<div style="text-align:right;margin-left:12px">'
       +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
-      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+statusLabel+'</div>'
       +'<div style="font-size:9px;color:var(--dim);margin-top:4px">View &#8250;</div>'
       +'</div></div></div>';
   });
@@ -541,21 +547,23 @@ function filterClientInvoices(v){
   });
   var html='';
   filtered.sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
-    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    var isPaidRow=(inv.status==='paid'||inv.autoPay);
+    var col=isPaidRow?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    var statusLabel=isPaidRow?'paid':inv.status;
     var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     window['_inv_'+inv.id]=inv;
-    html+='<div class="card tap" data-invid="'+inv.id+'" style="border-left:3px solid '+col+';margin-bottom:8px;cursor:pointer">'
+    html+='<div class="card tap" onclick="openInvoice(\''+inv.id+'\')" style="border-left:3px solid '+col+';margin-bottom:8px;cursor:pointer">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
       +'<div style="flex:1">'
       +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:3px">'+inv.invoiceNum+'</div>'
       +'<div style="font-size:13px;font-weight:500">'+inv.notes+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.period+' &nbsp;&#183;&nbsp; Due '+dueStr+'</div>'
-      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Auto-Pay</div>':'')
-      +(inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
+      +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:3px">&#10003; Auto-Pay</div>':'')
+      +(inv.paidDate&&!inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid'+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
       +'</div>'
       +'<div style="text-align:right;margin-left:12px">'
       +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
-      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+statusLabel+'</div>'
       +'<div style="font-size:9px;color:var(--dim);margin-top:4px">View &#8250;</div>'
       +'</div></div></div>';
   });
