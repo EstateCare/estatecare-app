@@ -149,9 +149,6 @@ function render(html){
   document.querySelectorAll('[data-action="cnav"]').forEach(function(el){
     el.addEventListener('click',function(){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();});
   });
-  document.querySelectorAll('[data-invid]').forEach(function(el){
-    el.addEventListener('click',function(){openInvoice(this.getAttribute('data-invid'));});
-  });
   document.querySelectorAll('[data-action="payopt"]').forEach(function(el){
     el.addEventListener('click',function(){showPayContact(this.getAttribute('data-paymethod'));});
   });
@@ -164,8 +161,13 @@ function render(html){
   document.querySelectorAll('[data-action="openPD"]').forEach(function(el){
     el.addEventListener('click',function(){openPD(parseInt(this.getAttribute('data-idx')));});
   });
-
 }
+
+// Delegated invoice click — works even when rows are injected after render()
+document.getElementById('screen').addEventListener('click',function(e){
+  var row=e.target.closest('[data-invid]');
+  if(row) openInvoice(row.getAttribute('data-invid'));
+});
 
 function ringHtml(sc,sz){sz=sz||90;var off=226-(226*sc.score/100);return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 90 90"><circle class="ring-bg" cx="45" cy="45" r="36"/><circle class="ring-fill" cx="45" cy="45" r="36" stroke="#c9a84c" stroke-dasharray="226" stroke-dashoffset="'+off+'" transform="rotate(-90 45 45)"/><text class="ring-score" x="45" y="50" text-anchor="middle">'+sc.score+'%</text></svg>';}
 function statsHtml(sc){return '<div style="flex:1"><div class="stat-row"><div class="sdot" style="background:var(--green)"></div><div class="sname">Healthy</div><div class="sval">'+sc.green+'</div></div><div class="stat-row"><div class="sdot" style="background:var(--yellow)"></div><div class="sname">Monitor</div><div class="sval">'+sc.yellow+'</div></div><div class="stat-row"><div class="sdot" style="background:var(--red)"></div><div class="sname">Attention</div><div class="sval">'+sc.red+'</div></div></div>';}
