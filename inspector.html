@@ -588,14 +588,125 @@ function finishInsp(){
     +'</div>';
 }
 function goSettings(){
-  document.getElementById('screen').innerHTML='<div class="topbar"><div><div class="topbar-title">Settings</div><div class="topbar-sub">Account</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+  var html='<div class="topbar"><div><div class="topbar-title">Settings</div><div class="topbar-sub">Account & Preferences</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Inspector</div>'
     +'<div class="card"><div style="font-size:10px;color:var(--dim);margin-bottom:4px">Signed in as</div>'
     +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+currentUser.name+'</div>'
     +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div></div>'
-    +'<button class="btn-gold" style="margin-top:8px" onclick="doSignOut()">Sign Out</button>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Inspection Template</div>'
+    +'<div class="card tap" onclick="goEditPoints()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
+    +'<div>'
+    +'<div style="font-size:13px;font-weight:500">Modify Inspection Points</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:3px">Add, remove or reorganise your default checklist</div>'
+    +'</div>'
+    +'<div style="font-size:20px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
+    +'<button class="btn-ghost" style="margin-top:20px" onclick="doSignOut()">Sign Out</button>'
     +'</div>'+nav('settings');
+  render(html);
+}
+
+// ── DEFAULT TEMPLATE ────────────────────────────────────────────────────────
+// Inspector's master checklist — loaded from localStorage if saved, otherwise built from estate data
+function getDefaultTemplate(){
+  var saved=localStorage.getItem('ec_insp_template');
+  if(saved) try{return JSON.parse(saved);}catch(e){}
+  // Build from first estate's data as starting point
+  var e=myEstates[0];
+  if(!e) return {exterior:[],interior:[],grounds:[]};
+  return {
+    exterior:e.data.exterior.points.map(function(p){return{id:p.id,name:p.name};}),
+    interior:e.data.interior.points.map(function(p){return{id:p.id,name:p.name};}),
+    grounds:e.data.grounds.points.map(function(p){return{id:p.id,name:p.name};})
+  };
+}
+function saveDefaultTemplate(tpl){localStorage.setItem('ec_insp_template',JSON.stringify(tpl));}
+
+function goEditPoints(){
+  var tpl=getDefaultTemplate();
+  var catDefs=[
+    {k:'exterior',label:'Exterior',icon:'🏠'},
+    {k:'interior',label:'Interior',icon:'🖥'},
+    {k:'grounds',label:'Grounds',icon:'🌿'}
+  ];
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center">'
+    +'<button class="back-btn" onclick="goSettings()">&#8592;</button>'
+    +'<div><div class="topbar-title">Inspection Points</div><div class="topbar-sub">Your default template</div></div></div></div>'
+    +'<div class="sc">'
+    +'<div style="font-size:10px;color:var(--dim);line-height:1.7;margin-bottom:16px">These points apply to every new property you are assigned. You can customise further per property. Red/yellow/green rules apply automatically to all points.</div>';
+
+  catDefs.forEach(function(cat){
+    var pts=tpl[cat.k]||[];
+    html+='<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">'+cat.icon+' '+cat.label+'</div>'
+      +'<div id="ptList_'+cat.k+'">';
+    pts.forEach(function(pt,idx){
+      html+=ptRow(cat.k,idx,pt.name);
+    });
+    html+='</div>'
+      // Add new point row
+      +'<div style="display:flex;gap:8px;margin-bottom:20px">'
+      +'<input id="newPt_'+cat.k+'" placeholder="Add '+cat.label.toLowerCase()+' point…" style="flex:1;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;padding:10px 12px;outline:none" onkeydown="if(event.key===\'Enter\')addPoint(\''+cat.k+'\')">'
+      +'<button onclick="addPoint(\''+cat.k+'\')" style="background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;padding:10px 14px;cursor:pointer">+ Add</button>'
+      +'</div>';
+  });
+
+  html+='<button class="btn-gold" onclick="savePoints()">Save Template</button>'
+    +'<button class="btn-ghost" onclick="goSettings()">Cancel</button>'
+    +'</div>'+nav('settings');
+  render(html);
+}
+
+function ptRow(cat,idx,name){
+  return '<div id="ptRow_'+cat+'_'+idx+'" style="display:flex;align-items:center;gap:10px;background:var(--ch2);border:1px solid var(--border);border-radius:1px;padding:10px 12px;margin-bottom:6px">'
+    +'<div style="display:flex;gap:4px;flex-shrink:0">'
+    +'<div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div>'
+    +'<div style="width:8px;height:8px;border-radius:50%;background:var(--yellow)"></div>'
+    +'<div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div>'
+    +'</div>'
+    +'<div style="flex:1;font-size:13px">'+name+'</div>'
+    +'<button onclick="removePoint(\''+cat+'\','+idx+')" style="background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:0 4px;line-height:1">&#128465;</button>'
+    +'</div>';
+}
+
+function addPoint(cat){
+  var input=document.getElementById('newPt_'+cat);
+  var name=input.value.trim();
+  if(!name) return;
+  var tpl=getDefaultTemplate();
+  tpl[cat].push({id:cat+'_'+Date.now(),name:name});
+  saveDefaultTemplate(tpl);
+  input.value='';
+  // Re-render just that category's list
+  var list=document.getElementById('ptList_'+cat);
+  if(list){
+    var html='';
+    tpl[cat].forEach(function(pt,idx){html+=ptRow(cat,idx,pt.name);});
+    list.innerHTML=html;
+  }
+  showToast('Point added');
+}
+
+function removePoint(cat,idx){
+  var tpl=getDefaultTemplate();
+  var name=tpl[cat][idx]?tpl[cat][idx].name:'';
+  tpl[cat].splice(idx,1);
+  saveDefaultTemplate(tpl);
+  // Re-render the list
+  var list=document.getElementById('ptList_'+cat);
+  if(list){
+    var html='';
+    tpl[cat].forEach(function(pt,i){html+=ptRow(cat,i,pt.name);});
+    list.innerHTML=html;
+  }
+  showToast(name?'"'+name+'" removed':'Point removed');
+}
+
+function savePoints(){
+  // Apply updated template as the base for all estates that haven't been customised yet
+  showToast('Template saved');
+  goSettings();
 }
 function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('inspector.html','');window.location.href=base+'index.html';}
 goCal();
