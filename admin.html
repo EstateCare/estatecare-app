@@ -325,7 +325,8 @@ function goDash(){
         +'</div></div>';
     });
   }
-  html+='</div>'+nav('dash');
+  html+='<button class="btn-ghost" onclick="doSignOut()" style="margin-top:8px;margin-bottom:8px">Sign Out</button>'
+    +'</div>'+nav('dash');
   render(html);
 }
 
@@ -393,36 +394,33 @@ function renderCal(vd){
       html+='</div>';
     });
   }
-  // ── UPCOMING INSPECTIONS ──
-  var upcoming=scheduleItems.filter(function(s){
-    return new Date(s.date)>=today;
-  }).sort(function(a,b){return new Date(a.date)-new Date(b.date)});
 
+  // Upcoming inspections list
+  var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=today;})
+    .sort(function(a,b){return new Date(a.date)-new Date(b.date);});
   html+='<div class="sec" style="margin-top:20px">Upcoming Inspections</div>';
   if(!upcoming.length){
-    // Generate filler from estates if no schedule items
-    var fillerDays=[1,3,5,7,10,12,14];
+    var fillerOffsets=[1,3,5,7,10,12,14,16,19,21];
     estates.forEach(function(e,idx){
       if(!e.contract) return;
       var insp=inspectors.find(function(i){return i.id===e.contract.assignedInspector;});
       var d=new Date(today);
-      d.setDate(d.getDate()+fillerDays[idx%fillerDays.length]);
+      d.setDate(d.getDate()+fillerOffsets[idx%fillerOffsets.length]);
       var dStr=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
       html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
         +'<div class="cat-ico">'+e.icon+'</div>'
         +'<div style="flex:1">'
         +'<div style="font-size:13px;font-weight:500">'+e.name+'</div>'
         +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+'</div>'
-        +'<div style="font-size:10px;color:var(--dim)">'+e.address+'</div>'
+        +'<div style="font-size:9px;color:var(--dim);margin-top:1px">'+e.address+' &nbsp;&#183;&nbsp; '+e.postalCode+'</div>'
         +'</div>'
-        +'<div style="text-align:right">'
+        +'<div style="text-align:right;flex-shrink:0">'
         +'<div style="font-size:12px;color:var(--gold)">'+dStr+'</div>'
         +'<div style="font-size:9px;color:var(--dim);margin-top:3px">'+(insp?insp.name.split(' ')[0]:'Unassigned')+'</div>'
-        +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-top:3px">'+e.postalCode+'</div>'
         +'</div></div>';
     });
   } else {
-    upcoming.slice(0,10).forEach(function(s){
+    upcoming.slice(0,12).forEach(function(s){
       var e=estates.find(function(x){return x.id===s.estateId;});
       var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
       if(!e) return;
@@ -432,19 +430,19 @@ function renderCal(vd){
         +'<div style="flex:1">'
         +'<div style="font-size:13px;font-weight:500">'+e.name+'</div>'
         +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+'</div>'
-        +'<div style="font-size:10px;color:var(--dim)">'+e.address+'</div>'
+        +'<div style="font-size:9px;color:var(--dim);margin-top:1px">'+e.address+' &nbsp;&#183;&nbsp; '+e.postalCode+'</div>'
         +'</div>'
-        +'<div style="text-align:right">'
+        +'<div style="text-align:right;flex-shrink:0">'
         +'<div style="font-size:12px;color:var(--gold)">'+dStr+'</div>'
         +'<div style="font-size:9px;color:var(--dim);margin-top:3px">'+(insp?insp.name.split(' ')[0]:'Unassigned')+'</div>'
-        +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-top:3px">'+e.postalCode+'</div>'
         +'</div></div>';
     });
   }
-
   html+='</div>'+nav('cal');
   render(html);
-}(d){calViewDate=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+d,1);renderCal(calViewDate);}
+}
+
+function shiftCal(d){calViewDate=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+d,1);renderCal(calViewDate);}
 
 function adminDayDetail(dateStr){
   var items=getByDate(dateStr);if(!items.length)return;
@@ -821,7 +819,7 @@ function goInspectors(){
       +'<div style="font-size:10px;color:var(--dim)">'+insp.phone+'</div>'
       +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+assigned.length+' estates &nbsp;&#183;&nbsp; '+completedCount+' inspections &nbsp;&#183;&nbsp; '+insp.postalCode+'</div>'
       +'</div>'
-      +'<div style="font-size:18px;color:var(--gold)">&#8250;</div>'
+      +'<div style="font-size:20px;color:var(--gold)">&#8250;</div>'
       +'</div>';
   });
   html+='</div></div>'+nav('inspectors');
@@ -838,13 +836,16 @@ function filterInspectors(v){
   var html='';
   filtered.forEach(function(insp){
     var assigned=estates.filter(function(e){return e.contract&&e.contract.assignedInspector===insp.id;});
-    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+    var completedCount=assigned.reduce(function(s,e){return s+e.pastInspections.length;},0);
+    html+='<div class="card tap" onclick="goInspectorDetail(\''+insp.id+'\')" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer">'
       +'<div class="avatar">'+insp.initials+'</div>'
       +'<div style="flex:1"><div style="font-size:14px;font-weight:500">'+insp.name+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+insp.email+'</div>'
       +'<div style="font-size:10px;color:var(--dim)">'+insp.phone+'</div>'
-      +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+assigned.length+' assigned &nbsp;&#183;&nbsp; Postal: '+insp.postalCode+'</div>'
-      +'</div></div>';
+      +'<div style="font-size:9px;color:var(--gold);margin-top:4px;letter-spacing:1px">'+assigned.length+' estates &nbsp;&#183;&nbsp; '+completedCount+' inspections &nbsp;&#183;&nbsp; '+insp.postalCode+'</div>'
+      +'</div>'
+      +'<div style="font-size:20px;color:var(--gold)">&#8250;</div>'
+      +'</div>';
   });
   document.getElementById('inspList').innerHTML=html;
 }
@@ -858,20 +859,19 @@ function goInspectorDetail(inspId){
 
   var html=topBar(insp.name,'Inspector Profile','goInspectors')
     +'<div class="sc">'
-    // Inspector summary card
     +'<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:20px">'
-    +'<div class="avatar" style="width:52px;height:52px;font-size:18px">'+insp.initials+'</div>'
+    +'<div class="avatar" style="width:52px;height:52px;font-size:18px;flex-shrink:0">'+insp.initials+'</div>'
     +'<div style="flex:1">'
     +'<div style="font-size:16px;font-weight:600">'+insp.name+'</div>'
     +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+insp.email+'</div>'
     +'<div style="font-size:10px;color:var(--dim)">'+insp.phone+'</div>'
     +'<div style="font-size:9px;color:var(--gold);margin-top:6px;letter-spacing:1px">Postal Zone: '+insp.postalCode+'</div>'
     +'</div>'
-    +'<div style="text-align:right">'
-    +'<div style="font-family:var(--ff);font-size:24px;color:var(--gl)">'+assigned.length+'</div>'
-    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px">ESTATES</div>'
-    +'<div style="font-family:var(--ff);font-size:18px;color:var(--green);margin-top:6px">'+completedTotal+'</div>'
-    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px">DONE</div>'
+    +'<div style="text-align:right;flex-shrink:0">'
+    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl)">'+assigned.length+'</div>'
+    +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px">ESTATES</div>'
+    +'<div style="font-family:var(--ff);font-size:20px;color:var(--green);margin-top:6px">'+completedTotal+'</div>'
+    +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px">DONE</div>'
     +'</div></div>';
 
   if(!assigned.length){
@@ -882,11 +882,12 @@ function goInspectorDetail(inspId){
       var con=e.contract;
       var sc=liveScore(e);
       var past=e.pastInspections||[];
-      var upcoming=scheduleItems.filter(function(s){return s.estateId===e.id&&s.inspectorId===inspId&&new Date(s.date)>=today;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+      var upcoming=scheduleItems.filter(function(s){
+        return s.estateId===e.id&&s.inspectorId===inspId&&new Date(s.date)>=today;
+      }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
       var nextStr=upcoming.length?new Date(upcoming[0].date).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'-';
 
       html+='<div class="card" style="margin-bottom:12px">'
-        // Estate header
         +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">'
         +'<div class="cat-ico">'+e.icon+'</div>'
         +'<div style="flex:1">'
@@ -896,7 +897,6 @@ function goInspectorDetail(inspId){
         +'</div>'
         +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc.score+'%</div>'
         +'</div>'
-        // Stats row
         +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">'
         +'<div style="text-align:center;background:var(--ch3);border-radius:2px;padding:8px">'
         +'<div style="font-family:var(--ff);font-size:18px;color:var(--green)">'+past.length+'</div>'
@@ -907,26 +907,24 @@ function goInspectorDetail(inspId){
         +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Upcoming</div>'
         +'</div>'
         +'<div style="text-align:center;background:var(--ch3);border-radius:2px;padding:8px">'
-        +'<div style="font-size:12px;color:var(--text);margin-top:2px">'+nextStr+'</div>'
-        +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Next Visit</div>'
+        +'<div style="font-size:12px;color:var(--text);margin-top:4px">'+nextStr+'</div>'
+        +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Next</div>'
         +'</div>'
         +'</div>';
 
-      // Upcoming inspections
       if(upcoming.length){
-        html+='<div style="font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Upcoming</div>';
+        html+='<div style="font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Upcoming</div>';
         upcoming.slice(0,3).forEach(function(s){
           var dStr=new Date(s.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-          html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border)">'
+          html+='<div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border)">'
             +'<div style="font-size:11px">'+dStr+'</div>'
             +'<div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px">Scheduled</div>'
             +'</div>';
         });
       }
 
-      // Past inspections
       if(past.length){
-        html+='<div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-top:10px;margin-bottom:8px">Past Inspections</div>';
+        html+='<div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-top:10px;margin-bottom:6px">Past Inspections</div>';
         past.slice(-3).reverse().forEach(function(p){
           var dStr=new Date(p.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
           var hasRed=p.issues&&p.issues.some(function(iss){return iss.status==='red';});
@@ -934,21 +932,22 @@ function goInspectorDetail(inspId){
           var dotCol=hasRed?'var(--red)':hasYellow?'var(--gold)':'var(--green)';
           html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border)">'
             +'<div style="display:flex;align-items:center;gap:8px">'
-            +'<div style="width:8px;height:8px;border-radius:50%;background:'+dotCol+'"></div>'
+            +'<div style="width:8px;height:8px;border-radius:50%;background:'+dotCol+';flex-shrink:0"></div>'
             +'<div style="font-size:11px">'+dStr+'</div>'
             +'</div>'
             +'<div style="font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:1px">Completed</div>'
             +'</div>';
         });
-        if(past.length>3) html+='<div style="font-size:10px;color:var(--dim);text-align:center;padding:6px">+' +(past.length-3)+' more inspections</div>';
+        if(past.length>3) html+='<div style="font-size:10px;color:var(--dim);text-align:center;padding:6px">+'+(past.length-3)+' more</div>';
       }
       html+='</div>';
     });
   }
-  html+='<button class="btn-ghost" onclick="goInspectors()">Back to Inspectors</button>'
-    +'</div>'+nav('inspectors');
+  html+='</div>'+nav('inspectors');
   render(html);
 }
+
+function goAddInspector(){
   var html=topBar('Add Inspector','New Team Member','goInspectors')
     +'<div class="sc"><div class="sec">Inspector Details</div><div class="card">'
     +ff('Full Name','text','niName','')+ff('Email','email','niEmail','')+ff('Password','text','niPass','test')
@@ -1020,7 +1019,7 @@ function goWaitlist(){
 }
 
 function renderWaitlist(rows){
-  var topHtml=topBar('Waitlist',rows.length+' Signup'+(rows.length===1?'':'s'),'goDash');
+  var topHtml=topBar('Waitlist',rows.length+' Signup'+(rows.length===1?'':'s'));
   var html='<div class="sc">'
     +'<input class="inp" id="waitlistSearch" placeholder="Search email or postal code" oninput="filterWaitlist(this.value)">'
     +'<div class="sec">Signups</div>';
