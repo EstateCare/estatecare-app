@@ -1084,8 +1084,12 @@ preloadWaitlistCount(15);
 
 <script>
 if('serviceWorker' in navigator){
+  // Unregister stale SWs first so cached broken files don't block updates
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(reg){reg.unregister();});
+  });
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
+    navigator.serviceWorker.register('sw.js').then(function(reg){reg.update();console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
   });
 }
 </script>
