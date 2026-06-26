@@ -341,12 +341,35 @@ function openDetail(key){
   var neverStarted=liveScore(e).total===0&&e.pastInspections.length===0;
   var canStart=neverStarted||isComp;
   if(canStart) html+='<button class="btn-outline" onclick="startInspection()" style="margin-top:8px">'+(neverStarted?'+ Start Inspection':'+ Start New Inspection')+'</button>';
+
+  // ── INVOICES ──
+  var estInvoices=(window.invoices||[]).filter(function(inv){return inv.estateId===e.id;});
+  if(estInvoices.length){
+    html+='<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Invoices</div>';
+    estInvoices.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
+      var isPaid=inv.status==='paid'||inv.autoPay;
+      var col=isPaid?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+      var statusLabel=isPaid?'Paid':inv.status==='unpaid'?'Unpaid':'Upcoming';
+      var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">'
+        +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:2px">'+inv.invoiceNum+'</div>'
+        +'<div style="font-size:12px">'+inv.notes+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Due '+dueStr+'</div>'
+        +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Auto-Pay</div>':'')
+        +'</div>'
+        +'<div style="text-align:right">'
+        +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+        +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+statusLabel+'</div>'
+        +'</div></div>';
+    });
+  }
+
   html+='</div>';
   render(html);
 }
 
 function inspDateCard(key,dateStr,sub,sc,isCurrent){
-  return '<div class="card tap" data-action="openEstate" data-id="'+curEstateId+'" onclick="openDateDetail(\''+key+'\')" style="display:flex;align-items:center;gap:14px;'+(isCurrent?'border-color:var(--yellow)':'')+'">'
+  return '<div class="card tap" onclick="openDateDetail(\''+key+'\')" style="display:flex;align-items:center;gap:14px;'+(isCurrent?'border-color:var(--yellow)':'')+'">'
     +'<div style="flex:1"><div style="font-size:13px">'+dateStr+'</div>'
     +'<div style="font-size:9px;color:'+(isCurrent?'var(--yellow)':'var(--green)')+';letter-spacing:1.5px;text-transform:uppercase;margin-top:3px">'+sub+'</div>'
     +'<div style="display:flex;gap:5px;align-items:center;margin-top:6px">'
