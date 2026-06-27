@@ -601,14 +601,14 @@ function finishInsp(){
     +'</div>';
 }
 function goSettings(){
-  var html='<div class="topbar"><div><div class="topbar-title">Settings</div><div class="topbar-sub">Account & Preferences</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+  document.getElementById('screen').innerHTML='<div class="topbar"><div><div class="topbar-title">Settings</div><div class="topbar-sub">Account & Preferences</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Inspector</div>'
     +'<div class="card"><div style="font-size:10px;color:var(--dim);margin-bottom:4px">Signed in as</div>'
     +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+currentUser.name+'</div>'
     +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div></div>'
     +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Inspection Template</div>'
-    +'<div class="card tap" data-action="goEditPts" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
+    +'<div id="editPtsBtn" class="card tap" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-color:var(--gold)">'
     +'<div>'
     +'<div style="font-size:13px;font-weight:500;color:var(--gold)">Modify Inspection Points</div>'
     +'<div style="font-size:10px;color:var(--dim);margin-top:3px">Add, remove or reorganise your default checklist</div>'
@@ -617,7 +617,7 @@ function goSettings(){
     +'</div>'
     +'<button class="btn-ghost" style="margin-top:20px" onclick="doSignOut()">Sign Out</button>'
     +'</div>'+nav('settings');
-  render(html);
+  document.getElementById('editPtsBtn').onclick = function(){ goEditPoints(); };
 }
 
 // ── DEFAULT TEMPLATE ────────────────────────────────────────────────────────
