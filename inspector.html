@@ -189,6 +189,7 @@ function render(html){
       var a=this.getAttribute('data-action');
       if(a==='openEstate'){curEstateId=this.getAttribute('data-id');openDetail('live');}
       else if(a==='openDay') inspDayDetail(this.getAttribute('data-date'));
+      else if(a==='goEditPts') goEditPoints();
     });
   });
   document.querySelectorAll('.sbtn[data-pid]').forEach(function(btn){
@@ -595,9 +596,9 @@ function goSettings(){
     +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+currentUser.name+'</div>'
     +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div></div>'
     +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Inspection Template</div>'
-    +'<div class="card tap" onclick="goEditPoints()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
+    +'<div class="card tap" data-action="goEditPts" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
     +'<div>'
-    +'<div style="font-size:13px;font-weight:500">Modify Inspection Points</div>'
+    +'<div style="font-size:13px;font-weight:500;color:var(--gold)">Modify Inspection Points</div>'
     +'<div style="font-size:10px;color:var(--dim);margin-top:3px">Add, remove or reorganise your default checklist</div>'
     +'</div>'
     +'<div style="font-size:20px;color:var(--gold)">&#8250;</div>'
