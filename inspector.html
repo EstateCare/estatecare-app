@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EstateCare">
@@ -725,11 +726,9 @@ function doSignOut(){localStorage.removeItem('ec_user');var base=window.location
 goCal();
 </script>
 <script>
+// Unregister any stale service workers
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});});
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(r){r.update();}).catch(function(e){});
-  });
 }
 </script>
 
