@@ -637,7 +637,7 @@ function getDefaultTemplate(){
 }
 function saveDefaultTemplate(tpl){localStorage.setItem('ec_insp_template',JSON.stringify(tpl));}
 
-function goEditPoints(){
+function goEditPoints(){alert("goEditPoints fired");
   var tpl=getDefaultTemplate();
   var catDefs=[
     {k:'exterior',label:'Exterior',icon:'🏠'},
