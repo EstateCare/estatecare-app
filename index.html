@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EstateCare">
-<meta name="theme-color" content="#c9a84c">
-<link rel="apple-touch-icon" href="Logo%20(Master).png">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-touch-fullscreen" content="yes">
+<link rel="apple-touch-icon" href="Logo IOS 192.png">
+<link rel="apple-touch-startup-image" href="Logo IOS 512.png">
+<link rel="apple-touch-icon" href="Logo IOS 192.png">
 <title>EstateCare</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -149,7 +153,8 @@ function showWelcome(){
     '<div class="welcome-bg" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 60px;min-height:100vh">'
     +'<div style="width:100%;padding:0 32px;display:flex;flex-direction:column;gap:12px">'
     +'<button class="btn-gold" onclick="showTiers()">Get Started</button>'
-    +'<button class="btn-outline-gold" onclick="showLogin()">Already a Client? Log In</button>'
+    +'<button class="btn-outline-gold" onclick="showLogin()">Sign In</button>'
+    +'<button id="androidInstallBtn" onclick="triggerInstall()" style="display:none;width:100%;background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gold);font-family:Montserrat,sans-serif;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px;cursor:pointer;margin-top:0">&#128247; Add to Home Screen</button>'
     +'</div></div>'
   );
 }
@@ -423,6 +428,15 @@ function goToClientApp(){
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────
+// Capture Android install prompt
+var _pwaPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();_pwaPrompt=e;
+  var btn=document.getElementById('androidInstallBtn');
+  if(btn) btn.style.display='block';
+});
+window.addEventListener('appinstalled',function(){_pwaPrompt=null;});
+
 var users=[
   {email:'admin@estatecare.com',password:'test',role:'admin',name:'Justin',initials:'EC'},
   {email:'inspector@estatecare.com',password:'test',role:'inspector',name:'John Davis',initials:'JD'},
@@ -483,6 +497,18 @@ function checkShowPWA(){
   }, 3000);
 }
 
+function triggerInstall(){
+  if(_pwaPrompt){
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(function(r){
+      if(r.outcome==='accepted') showToast('Installing EstateCare...');
+      _pwaPrompt=null;
+    });
+  } else {
+    showPwaSteps();
+  }
+}
+
 function showPwaSteps(){
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   var steps=document.getElementById('pwaSteps');
@@ -512,8 +538,9 @@ function dismissPwa(){
 
 <script>
 if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});});
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed:',e);});
+    navigator.serviceWorker.register('sw.js').then(function(r){r.update();}).catch(function(e){});
   });
 }
 </script>
