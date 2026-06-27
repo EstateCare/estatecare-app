@@ -135,7 +135,7 @@ var inspectors=[{id:'insp1',name:'John Davis',email:'inspector@estatecare.com',p
 var estates=[
   {id:'vs',name:'Hartwell Estate',address:'1402 Pelican Bay Drive, Naples FL 34108',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',clientEmail:'client1@estatecare.com',postalCode:'34108',
    contract:{tier:'Premium',weeklyRate:59.95,nextInspection:new Date('2026-06-15'),assignedInspector:'insp1'},
-   completedAt:new Date('2026-06-01'),completedCats:{exterior:new Date('2026-06-01'),interior:new Date('2026-06-01'),grounds:new Date('2026-06-01')},pastInspections:[{completedAt:new Date('2026-06-01'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'yellow'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'yellow'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'red'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'yellow'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'yellow'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}}],
+   completedAt:new Date('2026-06-01'),completedCats:{exterior:new Date('2026-06-01'),interior:new Date('2026-06-01'),grounds:new Date('2026-06-01')},pastInspections:[{date:new Date('2026-06-01'),snap:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'yellow'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'yellow'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'red'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'yellow'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'yellow'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}}],
    data:{
     exterior:{label:'Exterior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',points:[mkPt('e1','Front Entry & Door','green',''),mkPt('e2','Roof & Gutters','green',''),mkPt('e3','Windows & Seals','yellow','West window seal has slight gap.'),mkPt('e4','Driveway & Walkways','green',''),mkPt('e5','Garage Door','green',''),mkPt('e6','Exterior Lighting','yellow','Two path lights not working.')]},
     interior:{label:'Interior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',points:[mkPt('i1','HVAC System','green',''),mkPt('i2','Water Heater','green',''),mkPt('i3','Kitchen Appliances','green',''),mkPt('i4','Plumbing & Fixtures','red','Active leak under guest bath vanity.'),mkPt('i5','Electrical Panel','green',''),mkPt('i6','Security System','yellow','Battery backup low.')]},
@@ -341,7 +341,7 @@ function openDetail(key){
   for(var i=e.pastInspections.length-1;i>=0;i--){
     var insp=e.pastInspections[i];
     var ds2=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
-    var snap2=insp.snapshot||insp.snap;var sc2=snap2?scoreOf(Object.values(snap2).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]);
+    var sc2=insp.snapshot?scoreOf(Object.values(insp.snapshot).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]);
     html+=inspDateCard(i,ds2,'&#10003; Completed',sc2,false);
   }
 
@@ -396,7 +396,7 @@ function openDateDetail(key){
   var isLive=(key==='live');
   var isComp=!!e.completedAt;
 
-  var pastI=e.pastInspections[parseInt(key)];var snap=isLive?null:(pastI?(pastI.snapshot||pastI.snap):null);
+  var snap=isLive?null:(e.pastInspections[parseInt(key)]?e.pastInspections[parseInt(key)].snapshot:null);
   var sc=isLive?liveScore(e):(snap?scoreOf(Object.values(snap).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]));
   var dateLabel=isLive?(isComp?new Date(e.completedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'Current Inspection'):(e.pastInspections[parseInt(key)]&&e.pastInspections[parseInt(key)].completedAt?new Date(e.pastInspections[parseInt(key)].completedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'Past');
 
@@ -452,7 +452,7 @@ function openLiveCat(cat){curCat=cat;var e=CE();renderCatScreen(e.data[cat].labe
 function openReadCat(cat){curCat=cat;var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,true,"openDateDetail('live')");}
 function openPastCat(cat){
   curCat=cat;var e=CE();var idx=parseInt(selKey);
-  var pastInsp=e.pastInspections[idx];var snap=pastInsp.snapshot||pastInsp.snap;var c=snap[cat];
+  var snap=e.pastInspections[idx].snapshot;var c=snap[cat];
   renderCatScreen(c.label,e.name,c.points,cat,true,"openDateDetail('"+selKey+"')");
 }
 
@@ -479,12 +479,12 @@ function renderCatScreen(label,estateName,pts,cat,readOnly,backFn){
     var photoHtml=pcnt>0?'<div style="font-size:9px;color:var(--gold);margin-top:3px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> '+pcnt+' photo'+(pcnt>1?'s':'')+'</div>':(p.status==='red'&&pcnt===0&&!readOnly?'<div style="font-size:9px;color:var(--red);margin-top:3px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Photo required</div>':'');
     var pdKey='_pd_'+cat+'_'+idx;
     window[pdKey]=(function(pp,cc){return function(){openPD(pp,cc);};})(p,cat);
+    var pdOnclick=tappable?' onclick="'+pdKey+'()"':'';
     var e2=CE();var prevStatus=null;
     if(e2&&e2.pastInspections&&e2.pastInspections.length){
       var lastI=e2.pastInspections[e2.pastInspections.length-1];
-      var lastSnap=lastI.snapshot||lastI.snap;
-      if(lastI&&lastSnap&&lastSnap[cat]){
-        var snapPts=lastSnap[cat].points||[];
+      if(lastI&&lastI.snap&&lastI.snap[cat]){
+        var snapPts=lastI.snap[cat].points||[];
         for(var si=0;si<snapPts.length;si++){if(snapPts[si].name===p.name){prevStatus=snapPts[si].status;break;}}
       }
     }
@@ -492,7 +492,7 @@ function renderCatScreen(label,estateName,pts,cat,readOnly,backFn){
     var prevLbl=prevStatus==='green'?'Good':prevStatus==='yellow'?'Monitor':prevStatus==='red'?'Issue':'--';
     var prevHtml=!readOnly?'<div style="font-size:9px;color:#888;margin-top:3px;display:flex;align-items:center;gap:5px"><span style="font-size:8px;letter-spacing:1px;text-transform:uppercase">Last:</span><span style="width:8px;height:8px;border-radius:50%;background:'+prevCol+';display:inline-block;flex-shrink:0;border:1px solid #333"></span><span style="color:'+prevCol+'">'+prevLbl+'</span></div>':'';
 
-    html+='<div class="point-card'+(locked?' locked':'')+(tappable?' tappable':'')+'"'+(tappable?' data-pdkey="'+pdKey+'"':'')+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s-ready="1"')+'>'
+    html+='<div class="point-card'+(locked?' locked':'')+(tappable?' tappable':'')+'"'+(tappable?' onclick="'+pdKey+'()"':'')+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s-ready="1"')+'>'
       +'<div style="flex:1"><div style="font-size:12px">'+p.name+'</div>'
       +'<div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+label+'</div>'
       +prevHtml+noteHtml+photoHtml+'</div>'
