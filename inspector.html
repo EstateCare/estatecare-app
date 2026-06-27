@@ -213,11 +213,6 @@ function nav(active){return '<div class="bnav"><button class="ni'+(active==='cal
 
 // ── CALENDAR ──────────────────────────────────────────────────────────────
 function goCal(){
-  // VERSION CHECK - remove after confirmed working
-  var vb=document.createElement('div');
-  vb.style.cssText='position:fixed;top:0;left:0;right:0;background:#e05c5c;color:#fff;text-align:center;font-size:11px;padding:3px;z-index:9999;font-family:monospace';
-  vb.textContent='v9-FRESH';
-  document.body.appendChild(vb);
 renderCal(calViewDate);}
 
 function renderCal(vd){
@@ -485,12 +480,14 @@ function renderCatScreen(label,estateName,pts,cat,readOnly,backFn){
     var e2=CE();var prevStatus=null;
     if(e2&&e2.pastInspections&&e2.pastInspections.length){
       var lastI=e2.pastInspections[e2.pastInspections.length-1];
-      if(lastI&&lastI.snap&&lastI.snap[cat]){var prevPt=(lastI.snap[cat].points||[]).find(function(pp){return pp.name===p.name;});if(prevPt)prevStatus=prevPt.status;}
+      if(lastI&&lastI.snap&&lastI.snap[cat]){
+        var snapPts=lastI.snap[cat].points||[];
+        for(var si=0;si<snapPts.length;si++){if(snapPts[si].name===p.name){prevStatus=snapPts[si].status;break;}}
+      }
     }
-    var prevCol=prevStatus==="green"?"#4caf7d":prevStatus==="yellow"?"#c9a84c":prevStatus==="red"?"#e05c5c":"#555";
-    var prevLbl=prevStatus==="green"?"Good":prevStatus==="yellow"?"Monitor":prevStatus==="red"?"Issue":"\u2014";
-    console.log("prevStatus for "+p.name+":", prevStatus, "col:", prevCol);
-    var prevHtml=!readOnly?'<div style="font-size:9px;color:var(--dim);margin-top:3px;display:flex;align-items:center;gap:5px"><span style="font-size:8px;letter-spacing:1px;text-transform:uppercase">Last:</span><span style="width:7px;height:7px;border-radius:50%;background:'+prevCol+';display:inline-block;flex-shrink:0"></span><span style="color:'+prevCol+'">'+prevLbl+'</span></div>':"";
+    var prevCol=prevStatus==='green'?'#4caf7d':prevStatus==='yellow'?'#c9a84c':prevStatus==='red'?'#e05c5c':'#555';
+    var prevLbl=prevStatus==='green'?'Good':prevStatus==='yellow'?'Monitor':prevStatus==='red'?'Issue':'--';
+    var prevHtml=!readOnly?'<div style="font-size:9px;color:#888;margin-top:3px;display:flex;align-items:center;gap:5px"><span style="font-size:8px;letter-spacing:1px;text-transform:uppercase">Last:</span><span style="width:8px;height:8px;border-radius:50%;background:'+prevCol+';display:inline-block;flex-shrink:0;border:1px solid #333"></span><span style="color:'+prevCol+'">'+prevLbl+'</span></div>':'';
 
     html+='<div class="point-card'+(locked?' locked':'')+(tappable?' tappable':'')+'"'+(tappable?' data-pdkey="'+pdKey+'"':'')+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s-ready="1"')+'>'
       +'<div style="flex:1"><div style="font-size:12px">'+p.name+'</div>'
