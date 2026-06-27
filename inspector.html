@@ -281,7 +281,7 @@ function inspDayDetail(dateStr){
       +'<div style="text-align:right"><div style="font-size:9px;color:'+(s.status==='completed'?'var(--green)':'var(--dim)')+';text-transform:uppercase;letter-spacing:1px">'+s.status+'</div>'
       +'<div style="font-size:9px;color:var(--gold);margin-top:4px">Tap &#8250;</div></div></div></div>';
   });
-  html+='</div>';
+  html+='</div>'+nav('cal');
   render(html);
 }
 
@@ -441,7 +441,7 @@ function openDateDetail(key){
   var allLocked=['exterior','interior','grounds'].every(function(k){return !!e.completedCats[k];});
   if(!isComp&&allLocked) html+='<button class="btn-gold" onclick="finishInsp()">Complete Inspection</button>';
   if(isComp) html+='<button class="btn-outline" onclick="confirmNew()" style="margin-top:8px">+ Start New Inspection</button>';
-  html+='</div>';
+  html+='</div>'+nav('props');
   render(html);
 }
 
