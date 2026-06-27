@@ -1,4 +1,12 @@
-var CACHE='estatecare-v1';
-var FILES=['/estatecare-app/','/estatecare-app/index.html','/estatecare-app/admin.html','/estatecare-app/inspector.html','/estatecare-app/client.html','/estatecare-app/manifest.json'];
-self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(FILES);}));});
-self.addEventListener('fetch',function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request);}));});
+// Disabled caching - always fetch fresh from network
+self.addEventListener('install', function(e){ self.skipWaiting(); });
+self.addEventListener('activate', function(e){
+  e.waitUntil(
+    caches.keys().then(function(keys){
+      return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+    }).then(function(){ return self.clients.claim(); })
+  );
+});
+self.addEventListener('fetch', function(e){
+  e.respondWith(fetch(e.request));
+});
