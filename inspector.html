@@ -333,10 +333,10 @@ function openDetail(key){
   if(isComp){
     var ds=new Date(e.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'});
     html+=inspDateCard('live',ds,'&#10003; Completed',sc,false);
-  } else {
+  } else if(e.inspectionStarted){
     var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});
     var done=all.filter(function(p){return p.status!==null;}).length;
-    html+=inspDateCard('live','Current Inspection',done===0?'Not started':done+' / '+all.length+' inspected',scoreOf(all),true);
+    html+=inspDateCard('live','Current Inspection',done+' / '+all.length+' inspected',scoreOf(all),true);
   }
   for(var i=e.pastInspections.length-1;i>=0;i--){
     var insp=e.pastInspections[i];
@@ -345,8 +345,8 @@ function openDetail(key){
     html+=inspDateCard(i,ds2,'&#10003; Completed',sc2,false);
   }
 
-  var neverStarted=liveScore(e).total===0&&e.pastInspections.length===0;
-  var inProgress=!neverStarted&&!isComp&&liveScore(e).total>0;
+  var neverStarted=!e.inspectionStarted&&!isComp;
+  var inProgress=!neverStarted&&!isComp&&e.inspectionStarted;
   var canStart=neverStarted||isComp;
   if(inProgress) html+='<button onclick="cancelInspection()\" style="width:100%;background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:8px">&#128465; Cancel Inspection</button>';
   if(canStart) html+='<button class="btn-outline" onclick="startInspection()" style="margin-top:8px">'+(neverStarted?'+ Start Inspection':'+ Start New Inspection')+'</button>';
@@ -591,18 +591,19 @@ function saveNote(){
 function cancelInspection(){
   var e=CE();
   if(!e) return;
-  // Reset all points to null status
   Object.keys(e.data).forEach(function(cat){
     e.data[cat].points.forEach(function(p){p.status=null;p.notes='';p.photos=[];});
   });
   e.completedAt=null;
   e.completedCats={};
+  e.inspectionStarted=false;
   showToast('Inspection cancelled');
-  openDateDetail('live');
+  openDetail('live');
 }
 
 function startInspection(){
   var e=CE();
+  e.inspectionStarted=true;
   if(e.completedAt){e.pastInspections.push({completedAt:e.completedAt,snapshot:liveSnap(e)});Object.values(e.data).forEach(function(c){c.points.forEach(function(p){p.status=null;p.notes='';p.photos=[];});});e.completedCats={};e.completedAt=null;}
   openDateDetail('live');
 }
