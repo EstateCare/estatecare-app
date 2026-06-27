@@ -184,13 +184,13 @@ function getMyForDate(ds){return getMySchedule().filter(function(s){return s.dat
 
 function render(html){
   document.getElementById('screen').innerHTML=html;
-  document.querySelectorAll('[data-action]').forEach(function(el){
-    el.addEventListener('click',function(){
-      var a=this.getAttribute('data-action');
-      if(a==='openEstate'){curEstateId=this.getAttribute('data-id');openDetail('live');}
-      else if(a==='openDay') inspDayDetail(this.getAttribute('data-date'));
-      else if(a==='goEditPts') goEditPoints();
-    });
+  document.getElementById('screen').addEventListener('click',function(e){
+    var el=e.target.closest('[data-action]');
+    if(!el) return;
+    var a=el.getAttribute('data-action');
+    if(a==='openEstate'){curEstateId=el.getAttribute('data-id');openDetail('live');}
+    else if(a==='openDay') inspDayDetail(el.getAttribute('data-date'));
+    else if(a==='goEditPts') goEditPoints();
   });
   document.querySelectorAll('.sbtn[data-pid]').forEach(function(btn){
     btn.addEventListener('click',function(ev){ev.stopPropagation();setStatus(this.getAttribute('data-pid'),this.getAttribute('data-cat'),this.getAttribute('data-s'));});
@@ -471,11 +471,19 @@ function renderCatScreen(label,estateName,pts,cat,readOnly,backFn){
     var photoHtml=pcnt>0?'<div style="font-size:9px;color:var(--gold);margin-top:3px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> '+pcnt+' photo'+(pcnt>1?'s':'')+'</div>':(p.status==='red'&&pcnt===0&&!readOnly?'<div style="font-size:9px;color:var(--red);margin-top:3px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Photo required</div>':'');
     var pdKey='_pd_'+cat+'_'+idx;
     window[pdKey]=(function(pp,cc){return function(){openPD(pp,cc);};})(p,cat);
+    var e2=CE();var prevStatus=null;
+    if(e2&&e2.pastInspections&&e2.pastInspections.length){
+      var lastI=e2.pastInspections[e2.pastInspections.length-1];
+      if(lastI&&lastI.snap&&lastI.snap[cat]){var prevPt=(lastI.snap[cat].points||[]).find(function(pp){return pp.name===p.name;});if(prevPt)prevStatus=prevPt.status;}
+    }
+    var prevCol=prevStatus==="green"?"var(--green)":prevStatus==="yellow"?"var(--yellow)":prevStatus==="red"?"var(--red)":"var(--border)";
+    var prevLbl=prevStatus==="green"?"Good":prevStatus==="yellow"?"Monitor":prevStatus==="red"?"Issue":"—";
+    var prevHtml=!readOnly?'<div style="font-size:9px;color:var(--dim);margin-top:3px;display:flex;align-items:center;gap:5px"><span style="font-size:8px;letter-spacing:1px;text-transform:uppercase">Last:</span><span style="width:7px;height:7px;border-radius:50%;background:'+prevCol+';display:inline-block;flex-shrink:0"></span><span style="color:'+prevCol+'">'+prevLbl+'</span></div>':"";
 
     html+='<div class="point-card'+(locked?' locked':'')+(tappable?' tappable':'')+'"'+(tappable?' data-pdkey="'+pdKey+'"':'')+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s-ready="1"')+'>'
       +'<div style="flex:1"><div style="font-size:12px">'+p.name+'</div>'
       +'<div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+label+'</div>'
-      +noteHtml+photoHtml+'</div>'
+      +prevHtml+noteHtml+photoHtml+'</div>'
       +'<div class="trio">'
       +'<div class="sbtn '+gc+'"'+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s="green"')+' title="Healthy"><span style="color:'+gco+'">&#9679;</span></div>'
       +'<div class="sbtn '+yc+'"'+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s="yellow"')+' title="Monitor"><span style="color:'+yco+'">&#9679;</span></div>'
