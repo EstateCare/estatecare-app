@@ -488,7 +488,8 @@ function renderCatScreen(label,estateName,pts,cat,readOnly,backFn){
       if(lastI&&lastI.snap&&lastI.snap[cat]){var prevPt=(lastI.snap[cat].points||[]).find(function(pp){return pp.name===p.name;});if(prevPt)prevStatus=prevPt.status;}
     }
     var prevCol=prevStatus==="green"?"#4caf7d":prevStatus==="yellow"?"#c9a84c":prevStatus==="red"?"#e05c5c":"#555";
-    var prevLbl=prevStatus==="green"?"Good":prevStatus==="yellow"?"Monitor":prevStatus==="red"?"Issue":"—";
+    var prevLbl=prevStatus==="green"?"Good":prevStatus==="yellow"?"Monitor":prevStatus==="red"?"Issue":"\u2014";
+    console.log("prevStatus for "+p.name+":", prevStatus, "col:", prevCol);
     var prevHtml=!readOnly?'<div style="font-size:9px;color:var(--dim);margin-top:3px;display:flex;align-items:center;gap:5px"><span style="font-size:8px;letter-spacing:1px;text-transform:uppercase">Last:</span><span style="width:7px;height:7px;border-radius:50%;background:'+prevCol+';display:inline-block;flex-shrink:0"></span><span style="color:'+prevCol+'">'+prevLbl+'</span></div>':"";
 
     html+='<div class="point-card'+(locked?' locked':'')+(tappable?' tappable':'')+'"'+(tappable?' data-pdkey="'+pdKey+'"':'')+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s-ready="1"')+'>'
@@ -632,9 +633,13 @@ function goSettings(){
 function getDefaultTemplate(){
   var saved=localStorage.getItem('ec_insp_template');
   if(saved) try{return JSON.parse(saved);}catch(e){}
-  // Build from first estate's data as starting point
-  var e=myEstates[0];
-  if(!e) return {exterior:[],interior:[],grounds:[]};
+  // Build from first estate's data
+  var e=estates&&estates[0];
+  if(!e||!e.data) return {
+    exterior:[{id:'e1',name:'Front Entry & Door'},{id:'e2',name:'Roof & Gutters'},{id:'e3',name:'Windows & Seals'},{id:'e4',name:'Driveway & Walkways'},{id:'e5',name:'Garage Door'},{id:'e6',name:'Exterior Lighting'}],
+    interior:[{id:'i1',name:'HVAC System'},{id:'i2',name:'Water Heater'},{id:'i3',name:'Kitchen Appliances'},{id:'i4',name:'Plumbing & Fixtures'},{id:'i5',name:'Electrical Panel'},{id:'i6',name:'Security System'}],
+    grounds:[{id:'g1',name:'Lawn & Landscaping'},{id:'g2',name:'Irrigation System'},{id:'g3',name:'Pool & Equipment'},{id:'g4',name:'Outdoor Furniture'}]
+  };
   return {
     exterior:e.data.exterior.points.map(function(p){return{id:p.id,name:p.name};}),
     interior:e.data.interior.points.map(function(p){return{id:p.id,name:p.name};}),
