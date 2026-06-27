@@ -714,8 +714,9 @@ goCal();
 </script>
 <script>
 if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});});
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(r){}).catch(function(e){});
+    navigator.serviceWorker.register('sw.js').then(function(r){r.update();}).catch(function(e){});
   });
 }
 </script>
