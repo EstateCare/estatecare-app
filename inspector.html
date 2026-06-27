@@ -346,7 +346,9 @@ function openDetail(key){
   }
 
   var neverStarted=liveScore(e).total===0&&e.pastInspections.length===0;
+  var inProgress=!neverStarted&&!isComp&&liveScore(e).total>0;
   var canStart=neverStarted||isComp;
+  if(inProgress) html+='<button onclick="cancelInspection()\" style="width:100%;background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:8px">&#128465; Cancel Inspection</button>';
   if(canStart) html+='<button class="btn-outline" onclick="startInspection()" style="margin-top:8px">'+(neverStarted?'+ Start Inspection':'+ Start New Inspection')+'</button>';
 
   // ── INVOICES ──
@@ -586,6 +588,19 @@ function saveNote(){
   var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");
   showToast('Saved');
 }
+function cancelInspection(){
+  var e=CE();
+  if(!e) return;
+  // Reset all points to null status
+  Object.keys(e.data).forEach(function(cat){
+    e.data[cat].points.forEach(function(p){p.status=null;p.notes='';p.photos=[];});
+  });
+  e.completedAt=null;
+  e.completedCats={};
+  showToast('Inspection cancelled');
+  openDateDetail('live');
+}
+
 function startInspection(){
   var e=CE();
   if(e.completedAt){e.pastInspections.push({completedAt:e.completedAt,snapshot:liveSnap(e)});Object.values(e.data).forEach(function(c){c.points.forEach(function(p){p.status=null;p.notes='';p.photos=[];});});e.completedCats={};e.completedAt=null;}
