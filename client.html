@@ -201,7 +201,7 @@ function statsHtml(sc){return '<div style="flex:1"><div class="stat-row"><div cl
 function goHome(){
   var myEstates=estates.filter(function(e){return e.clientEmail===currentUser.email;});
   if(myEstates.length===1){curEstateId=myEstates[0].id;goDashboard();return;}
-  var html='<div class="topbar"><div><div class="topbar-title">My Properties</div><div class="topbar-sub">EstateCare</div></div><div class="avatar" onclick="doSignOut()">'+currentUser.initials+'</div></div>'
+  var html='<div class="topbar"><div><div class="topbar-title">My Properties</div><div class="topbar-sub">EstateCare</div></div><div class="avatar" onclick="goClientProfile()">'+currentUser.initials+'</div></div>'
     +'<div class="sc">';
   myEstates.forEach(function(e){
     var sc=liveScore(e);
@@ -230,7 +230,7 @@ function showNewClientDash(e){
   var walkTime=con.walkThrough?con.walkThrough.time:'';
   var tierName=con.tier?con.tier.charAt(0).toUpperCase()+con.tier.slice(1):'Pending';
 
-  var html='<div class="topbar"><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">My Property</div></div><div class="avatar" onclick="doSignOut()">'+currentUser.initials+'</div></div>'
+  var html='<div class="topbar"><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">My Property</div></div><div class="avatar" onclick="goClientProfile()">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div class="card" style="text-align:center;padding:32px 20px;border-color:var(--gold)">'
     +'<div style="font-size:32px;margin-bottom:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div>'
@@ -289,7 +289,7 @@ function showFullDashboard(){
   var acctLabel=hasUnpaid?'Balance Due — $'+unpaidAmt.toFixed(2):'Account Up to Date';
   var acctIcon=hasUnpaid?'&#9888;':'&#10003;';
 
-  var html='<div class="topbar"><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">My Property</div></div><div class="avatar" onclick="doSignOut()">'+currentUser.initials+'</div></div>'
+  var html='<div class="topbar"><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">My Property</div></div><div class="avatar" onclick="goClientProfile()">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div onclick="goClientInvoices(\'unpaid\')" style="display:flex;align-items:center;justify-content:space-between;background:'+acctCol+'18;border:1px solid '+acctCol+';border-radius:2px;padding:10px 14px;margin-bottom:12px;cursor:pointer">'
     +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;color:'+acctCol+'">'+acctIcon+'</span><span style="font-size:11px;font-weight:500;color:'+acctCol+'">'+acctLabel+'</span></div>'
@@ -530,6 +530,70 @@ function openPointDetail(p){
   document.getElementById('pdModal').classList.add('open');
 }
 function closePD(){document.getElementById('pdModal').classList.remove('open');}
+
+// ── CLIENT PROFILE ────────────────────────────────────────────────────────
+function goClientProfile(){
+  var e=CE();
+  var con=e?e.contract:{};
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goDashboard()">&#8592;</button><div><div class="topbar-title">My Profile</div><div class="topbar-sub">Account & Settings</div></div></div><div class="avatar" onclick="goClientProfile()">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div style="text-align:center;margin-bottom:24px">'
+    +'<div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gl));display:flex;align-items:center;justify-content:center;font-family:var(--ff);font-size:28px;color:#000;margin:0 auto 12px">'+currentUser.initials+'</div>'
+    +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+currentUser.name+'</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div>'
+    +'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">Personal Information</div>'
+    +'<div class="card" style="margin-bottom:16px">'
+    +profileRow('Full Name',currentUser.name,true)
+    +profileRow('Email',currentUser.email,true)
+    +profileRow('Phone',currentUser.phone||'Not set',true)
+    +profileRow('Emergency Contact',currentUser.emergencyContact||'Not set',true)
+    +'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">Property</div>'
+    +'<div class="card" style="margin-bottom:16px">'
+    +profileRow('Estate Name',e?e.name:'--',false)
+    +profileRow('Address',e?e.address:'--',false)
+    +profileRow('Service Tier',con&&con.tier?con.tier:'--',false)
+    +profileRow('Season Start',con&&con.startDate?new Date(con.startDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'--',false)
+    +profileRow('Season End',con&&con.endDate?new Date(con.endDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'--',false)
+    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.6">To update property details contact hello@myestatecare.ca</div>'
+    +'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">Payment on File</div>'
+    +'<div class="card" style="margin-bottom:16px">'
+    +profileRow('Card','Visa ending in 4242',false)
+    +profileRow('Expiry','08 / 27',false)
+    +profileRow('Billing Address',currentUser.billingAddress||'Same as property',false)
+    +'<button onclick="goClientInvoices()" style="width:100%;background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gold);font-family:Montserrat,sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer;margin-top:12px">Update Payment Method</button>'
+    +'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">Notifications</div>'
+    +'<div class="card" style="margin-bottom:20px">'
+    +toggleRow('Inspection Reports','Receive report after each visit',true)
+    +toggleRow('Issue Alerts','Notify me of red flags immediately',true)
+    +toggleRow('Invoice Reminders','Payment due reminders',true)
+    +'</div>'
+    +'<button class="btn-ghost" onclick="doSignOut()">Sign Out</button>'
+    +'</div>'+clientNav('home');
+  render(html);
+}
+
+function profileRow(label,val,editable){
+  return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">'
+    +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">'+label+'</div>'
+    +'<div style="font-size:13px">'+val+'</div></div>'
+    +(editable?'<div style="font-size:10px;color:var(--gold);cursor:pointer;flex-shrink:0;margin-left:12px">Edit</div>':'<div style="font-size:9px;color:var(--dim);flex-shrink:0;margin-left:12px">View only</div>')
+    +'</div>';
+}
+
+function toggleRow(label,sub,on){
+  var id='tog_'+label.replace(/ /g,'_');
+  return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">'
+    +'<div><div style="font-size:12px;font-weight:500">'+label+'</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+sub+'</div></div>'
+    +'<div id="'+id+'" onclick="var o=this.classList.toggle(\'on\');this.style.background=this.classList.contains(\'on\')?\'var(--gold)\':\'var(--ch)\';this.querySelector(\'span\').style.transform=this.classList.contains(\'on\')?\'translateX(20px)\':\'none\';this.querySelector(\'span\').style.background=this.classList.contains(\'on\')?\'#000\':\'var(--dim)\';" style="width:44px;height:24px;border-radius:12px;background:'+(on?'var(--gold)':'var(--ch)')+';border:1px solid var(--border);cursor:pointer;position:relative;flex-shrink:0;transition:background .2s" class="'+(on?'on':'')+'">'
+    +'<span style="position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:'+(on?'#000':'var(--dim)')+';transition:transform .2s;transform:'+(on?'translateX(20px)':'none')+'"></span>'
+    +'</div></div>';
+}
+
 function goClientInvoices(){
   var myInvoices=clientInvoices;
   var unpaidTotal=myInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
@@ -640,21 +704,19 @@ function goContact(){
     +'</div>'
     +'<div class="sec">Get In Touch</div>'
     +'<div class="card" style="margin-bottom:10px">'
-    +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">'
-    +'<div style="font-size:22px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.09-1.09a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>'
-    +'<div><div style="font-size:12px;font-weight:500">Phone</div>'
-    +'<div style="font-size:13px;color:var(--gold);margin-top:2px">1-800-ESTCARE</div></div></div>'
-    +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">'
-    +'<div style="font-size:22px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>'
-    +'<div><div style="font-size:12px;font-weight:500">Email</div>'
-    +'<div style="font-size:13px;color:var(--gold);margin-top:2px">hello@myestatecare.ca</div></div></div>'
-    +'<div style="display:flex;align-items:center;gap:14px;padding:10px 0">'
-    +'<div style="font-size:22px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>'
-    +'<div><div style="font-size:12px;font-weight:500">Website</div>'
-    +'<div style="font-size:13px;color:var(--gold);margin-top:2px">myestatecare.ca</div></div></div>'
+    +'<a href="tel:+12508265570" style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);text-decoration:none">'
+    +'<div style="width:40px;height:40px;border-radius:50%;background:var(--gd);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.09-1.09a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>'
+    +'<div style="flex:1"><div style="font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Call Us</div><div style="font-size:14px;color:var(--gold);font-weight:500">(250) 826-5570</div></div>'
+    +'<div style="font-size:18px;color:var(--gold)">&#8250;</div></a>'
+    +'<a href="mailto:info@myestatecare.ca" style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);text-decoration:none">'
+    +'<div style="width:40px;height:40px;border-radius:50%;background:var(--gd);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>'
+    +'<div style="flex:1"><div style="font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Email Us</div><div style="font-size:14px;color:var(--gold);font-weight:500">info@myestatecare.ca</div></div>'
+    +'<div style="font-size:18px;color:var(--gold)">&#8250;</div></a>'
+    +'<a href="https://www.myestatecare.ca" target="_blank" style="display:flex;align-items:center;gap:14px;padding:12px 0;text-decoration:none">'
+    +'<div style="width:40px;height:40px;border-radius:50%;background:var(--gd);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>'
+    +'<div style="flex:1"><div style="font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Website</div><div style="font-size:14px;color:var(--gold);font-weight:500">myestatecare.ca</div></div>'
+    +'<div style="font-size:18px;color:var(--gold)">&#8250;</div></a>'
     +'</div>'
-    +'<div class="sec" style="margin-top:4px">Your Account Manager</div>'
-    +'<div class="card">'
     +'<div style="font-size:13px;font-weight:500;margin-bottom:4px">Justin</div>'
     +'<div style="font-size:11px;color:var(--dim);line-height:1.7">Your dedicated EstateCare account manager. Available Mon–Fri 8am–6pm EST.</div>'
     +'</div>'
