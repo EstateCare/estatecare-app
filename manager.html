@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EstateCare">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="Logo IOS 192.png">
+<title>EstateCare Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
+:root{--black:#0a0a0a;--ch:#141414;--ch2:#1c1c1c;--ch3:#242424;--gold:#c9a84c;--gl:#e2c97e;--gd:rgba(201,168,76,0.15);--green:#4caf7d;--yellow:#e6b84a;--red:#e05c5c;--text:#f0ece4;--dim:#9a9488;--border:rgba(201,168,76,0.2);--ff:"Cormorant Garamond",serif;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);background:var(--black);}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;}
+#screen::-webkit-scrollbar{width:3px;}
+#screen::-webkit-scrollbar-thumb{background:var(--gd);}
+.topbar{background:var(--ch);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:var(--ff);font-size:22px;letter-spacing:2px;color:var(--gl);}
+.topbar-sub{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--gd);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold);cursor:pointer;flex-shrink:0;}
+.back-btn{background:none;border:none;color:var(--gold);cursor:pointer;font-size:22px;line-height:1;padding:0;margin-right:12px;}
+.sc{flex:1;padding:20px;}
+.bnav{background:var(--ch);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:max(10px,env(safe-area-inset-bottom));}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px;cursor:pointer;color:var(--dim);font-size:8px;letter-spacing:1px;text-transform:uppercase;gap:4px;border:none;background:none;}
+.ni.active{color:var(--gold);}
+.ni span{font-size:16px;}
+.btn-gold{width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px;cursor:pointer;margin-top:8px;}
+.btn-outline{width:100%;background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gl);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:8px;}
+.btn-ghost{width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer;margin-top:8px;}
+.sec{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;margin-top:4px;}
+.card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:10px;}
+.card.tap{cursor:pointer;transition:border-color .2s;}
+.card.tap:hover{border-color:var(--gold);}
+.cat-ico{width:38px;height:38px;border-radius:50%;background:var(--gd);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.pbar-wrap{background:var(--ch3);border-radius:10px;height:5px;margin-top:6px;overflow:hidden;}
+.pbar{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--gl));}
+.lbl{font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;}
+.inp{width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:16px;font-weight:300;padding:12px 16px;margin-bottom:14px;outline:none;transition:border-color .2s;}
+.inp:focus{border-color:var(--gold);}
+.sel{width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:16px;padding:12px;margin-bottom:14px;outline:none;}
+.pill{display:inline-block;padding:3px 10px;border-radius:10px;font-size:9px;letter-spacing:1px;text-transform:uppercase;}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ch);border:1px solid var(--gold);border-radius:2px;padding:10px 20px;font-size:11px;color:var(--gl);z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;}
+.toggle{width:44px;height:24px;border-radius:12px;border:1px solid var(--border);cursor:pointer;position:relative;flex-shrink:0;transition:background .2s;}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;transition:transform .2s;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px);}
+.color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;}
+.color-swatch.selected{border-color:#fff;}
+</style>
+</head>
+<body>
+<div id="app"><div id="screen"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+var currentUser=JSON.parse(localStorage.getItem('ec_user')||'null');
+if(!currentUser||currentUser.role!=='manager'){
+  window.location.href='index.html';
+}
+var base=window.location.pathname.replace('manager.html','').replace(/\/$/,'/')||'/';
+
+// ── TENANT / COMPANY DATA ───────────────────────────────────────────────────
+var tenantConfig={
+  companyName:'EstateCare',
+  logoUrl:'Logo IOS 192.png',
+  brandColor:'#c9a84c',
+  bgTheme:'dark',
+  businessAddress:'',
+  taxNumber:'',
+  licenseNumber:'',
+  invoiceFooter:'',
+  paymentInstructions:''
+};
+
+// ── DUMMY DATA (scoped to this manager's tenant — replaced by Firestore queries later) ──
+function mkPt(id,name,status,notes){return{id:id,name:name,status:status,notes:notes,photos:[]};}
+
+var inspectors=[
+  {id:'insp1',name:'Sarah Klein',email:'sarah@estatecare.com',phone:'+12395550111',initials:'SK',postalCode:'34108',assignedEstates:['vs','mh']},
+  {id:'insp2',name:'Mike Torres',email:'mike@estatecare.com',phone:'+12395550122',initials:'MT',postalCode:'34102',assignedEstates:[]}
+];
+
+var clients=[
+  {email:'client1@estatecare.com',name:'Michael Hartwell',phone:'+12395550142',estateId:'vs'},
+  {email:'client2@estatecare.com',name:'Sandra Beaumont',phone:'+12395550198',estateId:'mh'}
+];
+
+var estates=[
+  {id:'vs',name:'Hartwell Estate',address:'1402 Pelican Bay Drive, Naples FL 34108',
+   icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',
+   clientEmail:'client1@estatecare.com',clientName:'Mr. & Mrs. Hartwell',postalCode:'34108',
+   contract:{tier:'Total Estate Protection',weeklyRate:99.95,assignedInspector:'insp1',
+     startDate:new Date('2025-10-15'),endDate:new Date('2026-04-28'),
+     totalInspections:60,contractValue:2398.80,nextInspection:new Date('2026-07-02')},
+   completedAt:new Date('2026-06-01'),pastInspections:[
+     {completedAt:new Date('2026-05-01'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'green'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'green'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'green'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'green'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'green'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}}
+   ],
+   data:{
+    exterior:{label:'Exterior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',points:[mkPt('e1','Front Entry & Door','green',''),mkPt('e2','Roof & Gutters','green',''),mkPt('e3','Windows & Seals','yellow','West window seal has slight gap.'),mkPt('e4','Driveway & Walkways','green',''),mkPt('e5','Garage Door','green',''),mkPt('e6','Exterior Lighting','yellow','Two path lights on north side not working.')]},
+    interior:{label:'Interior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',points:[mkPt('i1','HVAC System','green',''),mkPt('i2','Water Heater','green',''),mkPt('i3','Kitchen Appliances','green',''),mkPt('i4','Plumbing & Fixtures','red','Visible leak under kitchen sink.'),mkPt('i5','Electrical Panel','green',''),mkPt('i6','Security System','green','')]},
+    grounds:{label:'Grounds',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0020 0h-3"/><path d="M12 12a5 5 0 000-10 5 5 0 000 10z"/></svg>',points:[mkPt('g1','Lawn & Landscaping','green',''),mkPt('g2','Irrigation System','green',''),mkPt('g3','Pool & Equipment','green',''),mkPt('g4','Outdoor Furniture','green','')]}}},
+  {id:'mh',name:'Beaumont Residence',address:'880 Gulf Shore Blvd N, Naples FL 34102',
+   icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><line x1="8" y1="21" x2="8" y2="12"/><line x1="16" y1="21" x2="16" y2="12"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+   clientEmail:'client2@estatecare.com',clientName:'Mr. & Mrs. Beaumont',postalCode:'34102',
+   contract:{tier:'Preferred',weeklyRate:79.95,assignedInspector:'insp1',
+     startDate:new Date('2025-10-15'),endDate:new Date('2026-04-28'),
+     totalInspections:50,contractValue:1998.75,nextInspection:new Date('2026-07-03')},
+   completedAt:new Date('2026-06-20'),pastInspections:[
+     {completedAt:new Date('2026-05-01'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'green'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'green'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'green'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'green'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'green'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}}
+   ],
+   data:{
+    exterior:{label:'Exterior',icon:'',points:[mkPt('me1','Front Entry & Door','green',''),mkPt('me2','Roof & Gutters','green',''),mkPt('me3','Windows & Seals','green',''),mkPt('me4','Driveway & Walkways','green',''),mkPt('me5','Garage Door','green',''),mkPt('me6','Exterior Lighting','green','')]},
+    interior:{label:'Interior',icon:'',points:[mkPt('mi1','HVAC System','green',''),mkPt('mi2','Water Heater','green',''),mkPt('mi3','Kitchen Appliances','green',''),mkPt('mi4','Plumbing & Fixtures','green',''),mkPt('mi5','Electrical Panel','green',''),mkPt('mi6','Security System','green','')]},
+    grounds:{label:'Grounds',icon:'',points:[mkPt('mg1','Lawn & Landscaping','green',''),mkPt('mg2','Irrigation System','green',''),mkPt('mg3','Pool & Equipment','green',''),mkPt('mg4','Outdoor Furniture','green','')]}}}
+];
+
+var allInvoices=[
+  {id:'ci001',estateId:'vs',clientEmail:'client1@estatecare.com',invoiceNum:'EC-2026-041',amount:99.95,period:'Weekly',dueDate:new Date('2026-06-15'),status:'upcoming',paidDate:null,notes:'Total Estate Protection — Week of Jun 15',paymentMethod:null,autoPay:false},
+  {id:'ci002',estateId:'vs',clientEmail:'client1@estatecare.com',invoiceNum:'EC-2026-040',amount:99.95,period:'Weekly',dueDate:new Date('2026-06-08'),status:'unpaid',paidDate:null,notes:'Total Estate Protection — Week of Jun 8',paymentMethod:null,autoPay:false},
+  {id:'ci003',estateId:'vs',clientEmail:'client1@estatecare.com',invoiceNum:'EC-2026-035',amount:399.80,period:'Monthly',dueDate:new Date('2026-05-01'),status:'paid',paidDate:new Date('2026-05-03'),notes:'Total Estate Protection — May 2026',paymentMethod:'E-Transfer',autoPay:false},
+  {id:'mh001',estateId:'mh',clientEmail:'client2@estatecare.com',invoiceNum:'EC-2026-039',amount:79.95,period:'Weekly',dueDate:new Date('2026-06-20'),status:'paid',paidDate:new Date('2026-06-20'),notes:'Preferred Plan — Week of Jun 20',paymentMethod:'Credit Card',autoPay:true},
+  {id:'mh002',estateId:'mh',clientEmail:'client2@estatecare.com',invoiceNum:'EC-2026-032',amount:79.95,period:'Weekly',dueDate:new Date('2026-06-13'),status:'paid',paidDate:new Date('2026-06-13'),notes:'Preferred Plan — Week of Jun 13',paymentMethod:'Credit Card',autoPay:true},
+  {id:'mh003',estateId:'mh',clientEmail:'client2@estatecare.com',invoiceNum:'EC-2026-025',amount:319.80,period:'Monthly',dueDate:new Date('2026-05-01'),status:'paid',paidDate:new Date('2026-05-01'),notes:'Preferred Plan — May 2026',paymentMethod:'Credit Card',autoPay:true}
+];
+
+var scheduleItems=[
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-07-02'),status:'scheduled'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-07-03'),status:'scheduled'},
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-06-25'),status:'completed'}
+];
+
+var calViewDate=new Date();
+
+// ── CORE HELPERS ─────────────────────────────────────────────────────────────
+function render(html){
+  document.getElementById('screen').innerHTML=html;
+  document.querySelectorAll('[data-back]').forEach(function(el){
+    el.addEventListener('click',function(){var fn=this.getAttribute('data-back');if(fn&&window[fn])window[fn]();});
+  });
+  document.querySelectorAll('[data-action]').forEach(function(el){
+    el.addEventListener('click',function(){
+      var a=this.getAttribute('data-action');
+      if(a==='estate') goEstateDetail(this.getAttribute('data-id'));
+      else if(a==='client') goClientDetail(this.getAttribute('data-id'));
+      else if(a==='inspector') goInspectorDetail(this.getAttribute('data-id'));
+      else if(a==='nav'){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();}
+    });
+  });
+}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+
+function ff(label,type,id,ph,val){return '<div class="lbl">'+label+'</div><input class="inp" type="'+type+'" id="'+id+'" placeholder="'+(ph||'')+'" value="'+(val||'')+'">';}
+function fs(label,id,opts){return '<div class="lbl">'+label+'</div><select class="sel" id="'+id+'">'+opts+'</select>';}
+
+function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});return scoreOf(all);}
+function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.status==='green')g++;else if(p.status==='yellow')y++;else if(p.status==='red')r++;});return{score:t>0?Math.round(((g*2+y)/(t*2))*100):0,green:g,yellow:y,red:r,total:t};}
+
+function topBar(title,sub,back){
+  var l=back?'<div style="display:flex;align-items:center"><button class="back-btn" data-back="'+back+'">&#8592;</button><div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div></div>':'<div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div>';
+  return '<div class="topbar">'+l+'<div class="avatar" data-action="nav" data-fn="goSettings" title="Account">'+currentUser.initials+'</div></div>';
+}
+
+function nav(active){
+  return '<div class="bnav">'
+    +'<button class="ni'+(active==='dash'?' active':'')+'" data-action="nav" data-fn="goDash"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>Dashboard</button>'
+    +'<button class="ni'+(active==='cal'?' active':'')+'" data-action="nav" data-fn="goSchedule"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Schedule</button>'
+    +'<button class="ni'+(active==='team'?' active':'')+'" data-action="nav" data-fn="goTeam"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>Team</button>'
+    +'<button class="ni'+(active==='billing'?' active':'')+'" data-action="nav" data-fn="goFinancials"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>Billing</button>'
+    +'<button class="ni'+(active==='settings'?' active':'')+'" data-action="nav" data-fn="goSettings"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Settings</button>'
+    +'</div>';
+}
+
+function statBox(label,val,icon,color,fn){
+  var cls=fn?'card tap':'card';
+  var click=fn?' onclick="'+fn+'"':'';
+  return '<div class="'+cls+'"'+click+' style="padding:12px;display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">'+label+'</div>'
+    +'<div style="font-size:20px;font-family:var(--ff);color:'+(color||'var(--gl)')+';margin-top:2px">'+val+'</div></div>'
+    +(fn?'<div style="font-size:14px;color:'+(color||'var(--gold)')+'">&#8250;</div>':'')
+    +'</div>';
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────
+function goDash(){
+  var activeClients=clients.length;
+  var activeInspectors=inspectors.length;
+  var mtdRevenue=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getMonth()===new Date().getMonth();}).reduce(function(s,i){return s+i.amount;},0);
+  var unpaidTotal=allInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
+
+  var html=topBar(tenantConfig.companyName,'Manager Dashboard')
+    +'<div class="sc">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
+    +statBox('Active Clients',activeClients,null,null,'goTeam(\'clients\')')
+    +statBox('Inspectors',activeInspectors,null,null,'goTeam(\'inspectors\')')
+    +statBox('This Month Revenue','$'+mtdRevenue.toLocaleString('en',{maximumFractionDigits:0}),null,'var(--green)','goFinancials()')
+    +statBox('Unpaid Invoices','$'+unpaidTotal.toLocaleString('en',{maximumFractionDigits:0}),null,unpaidTotal>0?'var(--red)':'var(--green)','goInvoices(\'unpaid\')')
+    +'</div>';
+
+  // Today's schedule
+  var todayStr=new Date().toDateString();
+  var todayItems=scheduleItems.filter(function(s){return new Date(s.date).toDateString()===todayStr;});
+  html+='<div class="sec">Today\'s Schedule</div>';
+  if(!todayItems.length){
+    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:16px;background:var(--ch2);border:1px solid var(--border);border-radius:2px;margin-bottom:16px">No inspections scheduled today</div>';
+  } else {
+    todayItems.forEach(function(s){
+      var e=estates.find(function(x){return x.id===s.estateId;});
+      var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
+      if(!e) return;
+      var isDone=s.status==='completed';
+      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+(isDone?'var(--green)':'var(--gold)')+'">'
+        +'<div class="cat-ico">'+e.icon+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+'</div></div>'
+        +'<div style="font-size:9px;color:'+(isDone?'var(--green)':'var(--gold)')+';text-transform:uppercase;letter-spacing:1px">'+(isDone?'Done':'Scheduled')+'</div>'
+        +'</div>';
+    });
+  }
+
+  // Quick access grid
+  html+='<div class="sec" style="margin-top:16px">Quick Access</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">'
+    +qaCard('Clients','goTeam(\'clients\')')
+    +qaCard('Inspectors','goTeam(\'inspectors\')')
+    +qaCard('Estates','goEstates()')
+    +qaCard('Invoices','goInvoices()')
+    +qaCard('Schedule','goSchedule()')
+    +qaCard('Company Profile','goCompanyProfile()')
+    +'</div>';
+
+  // Switch to inspector mode
+  html+='<div class="card tap" onclick="switchToInspectorMode()" style="display:flex;align-items:center;justify-content:space-between;border-color:var(--gold);background:rgba(201,168,76,.06);margin-bottom:8px">'
+    +'<div style="font-size:11px;color:var(--gl)">Switch to Inspector Mode</div>'
+    +'<div style="font-size:16px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
+    +'<button class="btn-ghost" onclick="doSignOut()">Sign Out</button>'
+    +'</div>'+nav('dash');
+  render(html);
+}
+
+function qaCard(label,fn){
+  return '<div class="card tap" onclick="'+fn+'" style="text-align:center;padding:16px 10px">'
+    +'<div style="font-size:11px;color:var(--text)">'+label+'</div>'
+    +'</div>';
+}
+
+function switchToInspectorMode(){
+  // Solo operators: flip into their own inspector view under the same login
+  var inspectorSelf=inspectors.find(function(i){return i.email===currentUser.email;});
+  if(!inspectorSelf){
+    showToast('No inspector profile linked to this account yet');
+    return;
+  }
+  var inspUser={email:inspectorSelf.email,role:'inspector',name:inspectorSelf.name,initials:inspectorSelf.initials,phone:inspectorSelf.phone,managerMode:true,managerEmail:currentUser.email};
+  localStorage.setItem('ec_inspector_return',JSON.stringify(currentUser));
+  localStorage.setItem('ec_user',JSON.stringify(inspUser));
+  window.location.href=base+'inspector.html';
+}
+
+// ── FINANCIALS ────────────────────────────────────────────────────────────
+function goFinancials(){
+  var now=new Date();
+  var thisMonth=now.getMonth(),thisYear=now.getFullYear();
+  var lastMonth=thisMonth===0?11:thisMonth-1;
+  var lastMonthYear=thisMonth===0?thisYear-1:thisYear;
+
+  var mtd=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getMonth()===thisMonth&&new Date(i.paidDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
+  var lastMonthTotal=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getMonth()===lastMonth&&new Date(i.paidDate).getFullYear()===lastMonthYear;}).reduce(function(s,i){return s+i.amount;},0);
+  var trend=lastMonthTotal>0?Math.round(((mtd-lastMonthTotal)/lastMonthTotal)*100):0;
+  var ytd=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
+  var avgPerClient=clients.length>0?(ytd/clients.length):0;
+
+  var paidThisMonth=mtd;
+  var unpaidTotal=allInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
+  var upcoming30=allInvoices.filter(function(i){return i.status==='upcoming';}).reduce(function(s,i){return s+i.amount;},0);
+
+  // Revenue by tier
+  var tierTotals={};
+  allInvoices.filter(function(i){return i.status==='paid';}).forEach(function(i){
+    var e=estates.find(function(x){return x.id===i.estateId;});
+    var tier=e&&e.contract?e.contract.tier:'Other';
+    tierTotals[tier]=(tierTotals[tier]||0)+i.amount;
+  });
+  var maxTier=Math.max.apply(null,Object.values(tierTotals).concat([1]));
+
+  var html=topBar('Financials','Revenue Overview','goDash')
+    +'<div class="sc">'
+    +'<div class="card" style="border-color:var(--gold);margin-bottom:14px">'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Month to Date</div>'
+    +'<div style="font-family:var(--ff);font-size:32px;color:var(--gl)">$'+mtd.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div>'
+    +(lastMonthTotal>0?'<div style="font-size:10px;color:'+(trend>=0?'var(--green)':'var(--red)')+';margin-top:6px">'+(trend>=0?'&#9650;':'&#9660;')+' '+Math.abs(trend)+'% vs last month</div>':'')
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
+    +'<div class="card" style="padding:12px"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Year to Date</div><div style="font-size:18px;color:var(--text);margin-top:4px">$'+ytd.toLocaleString('en',{maximumFractionDigits:0})+'</div></div>'
+    +'<div class="card" style="padding:12px"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Avg / Client</div><div style="font-size:18px;color:var(--text);margin-top:4px">$'+avgPerClient.toFixed(0)+'</div></div>'
+    +'</div>'
+    +'<div class="sec">Invoice Status</div>'
+    +'<div class="card tap" onclick="goInvoices(\'paid\')" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+    +'<div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div><div style="font-size:12px">Paid this month</div></div>'
+    +'<div style="font-size:13px;color:var(--green);font-weight:500">$'+paidThisMonth.toFixed(2)+'</div></div>'
+    +'<div class="card tap" onclick="goInvoices(\'unpaid\')" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;border-color:'+(unpaidTotal>0?'var(--red)':'var(--border)')+'">'
+    +'<div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div><div style="font-size:12px">Unpaid</div></div>'
+    +'<div style="font-size:13px;color:var(--red);font-weight:500">$'+unpaidTotal.toFixed(2)+'</div></div>'
+    +'<div class="card tap" onclick="goInvoices(\'upcoming\')" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+    +'<div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--gold)"></div><div style="font-size:12px">Upcoming (30 days)</div></div>'
+    +'<div style="font-size:13px;color:var(--gold);font-weight:500">$'+upcoming30.toFixed(2)+'</div></div>'
+    +'<div class="sec">Revenue by Service Tier</div>'
+    +'<div class="card" style="margin-bottom:16px">';
+
+  Object.keys(tierTotals).forEach(function(tier){
+    var pct=Math.round((tierTotals[tier]/maxTier)*100);
+    html+='<div style="margin-bottom:12px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:11px;color:var(--text)">'+tier+'</div><div style="font-size:11px;color:var(--text)">$'+tierTotals[tier].toFixed(0)+'</div></div>'
+      +'<div class="pbar-wrap"><div class="pbar" style="width:'+pct+'%"></div></div>'
+      +'</div>';
+  });
+
+  html+='</div>'
+    +'<div class="card tap" onclick="goInvoices()" style="display:flex;align-items:center;justify-content:space-between">'
+    +'<div style="font-size:11px;color:var(--gl)">View All Invoices</div><div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
+    +'</div>'+nav('billing');
+  render(html);
+}
+
+// ── TEAM (Clients + Inspectors) ──────────────────────────────────────────
+function goTeam(tab){
+  tab=tab||'clients';
+  var html=topBar('Team',clients.length+' Clients &nbsp;&#183;&nbsp; '+inspectors.length+' Inspectors','goDash')
+    +'<div class="sc">'
+    +'<div style="display:flex;gap:8px;margin-bottom:16px">'
+    +'<button onclick="goTeam(\'clients\')" style="flex:1;background:'+(tab==='clients'?'var(--gd)':'transparent')+';border:1px solid '+(tab==='clients'?'var(--gold)':'var(--border)')+';border-radius:2px;color:'+(tab==='clients'?'var(--gl)':'var(--dim)')+';font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px;cursor:pointer">Clients</button>'
+    +'<button onclick="goTeam(\'inspectors\')" style="flex:1;background:'+(tab==='inspectors'?'var(--gd)':'transparent')+';border:1px solid '+(tab==='inspectors'?'var(--gold)':'var(--border)')+';border-radius:2px;color:'+(tab==='inspectors'?'var(--gl)':'var(--dim)')+';font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px;cursor:pointer">Inspectors</button>'
+    +'</div>';
+
+  if(tab==='clients'){
+    clients.forEach(function(c){
+      var e=estates.find(function(x){return x.id===c.estateId;});
+      var sc=e?liveScore(e):{score:0};
+      html+='<div class="card tap" data-action="client" data-id="'+c.email+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
+        +'<div class="avatar" style="cursor:default">'+c.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase()+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+c.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(e?e.name:'No estate')+'</div></div>'
+        +(e?'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+sc.score+'%</div>':'')
+        +'</div>';
+    });
+  } else {
+    html+='<button class="btn-outline" onclick="goAddInspector()" style="margin-bottom:14px">+ Add Inspector</button>';
+    inspectors.forEach(function(insp){
+      var assigned=estates.filter(function(e){return e.contract&&e.contract.assignedInspector===insp.id;});
+      html+='<div class="card tap" data-action="inspector" data-id="'+insp.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
+        +'<div class="avatar" style="cursor:default">'+insp.initials+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+insp.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+insp.email+'</div>'
+        +'<div style="font-size:9px;color:var(--gold);margin-top:3px">'+assigned.length+' estate'+(assigned.length===1?'':'s')+' assigned</div></div>'
+        +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+        +'</div>';
+    });
+  }
+
+  html+='</div>'+nav('team');
+  render(html);
+}
+
+function goClientDetail(email){
+  var c=clients.find(function(x){return x.email===email;});
+  if(!c) return;
+  var e=estates.find(function(x){return x.id===c.estateId;});
+  var sc=e?liveScore(e):null;
+  var clientInv=allInvoices.filter(function(i){return i.clientEmail===email;});
+
+  var html=topBar(c.name,'Client Profile','goTeam')
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px">'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Contact</div>'
+    +'<div style="font-size:13px">'+c.email+'</div>'
+    +'<div style="font-size:13px;margin-top:2px">'+c.phone+'</div>'
+    +'</div>';
+
+  if(e){
+    html+='<div class="card" style="margin-bottom:16px">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:16px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div></div>'
+      +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc.score+'%</div>'
+      +'</div>'
+      +'<div style="font-size:10px;color:var(--gold)">'+e.contract.tier+' &nbsp;&#183;&nbsp; $'+e.contract.weeklyRate+'/week</div>'
+      +'</div>';
+  }
+
+  html+='<div class="sec">Invoices</div>';
+  clientInv.forEach(function(inv){
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px;display:flex;justify-content:space-between">'
+      +'<div><div style="font-size:11px">'+inv.notes+'</div><div style="font-size:9px;color:var(--dim);margin-top:2px">'+new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div></div>'
+      +'<div style="font-family:var(--ff);font-size:16px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+      +'</div>';
+  });
+
+  html+='</div>'+nav('team');
+  render(html);
+}
+
+// ── ADD INSPECTOR ─────────────────────────────────────────────────────────
+function goAddInspector(){
+  var html=topBar('Add Inspector','Invite a New Team Member','goTeam')
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px;background:rgba(201,168,76,0.06)">'
+    +'<div style="font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Invite Only</div>'
+    +'<div style="font-size:11px;color:var(--dim);line-height:1.7">Inspectors cannot create their own account. They will receive an invite tied directly to your company so their data stays linked to you.</div>'
+    +'</div>'
+    +'<div class="sec">Inspector Details</div>'
+    +ff('Full Name','text','niName','')
+    +ff('Email','email','niEmail','')
+    +ff('Phone','tel','niPhone','')
+    +ff('Postal Code / Zone','text','niPostal','Base postal code for scheduling')
+    +'<div id="niErr" style="display:none;font-size:10px;color:var(--red);letter-spacing:1px;margin-bottom:8px">Please fill in name and email.</div>'
+    +'<button class="btn-gold" onclick="saveInspector()">Send Invite</button>'
+    +'<button class="btn-ghost" onclick="goTeam(\'inspectors\')">Cancel</button>'
+    +'</div>';
+  render(html);
+}
+
+function saveInspector(){
+  var name=document.getElementById('niName').value.trim();
+  var email=document.getElementById('niEmail').value.trim().toLowerCase();
+  if(!name||!email){document.getElementById('niErr').style.display='block';return;}
+  var initials=name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  var id='insp_'+Date.now();
+  inspectors.push({
+    id:id,name:name,email:email,
+    phone:document.getElementById('niPhone').value.trim(),
+    initials:initials,
+    postalCode:document.getElementById('niPostal').value.trim(),
+    assignedEstates:[],
+    managerEmail:currentUser.email // tenant scoping -- links inspector to this manager
+  });
+  showToast('Invite sent to '+email);
+  goTeam('inspectors');
+}
+
+function goInspectorDetail(inspId){
+  var insp=inspectors.find(function(i){return i.id===inspId;});
+  if(!insp) return;
+  var assigned=estates.filter(function(e){return e.contract&&e.contract.assignedInspector===inspId;});
+  var completedTotal=assigned.reduce(function(s,e){return s+e.pastInspections.length;},0);
+
+  var html=topBar(insp.name,'Inspector Profile','goTeam')
+    +'<div class="sc">'
+    +'<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:20px">'
+    +'<div class="avatar" style="width:52px;height:52px;font-size:18px;flex-shrink:0;cursor:default">'+insp.initials+'</div>'
+    +'<div style="flex:1">'
+    +'<div style="font-size:16px;font-weight:600">'+insp.name+'</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+insp.email+'</div>'
+    +'<div style="font-size:10px;color:var(--dim)">'+insp.phone+'</div>'
+    +'<div style="font-size:9px;color:var(--gold);margin-top:6px;letter-spacing:1px">Zone: '+insp.postalCode+'</div>'
+    +'</div>'
+    +'<div style="text-align:right;flex-shrink:0">'
+    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl)">'+assigned.length+'</div>'
+    +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px">ESTATES</div>'
+    +'<div style="font-family:var(--ff);font-size:20px;color:var(--green);margin-top:6px">'+completedTotal+'</div>'
+    +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px">DONE</div>'
+    +'</div></div>';
+
+  if(!assigned.length){
+    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No estates assigned yet</div>';
+  } else {
+    html+='<div class="sec">Assigned Estates</div>';
+    assigned.forEach(function(e){
+      var sc=liveScore(e);
+      html+='<div class="card" style="margin-bottom:10px">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<div class="cat-ico">'+e.icon+'</div>'
+        +'<div style="flex:1"><div style="font-family:var(--ff);font-size:15px;color:var(--gl)">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+'</div></div>'
+        +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+sc.score+'%</div>'
+        +'</div></div>';
+    });
+  }
+  html+='</div>'+nav('team');
+  render(html);
+}
+
+// ── ESTATES ───────────────────────────────────────────────────────────────
+function goEstates(){
+  var html=topBar('Estates',estates.length+' Properties','goDash')
+    +'<div class="sc">';
+  estates.forEach(function(e){
+    var sc=liveScore(e);
+    var insp=inspectors.find(function(i){return i.id===e.contract.assignedInspector;});
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+' &nbsp;&#183;&nbsp; <span style="color:var(--gold)">'+e.contract.tier+'</span></div></div>'
+      +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl)">'+sc.score+'%</div></div>'
+      +'<div style="font-size:9px;color:var(--dim)">Inspector: '+(insp?insp.name:'Unassigned')+'</div>'
+      +'</div>';
+  });
+  html+='</div>'+nav('dash');
+  render(html);
+}
+
+function goEstateDetail(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var sc=liveScore(e);
+  var insp=inspectors.find(function(i){return i.id===e.contract.assignedInspector;});
+  var estInv=allInvoices.filter(function(i){return i.estateId===estateId;});
+
+  var html=topBar(e.name,e.clientName,'goEstates')
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px">'
+    +'<div style="font-size:10px;color:var(--dim)">'+e.address+'</div>'
+    +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl);margin-top:8px">'+sc.score+'%</div>'
+    +'<div style="font-size:10px;color:var(--gold);margin-top:4px">'+e.contract.tier+' &nbsp;&#183;&nbsp; $'+e.contract.weeklyRate+'/week</div>'
+    +'</div>'
+    +'<div class="sec">Assigned Inspector</div>'
+    +'<div class="card" style="margin-bottom:16px">'
+    +fs('Inspector',inspectorSelectId(e),inspectorOptions(e.contract.assignedInspector))
+    +'</div>'
+    +'<div class="sec">Invoices</div>';
+  estInv.forEach(function(inv){
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px;display:flex;justify-content:space-between">'
+      +'<div style="font-size:11px">'+inv.notes+'</div>'
+      +'<div style="font-family:var(--ff);font-size:16px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+      +'</div>';
+  });
+  html+='</div>'+nav('dash');
+  render(html);
+}
+function inspectorSelectId(e){return 'estInsp_'+e.id;}
+function inspectorOptions(selectedId){
+  return inspectors.map(function(i){return '<option value="'+i.id+'"'+(i.id===selectedId?' selected':'')+'>'+i.name+'</option>';}).join('');
+}
+
+// ── INVOICES ──────────────────────────────────────────────────────────────
+function goInvoices(filterStatus){
+  filterStatus=filterStatus||'all';
+  var list=allInvoices.slice();
+  if(filterStatus!=='all') list=list.filter(function(i){return i.status===filterStatus;});
+
+  var html=topBar('Invoices',filterStatus==='all'?'All Invoices':filterStatus.charAt(0).toUpperCase()+filterStatus.slice(1),'goDash')
+    +'<div class="sc">'
+    +'<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">'
+    +invFilterBtn('all',filterStatus)+invFilterBtn('unpaid',filterStatus)+invFilterBtn('upcoming',filterStatus)+invFilterBtn('paid',filterStatus)
+    +'</div>';
+
+  list.sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
+    var e=estates.find(function(x){return x.id===inv.estateId;});
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:9px;color:var(--dim)">'+inv.invoiceNum+'</div>'
+      +'<div style="font-size:12px;margin-top:2px">'+(e?e.name:'')+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.notes+'</div></div>'
+      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:18px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div></div>'
+      +'</div></div>';
+  });
+  if(!list.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices found</div>';
+  html+='</div>'+nav('billing');
+  render(html);
+}
+function invFilterBtn(status,active){
+  var label=status==='all'?'All':status.charAt(0).toUpperCase()+status.slice(1);
+  var sel=status===active;
+  return '<button onclick="goInvoices(\''+status+'\')" style="background:'+(sel?'var(--gd)':'transparent')+';border:1px solid '+(sel?'var(--gold)':'var(--border)')+';border-radius:12px;color:'+(sel?'var(--gl)':'var(--dim)')+';font-family:Montserrat,sans-serif;font-size:10px;padding:7px 14px;cursor:pointer">'+label+'</button>';
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────
+function goSchedule(){
+  var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=new Date();}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  var html=topBar('Schedule','Upcoming Inspections','goDash')
+    +'<div class="sc">';
+  if(!upcoming.length){
+    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No upcoming inspections scheduled</div>';
+  } else {
+    upcoming.forEach(function(s){
+      var e=estates.find(function(x){return x.id===s.estateId;});
+      var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
+      if(!e) return;
+      var dStr=new Date(s.date).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric'});
+      html+='<div class="card" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer">'
+        +'<div class="cat-ico">'+e.icon+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+' &nbsp;&#183;&nbsp; '+e.postalCode+'</div></div>'
+        +'<div style="font-size:11px;color:var(--gold)">'+dStr+'</div>'
+        +'</div>';
+    });
+  }
+  html+='</div>'+nav('cal');
+  render(html);
+}
+
+// ── COMPANY PROFILE (white-label settings) ───────────────────────────────
+var BRAND_COLORS=['#c9a84c','#5c8de0','#4caf7d','#c95c5c','#9c5ce0','#e0a05c'];
+
+function goCompanyProfile(){
+  var html=topBar('Company Profile','Branding & Invoice Details','goDash')
+    +'<div class="sc">'
+    +'<div class="sec">Logo</div>'
+    +'<div class="card" style="text-align:center;margin-bottom:16px">'
+    +'<img src="'+tenantConfig.logoUrl+'" style="width:64px;height:64px;border-radius:8px;margin-bottom:10px">'
+    +'<button class="btn-outline" onclick="showToast(\'Logo upload available once Firestore is connected\')">Upload New Logo</button>'
+    +'</div>'
+    +'<div class="sec">Brand Color</div>'
+    +'<div class="card" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
+  BRAND_COLORS.forEach(function(c){
+    html+='<div class="color-swatch'+(tenantConfig.brandColor===c?' selected':'')+'" style="background:'+c+'" onclick="selectBrandColor(\''+c+'\')"></div>';
+  });
+  html+='</div>'
+    +'<div class="sec">Background Theme</div>'
+    +'<div class="card" style="display:flex;gap:10px;margin-bottom:16px">'
+    +themeBtn('dark','Black')
+    +themeBtn('light','White')
+    +'</div>'
+    +'<div class="sec">Company Details</div>'
+    +'<div class="card" style="margin-bottom:16px">'
+    +ff('Company Name','text','cpName',tenantConfig.companyName,tenantConfig.companyName)
+    +ff('Business Address','text','cpAddress','123 Main St, City, Province',tenantConfig.businessAddress)
+    +ff('Tax / GST Number','text','cpTax','',tenantConfig.taxNumber)
+    +ff('Business License Number','text','cpLicense','',tenantConfig.licenseNumber)
+    +'</div>'
+    +'<div class="sec">Invoice Footer</div>'
+    +'<div class="card" style="margin-bottom:16px">'
+    +'<textarea id="cpFooter" placeholder="Thank you message, terms, or payment instructions shown on every invoice" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;padding:12px;outline:none;resize:vertical;min-height:80px">'+(tenantConfig.invoiceFooter||'')+'</textarea>'
+    +'</div>'
+    +'<button class="btn-gold" onclick="saveCompanyProfile()">Save Changes</button>'
+    +'</div>'+nav('dash');
+  render(html);
+}
+function themeBtn(val,label){
+  var sel=tenantConfig.bgTheme===val;
+  return '<div onclick="selectTheme(\''+val+'\')" style="flex:1;text-align:center;padding:14px;border:2px solid '+(sel?'var(--gold)':'var(--border)')+';border-radius:2px;cursor:pointer;background:'+(val==='dark'?'#0a0a0a':'#f0ece4')+'">'
+    +'<div style="font-size:11px;color:'+(val==='dark'?'#fff':'#0a0a0a')+'">'+label+'</div>'
+    +(sel?'<div style="font-size:9px;color:var(--gold);margin-top:4px">&#10003; Selected</div>':'')
+    +'</div>';
+}
+function selectBrandColor(c){tenantConfig.brandColor=c;goCompanyProfile();}
+function selectTheme(t){tenantConfig.bgTheme=t;goCompanyProfile();}
+function saveCompanyProfile(){
+  tenantConfig.companyName=document.getElementById('cpName').value.trim()||tenantConfig.companyName;
+  tenantConfig.businessAddress=document.getElementById('cpAddress').value.trim();
+  tenantConfig.taxNumber=document.getElementById('cpTax').value.trim();
+  tenantConfig.licenseNumber=document.getElementById('cpLicense').value.trim();
+  tenantConfig.invoiceFooter=document.getElementById('cpFooter').value.trim();
+  showToast('Company profile saved');
+  goDash();
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────
+function goSettings(){
+  var html=topBar('Settings','Account','goDash')
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px">'
+    +'<div style="font-size:10px;color:var(--dim);margin-bottom:4px">Signed in as</div>'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+currentUser.name+'</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div>'
+    +'</div>'
+    +'<div class="card tap" onclick="goCompanyProfile()" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+    +'<div style="font-size:12px;color:var(--gold)">Company Profile</div><div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
+    +'<button class="btn-ghost" onclick="doSignOut()">Sign Out</button>'
+    +'</div>'+nav('settings');
+  render(html);
+}
+
+function doSignOut(){
+  localStorage.removeItem('ec_user');
+  window.location.href=base+'index.html';
+}
+
+goDash();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});});
+}
+</script>
+</body>
+</html>

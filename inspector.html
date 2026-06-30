@@ -814,6 +814,7 @@ function finishInsp(){
     +'</div>';
 }
 function goSettings(){
+  var inManagerMode=currentUser.managerMode===true;
   document.getElementById('screen').innerHTML='<div class="topbar"><div><div class="topbar-title">Settings</div><div class="topbar-sub">Account & Preferences</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Inspector</div>'
@@ -828,9 +829,20 @@ function goSettings(){
     +'</div>'
     +'<div style="font-size:20px;color:var(--gold)">&#8250;</div>'
     +'</div>'
-    +'<button class="btn-ghost" style="margin-top:20px" onclick="doSignOut()">Sign Out</button>'
+    +(inManagerMode?'<button class="btn-gold" style="margin-top:20px" onclick="returnToManager()">&#8592; Return to Manager Dashboard</button>':'')
+    +'<button class="btn-ghost" style="margin-top:'+(inManagerMode?'8px':'20px')+'" onclick="doSignOut()">Sign Out</button>'
     +'</div>'+nav('settings');
   document.getElementById('editPtsBtn').onclick = function(){ goEditPoints(); };
+}
+
+function returnToManager(){
+  var saved=localStorage.getItem('ec_inspector_return');
+  if(saved){
+    localStorage.setItem('ec_user',saved);
+    localStorage.removeItem('ec_inspector_return');
+    var base=window.location.pathname.replace('inspector.html','');
+    window.location.href=base+'manager.html';
+  }
 }
 
 // ── DEFAULT TEMPLATE ────────────────────────────────────────────────────────
