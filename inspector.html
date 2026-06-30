@@ -122,6 +122,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 </div>
 <div class="toast" id="toast"></div>
 <script>var currentUser=JSON.parse(localStorage.getItem('ec_user')||'null');
+if(!currentUser||currentUser.role!=='inspector'){
+  // No valid session -- redirect to login instead of crashing
+  window.location.href='index.html';
+}
 // If no valid inspector session, redirect to login
 if(!currentUser||currentUser.role!=='inspector'){
   var base=window.location.pathname.replace('inspector.html','');
