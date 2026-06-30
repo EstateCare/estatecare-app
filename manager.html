@@ -179,10 +179,10 @@ function nav(active){
 function statBox(label,val,icon,color,fn){
   var cls=fn?'card tap':'card';
   var click=fn?' onclick="'+fn+'"':'';
-  return '<div class="'+cls+'"'+click+' style="padding:12px;display:flex;align-items:center;justify-content:space-between">'
+  return '<div class="'+cls+'"'+click+' style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between">'
     +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">'+label+'</div>'
-    +'<div style="font-size:20px;font-family:var(--ff);color:'+(color||'var(--gl)')+';margin-top:2px">'+val+'</div></div>'
-    +(fn?'<div style="font-size:14px;color:'+(color||'var(--gold)')+'">&#8250;</div>':'')
+    +'<div style="font-size:22px;font-family:var(--ff);color:'+(color||'var(--gl)')+';margin-top:3px">'+val+'</div></div>'
+    +(fn?'<div style="font-size:15px;color:'+(color||'var(--gold)')+';opacity:.7">&#8250;</div>':'')
     +'</div>';
 }
 
@@ -214,11 +214,12 @@ function goDash(){
       var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
       if(!e) return;
       var isDone=s.status==='completed';
+      var timeStr=new Date(s.date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+(isDone?'var(--green)':'var(--gold)')+'">'
         +'<div class="cat-ico">'+e.icon+'</div>'
         +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
-        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+'</div></div>'
-        +'<div style="font-size:9px;color:'+(isDone?'var(--green)':'var(--gold)')+';text-transform:uppercase;letter-spacing:1px">'+(isDone?'Done':'Scheduled')+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+' &nbsp;&#183;&nbsp; '+(isDone?'Completed '+timeStr:timeStr)+'</div></div>'
+        +'<div style="font-size:9px;color:'+(isDone?'var(--green)':'var(--gold)')+';text-transform:uppercase;letter-spacing:1px;white-space:nowrap">'+(isDone?'Done':'Scheduled')+'</div>'
         +'</div>';
     });
   }
@@ -226,12 +227,12 @@ function goDash(){
   // Quick access grid
   html+='<div class="sec" style="margin-top:16px">Quick Access</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">'
-    +qaCard('Clients','goTeam(\'clients\')')
-    +qaCard('Inspectors','goTeam(\'inspectors\')')
-    +qaCard('Estates','goEstates()')
-    +qaCard('Invoices','goInvoices()')
-    +qaCard('Schedule','goSchedule()')
-    +qaCard('Company Profile','goCompanyProfile()')
+    +qaCard('Clients','goTeam(\'clients\')',ICO_CLIENTS)
+    +qaCard('Inspectors','goTeam(\'inspectors\')',ICO_INSPECTORS)
+    +qaCard('Estates','goEstates()',ICO_ESTATES)
+    +qaCard('Invoices','goInvoices()',ICO_INVOICES)
+    +qaCard('Schedule','goSchedule()',ICO_SCHEDULE)
+    +qaCard('Company Profile','goCompanyProfile()',ICO_PROFILE)
     +'</div>';
 
   // Switch to inspector mode
@@ -244,11 +245,19 @@ function goDash(){
   render(html);
 }
 
-function qaCard(label,fn){
-  return '<div class="card tap" onclick="'+fn+'" style="text-align:center;padding:16px 10px">'
+function qaCard(label,fn,icon){
+  return '<div class="card tap" onclick="'+fn+'" style="text-align:center;padding:18px 10px">'
+    +'<div style="color:var(--gold);margin-bottom:8px">'+icon+'</div>'
     +'<div style="font-size:11px;color:var(--text)">'+label+'</div>'
     +'</div>';
 }
+
+var ICO_CLIENTS='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+var ICO_INSPECTORS='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 1-1.6 4.5-9 9-7.4-4.5-9-8-9-9V5l9-3 9 3z"/></svg>';
+var ICO_ESTATES='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>';
+var ICO_INVOICES='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>';
+var ICO_SCHEDULE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+var ICO_PROFILE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>';
 
 function switchToInspectorMode(){
   // Solo operators: flip into their own inspector view under the same login
