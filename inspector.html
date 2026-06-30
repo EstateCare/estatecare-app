@@ -372,7 +372,12 @@ function openDetail(key){
   var inProgress=!neverStarted&&!isComp&&e.inspectionStarted;
   var canStart=neverStarted||isComp;
   if(inProgress) html+='<button onclick="cancelInspection()\" style="width:100%;background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:8px">&#128465; Cancel Inspection</button>';
-  if(canStart) html+='<button class="btn-outline" onclick="startInspection()" style="margin-top:8px">'+(neverStarted?'+ Start Inspection':'+ Start New Inspection')+'</button>';
+  if(canStart){
+    html+='<div style="display:flex;gap:8px;margin-top:8px">';
+    html+='<button class="btn-outline" onclick="startInspection()" style="flex:7;margin-top:0">'+(neverStarted?'+ Start Inspection':'+ Start New Inspection')+'</button>';
+    if(neverStarted) html+='<button onclick="showDeclineModal(\''+e.id+'\')" style="flex:3;background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:12px 4px;cursor:pointer">Decline</button>';
+    html+='</div>';
+  }
 
   // ── ACCESS INFO ──
   if(e.access){
@@ -715,6 +720,55 @@ function cancelInspection(){
   e.completedCats={};
   e.inspectionStarted=false;
   showToast('Inspection cancelled');
+  openDetail('live');
+}
+
+function showDeclineModal(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var html='<div style="padding:4px 0 8px">'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--red);margin-bottom:4px">Decline Inspection</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-bottom:18px">'+e.name+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Reason for Declining (required)</div>'
+    +'<textarea id="declineReason" rows="4" placeholder="e.g. Property inaccessible, gate locked, no access codes provided, severe weather, vehicle issue..." style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;padding:12px;outline:none;resize:vertical;margin-bottom:14px"></textarea>'
+    +'<div onclick="toggleNotifyClient()" style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--ch2);border:1px solid var(--border);border-radius:2px;margin-bottom:18px;cursor:pointer">'
+    +'<div id="notifyClientBox" style="width:20px;height:20px;border:2px solid var(--gold);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold)"></div>'
+    +'<div style="font-size:11px;color:var(--dim)">Also notify the client of this decline</div>'
+    +'</div>'
+    +'<button onclick="submitDecline(\''+e.id+'\')" style="width:100%;background:linear-gradient(135deg,#e05c5c,#ff7070);border:none;border-radius:1px;color:#fff;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:13px;cursor:pointer;margin-bottom:8px">Submit Decline</button>'
+    +'<button onclick="closeDeclineModal()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer">Cancel</button>'
+    +'</div>';
+  var overlay=document.createElement('div');
+  overlay.id='declineOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)';
+  overlay.innerHTML='<div style="background:var(--ch);border:1px solid var(--red);border-radius:4px;padding:22px;max-width:380px;width:100%">'+html+'</div>';
+  document.body.appendChild(overlay);
+  window._notifyClient=false;
+}
+
+function toggleNotifyClient(){
+  window._notifyClient=!window._notifyClient;
+  var box=document.getElementById('notifyClientBox');
+  if(box) box.innerHTML=window._notifyClient?'&#10003;':'';
+}
+
+function closeDeclineModal(){
+  var o=document.getElementById('declineOverlay');
+  if(o) o.remove();
+}
+
+function submitDecline(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  var reason=document.getElementById('declineReason').value.trim();
+  if(!reason){showToast('Please provide a reason for declining');return;}
+  var notifyClient=!!window._notifyClient;
+  var declineRecord={
+    estateId:estateId,estateName:e.name,inspectorName:currentUser.name,inspectorEmail:currentUser.email,
+    reason:reason,notifyClient:notifyClient,clientEmail:notifyClient?e.clientEmail:null,timestamp:new Date()
+  };
+  console.log('Decline submitted:',declineRecord);
+  closeDeclineModal();
+  showToast('Inspection declined'+(notifyClient?' -- client notified':''));
   openDetail('live');
 }
 
