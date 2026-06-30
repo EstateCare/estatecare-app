@@ -169,7 +169,20 @@ function CE(){return estates.find(function(e){return e.id===curEstateId;});}
 function CD(){return CE()?CE().data:null;}
 
 function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.status==='green')g++;else if(p.status==='yellow')y++;else if(p.status==='red')r++;});return{score:t>0?Math.round(((g*2+y)/(t*2))*100):0,green:g,yellow:y,red:r,total:t};}
-function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});return scoreOf(all);}
+function liveScore(e){
+  var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});
+  var hasActive=all.some(function(p){return p.status!==null;});
+  if(!hasActive&&e.pastInspections&&e.pastInspections.length){
+    // No active inspection data -- show last completed inspection's score instead of 0
+    var last=e.pastInspections[e.pastInspections.length-1];
+    var snap=last.snapshot||last.snap;
+    if(snap){
+      var snapAll=Object.values(snap).reduce(function(a,c){return a.concat(c.points);},[]);
+      return scoreOf(snapAll);
+    }
+  }
+  return scoreOf(all);
+}
 function liveSnap(e){var s={};Object.keys(e.data).forEach(function(k){var c=e.data[k];s[k]={label:c.label,icon:c.icon,points:c.points.map(function(p){return{id:p.id,name:p.name,status:p.status,notes:p.notes,photos:(p.photos||[]).slice()};})};});return s;}
 
 function autoAssign(postal,date){
