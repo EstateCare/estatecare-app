@@ -351,11 +351,17 @@ function openDetail(key){
     var done=all.filter(function(p){return p.status!==null;}).length;
     html+=inspDateCard('live','Current Inspection',done+' / '+all.length+' inspected',scoreOf(all),true);
   }
-  for(var i=e.pastInspections.length-1;i>=0;i--){
-    var insp=e.pastInspections[i];
-    var ds2=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
-    var sc2=insp.snapshot?scoreOf(Object.values(insp.snapshot).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]);
-    html+=inspDateCard(i,ds2,'&#10003; Completed',sc2,false);
+  if(e.pastInspections.length){
+    var lastIdx=e.pastInspections.length-1;
+    var lastInsp=e.pastInspections[lastIdx];
+    var dsL=lastInsp.completedAt?new Date(lastInsp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
+    var scL=lastInsp.snapshot?scoreOf(Object.values(lastInsp.snapshot).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]);
+    html+=inspDateCard(lastIdx,dsL,'&#10003; Completed',scL,false);
+    if(e.pastInspections.length>1){
+      html+='<div onclick="goInspectionHistory(\''+e.id+'\')" style="text-align:center;padding:12px;cursor:pointer;border:1px solid var(--border);border-radius:2px;margin-bottom:8px;background:var(--ch2)">'
+        +'<span style="font-size:11px;color:var(--gold);letter-spacing:1px">View All '+e.pastInspections.length+' Past Inspections &#8250;</span>'
+        +'</div>';
+    }
   }
 
   var neverStarted=!e.inspectionStarted&&!isComp;
@@ -645,6 +651,21 @@ function saveNote(){
   var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");
   showToast('Saved');
 }
+function goInspectionHistory(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="openDetail(\'live\')">&#8592;</button><div><div class="topbar-title">Inspection History</div><div class="topbar-sub">'+e.name+'</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+  for(var i=e.pastInspections.length-1;i>=0;i--){
+    var insp=e.pastInspections[i];
+    var ds=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
+    var sc=insp.snapshot?scoreOf(Object.values(insp.snapshot).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]);
+    html+=inspDateCard(i,ds,'&#10003; Completed',sc,false);
+  }
+  html+='</div>'+nav('props');
+  render(html);
+}
+
 function showOwnerContact(estateId){
   var e=estates.find(function(x){return x.id===estateId;});
   if(!e) return;
