@@ -577,7 +577,7 @@ function goEstateDetail(estateId){
     +'<div class="sec">Assigned Inspector</div>'
     +'<div class="card" style="margin-bottom:16px">'
     +fs('Inspector',inspectorSelectId(e),inspectorOptions(e.contract.assignedInspector))
-    +'</div>'
+    +'</div>';
   // Past inspections
   if(e.pastInspections&&e.pastInspections.length){
     html+='<div class="sec">Inspection History ('+e.pastInspections.length+')</div>';
