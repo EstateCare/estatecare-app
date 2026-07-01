@@ -130,9 +130,24 @@ var allInvoices=[
 ];
 
 var scheduleItems=[
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-06-04'),status:'completed'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-06-07'),status:'completed'},
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-06-11'),status:'completed'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-06-14'),status:'completed'},
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-06-18'),status:'completed'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-06-21'),status:'completed'},
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-06-25'),status:'completed'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-06-28'),status:'completed'},
   {estateId:'vs',inspectorId:'insp1',date:new Date('2026-07-02'),status:'scheduled'},
   {estateId:'mh',inspectorId:'insp1',date:new Date('2026-07-03'),status:'scheduled'},
-  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-06-25'),status:'completed'}
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-07-07'),status:'scheduled'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-07-10'),status:'scheduled'},
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-07-14'),status:'scheduled'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-07-17'),status:'scheduled'},
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-07-21'),status:'scheduled'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-07-24'),status:'scheduled'},
+  {estateId:'vs',inspectorId:'insp1',date:new Date('2026-07-28'),status:'scheduled'},
+  {estateId:'mh',inspectorId:'insp1',date:new Date('2026-07-31'),status:'scheduled'}
 ];
 
 var calViewDate=new Date();
@@ -587,26 +602,99 @@ function invFilterBtn(status,active){
 }
 
 // ── SCHEDULE ──────────────────────────────────────────────────────────────
-function goSchedule(){
-  var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=new Date();}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
-  var html=topBar('Schedule','Upcoming Inspections','goDash')
-    +'<div class="sc">';
+var mgCalViewDate=new Date();
+
+function goSchedule(){renderMgrCal(mgCalViewDate);}
+function shiftMgrCal(d){mgCalViewDate=new Date(mgCalViewDate.getFullYear(),mgCalViewDate.getMonth()+d,1);renderMgrCal(mgCalViewDate);}
+
+function renderMgrCal(vd){
+  var y=vd.getFullYear(),m=vd.getMonth();
+  var mn=vd.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+  var today=new Date();
+
+  var dayMap={};
+  scheduleItems.forEach(function(s){
+    var d=new Date(s.date);
+    if(d.getFullYear()===y&&d.getMonth()===m){
+      var key=d.getDate();
+      if(!dayMap[key]) dayMap[key]=[];
+      dayMap[key].push(s);
+    }
+  });
+
+  var html=topBar('Schedule',mn,'goDash')
+    +'<div class="sc">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+    +'<button onclick="shiftMgrCal(-1)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--gold);padding:8px 14px;cursor:pointer;font-size:18px">&#8249;</button>'
+    +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+mn+'</div>'
+    +'<button onclick="shiftMgrCal(1)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--gold);padding:8px 14px;cursor:pointer;font-size:18px">&#8250;</button>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px">';
+  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(function(d){
+    html+='<div style="text-align:center;font-size:9px;color:var(--dim);letter-spacing:1px;padding:4px 0">'+d+'</div>';
+  });
+  html+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:20px">';
+
+  for(var i=0;i<fd;i++) html+='<div></div>';
+  for(var day=1;day<=dim;day++){
+    var isToday=today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===day;
+    var items=dayMap[day]||[];
+    var hasDone=items.some(function(s){return s.status==='completed';});
+    var hasSched=items.some(function(s){return s.status==='scheduled';});
+    html+='<div style="min-height:42px;background:var(--ch2);border:1px solid '+(isToday?'var(--gold)':'var(--border)')+';border-radius:2px;padding:4px 2px;text-align:center;cursor:'+(items.length?'pointer':'default')+'" '+(items.length?'onclick="mgrDayDetail('+y+','+m+','+day+')"':'')+'>'
+      +'<div style="font-size:10px;color:'+(isToday?'var(--gold)':'var(--dim)')+'">'+day+'</div>'
+      +(items.length?'<div style="display:flex;justify-content:center;gap:2px;margin-top:3px">'
+        +(hasSched?'<div style="width:6px;height:6px;border-radius:50%;background:var(--gold)"></div>':'')
+        +(hasDone?'<div style="width:6px;height:6px;border-radius:50%;background:var(--green)"></div>':'')
+        +'</div>':'')
+      +'</div>';
+  }
+  html+='</div>';
+
+  var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=today;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  html+='<div class="sec">Upcoming</div>';
   if(!upcoming.length){
-    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No upcoming inspections scheduled</div>';
+    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px;background:var(--ch2);border:1px solid var(--border);border-radius:2px">No upcoming inspections scheduled</div>';
   } else {
     upcoming.forEach(function(s){
       var e=estates.find(function(x){return x.id===s.estateId;});
       var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
       if(!e) return;
-      var dStr=new Date(s.date).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric'});
-      html+='<div class="card" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer">'
+      var dStr=new Date(s.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
         +'<div class="cat-ico">'+e.icon+'</div>'
         +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
-        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+' &nbsp;&#183;&nbsp; '+e.postalCode+'</div></div>'
-        +'<div style="font-size:11px;color:var(--gold)">'+dStr+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+'</div></div>'
+        +'<div style="text-align:right"><div style="font-size:11px;color:var(--gold)">'+dStr+'</div>'
+        +'<div style="font-size:9px;color:var(--dim);margin-top:2px">'+e.postalCode+'</div></div>'
         +'</div>';
     });
   }
+  html+='</div>'+nav('cal');
+  render(html);
+}
+
+function mgrDayDetail(y,m,day){
+  var dayItems=scheduleItems.filter(function(s){
+    var sd=new Date(s.date);
+    return sd.getFullYear()===y&&sd.getMonth()===m&&sd.getDate()===day;
+  });
+  var dStr=new Date(y,m,day).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  var html=topBar(dStr,'Inspections','goSchedule')
+    +'<div class="sc">';
+  dayItems.forEach(function(s){
+    var e=estates.find(function(x){return x.id===s.estateId;});
+    var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
+    if(!e) return;
+    var isDone=s.status==='completed';
+    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+(isDone?'var(--green)':'var(--gold)')+'">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+'</div></div>'
+      +'<div style="font-size:9px;color:'+(isDone?'var(--green)':'var(--gold)')+';text-transform:uppercase;letter-spacing:1px">'+(isDone?'Done':'Scheduled')+'</div>'
+      +'</div>';
+  });
   html+='</div>'+nav('cal');
   render(html);
 }
