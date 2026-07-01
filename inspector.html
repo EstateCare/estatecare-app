@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EstateCare">
+<meta name="theme-color" content="#c9a84c">
+<link rel="apple-touch-icon" href="Logo%20(Master).png">
+<title>EstateCare Inspector</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
+:root{--black:#0a0a0a;--ch:#141414;--ch2:#1c1c1c;--ch3:#242424;--gold:#c9a84c;--gl:#e2c97e;--gd:rgba(201,168,76,0.15);--green:#4caf7d;--yellow:#e6b84a;--red:#e05c5c;--text:#f0ece4;--dim:#9a9488;--border:rgba(201,168,76,0.2);--ff:"Cormorant Garamond",serif;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;}
+#screen::-webkit-scrollbar{width:3px;}
+#screen::-webkit-scrollbar-thumb{background:var(--gd);}
+.topbar{background:var(--ch);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:var(--ff);font-size:22px;letter-spacing:2px;color:var(--gl);}
+.topbar-sub{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--gd);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold);cursor:pointer;flex-shrink:0;}
+.back-btn{background:none;border:none;color:var(--gold);cursor:pointer;font-size:22px;line-height:1;padding:0;margin-right:12px;}
+.sc{flex:1;padding:20px;}
+.bnav{background:var(--ch);border-top:1px solid var(--border);display:flex;flex-shrink:0;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px;cursor:pointer;color:var(--dim);font-size:8px;letter-spacing:1px;text-transform:uppercase;gap:4px;border:none;background:none;}
+.ni.active{color:var(--gold);}
+.ni span{font-size:16px;}
+.btn-gold{width:100%;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px;cursor:pointer;margin-top:8px;}
+.btn-outline{width:100%;background:transparent;border:1px solid var(--gold);border-radius:1px;color:var(--gl);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:8px;}
+.btn-ghost{width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer;margin-top:8px;}
+.sec{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;margin-top:4px;}
+.card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:10px;}
+.card.tap{cursor:pointer;transition:border-color .2s;}
+.card.tap:hover{border-color:var(--gold);}
+.cat-ico{width:38px;height:38px;border-radius:50%;background:var(--gd);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.cstat{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.cs-g{background:var(--green);box-shadow:0 0 5px var(--green);}
+.cs-y{background:var(--yellow);box-shadow:0 0 5px var(--yellow);}
+.cs-r{background:var(--red);box-shadow:0 0 5px var(--red);}
+.cs-p{background:var(--ch3);border:1px solid var(--dim);}
+.pbar-wrap{background:var(--ch3);border-radius:10px;height:3px;margin-top:6px;overflow:hidden;}
+.pbar{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--gl));}
+.cat-signed{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:1.5px;color:var(--green);text-transform:uppercase;margin-top:4px;}
+.point-card{background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:border-color .2s;}
+.point-card.tappable{cursor:pointer;}
+.point-card.tappable:hover{border-color:var(--gold);}
+.point-card.locked{opacity:.6;}
+.sbtn{width:32px;height:32px;border-radius:50%;border:2px solid var(--ch3);background:var(--ch3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+.sbtn.g{border-color:var(--green);background:rgba(76,175,125,.15);}
+.sbtn.y{border-color:var(--yellow);background:rgba(230,184,74,.15);}
+.sbtn.r{border-color:var(--red);background:rgba(224,92,92,.15);}
+.trio{display:flex;gap:6px;}
+.locked-banner{background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.25);border-radius:2px;padding:10px 14px;font-size:10px;letter-spacing:1.5px;color:var(--green);text-transform:uppercase;margin-bottom:12px;}
+.ring-bg{fill:none;stroke:var(--ch3);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;}
+.ring-score{font-family:var(--ff);font-size:26px;fill:var(--gl);}
+.stat-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.sname{font-size:10px;letter-spacing:1px;color:var(--dim);flex:1;text-transform:uppercase;}
+.sval{font-size:15px;font-family:var(--ff);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:var(--ch);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:var(--ff);font-size:20px;color:var(--gl);margin-bottom:4px;}
+.modal-sub{font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:16px;}
+.mtextarea{width:100%;background:var(--ch2);border:1px solid var(--border);color:var(--text);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:300;padding:12px;resize:none;height:90px;outline:none;margin-bottom:14px;border-radius:1px;}
+.photo-add{width:72px;height:72px;border-radius:2px;border:1px dashed var(--border);background:var(--ch2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);gap:4px;}
+.photo-add:hover{border-color:var(--gold);color:var(--gold);}
+.photo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.thumb-wrap{position:relative;width:72px;height:72px;}
+.thumb{width:72px;height:72px;object-fit:cover;border-radius:2px;border:1px solid var(--border);}
+.thumb-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.photo-err{font-size:10px;color:var(--red);letter-spacing:1px;margin-bottom:10px;display:none;}
+.photo-err.show{display:block;}
+.req-badge{background:rgba(224,92,92,.15);border:1px solid var(--red);border-radius:10px;padding:2px 8px;font-size:8px;letter-spacing:1.5px;color:var(--red);text-transform:uppercase;}
+.pd-status{display:inline-flex;align-items:center;gap:8px;border-radius:20px;padding:4px 14px;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ch);border:1px solid var(--gold);border-radius:2px;padding:10px 20px;font-size:11px;color:var(--gl);z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;}
+.comp-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;}
+.check-circle{width:80px;height:80px;border-radius:50%;background:rgba(76,175,125,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px;}
+.gold-line{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto;}
+
+.bnav{padding-bottom:max(10px,env(safe-area-inset-bottom));}
+
+</style>
+</head>
+<body>
+<div id="app"><div id="screen"></div></div>
+<div class="modal-overlay" id="notesModal">
+  <div class="modal-sheet">
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-sub" id="mSub"></div>
+    <div style="font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px">Photos <span class="req-badge" id="reqBadge" style="display:none">Required</span></div>
+    <div class="photo-grid" id="photoGrid"></div>
+    <div class="photo-err" id="photoErr">Photo required for red conditions</div>
+    <input type="file" id="photoInput" accept="image/*" capture="environment" multiple style="display:none" onchange="onPhotoSelected(event)">
+    <textarea class="mtextarea" id="mNotes" placeholder="Describe the issue…"></textarea>
+    <div style="display:flex;gap:10px">
+      <button class="btn-ghost" style="margin:0" onclick="closeModal()">Cancel</button>
+      <button class="btn-gold" style="margin:0" onclick="saveNote()">Save</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="pdModal">
+  <div class="modal-sheet" id="pdContent"></div>
+</div>
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-sheet">
+    <div class="modal-title">Start New Inspection?</div>
+    <div class="modal-sub" style="margin-bottom:20px">Previous inspection will be saved to history.</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-ghost" style="margin:0" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-gold" style="margin:0" onclick="doNew()">Start Fresh</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>var currentUser=JSON.parse(localStorage.getItem('ec_user')||'null');
+if(!currentUser||currentUser.role!=='inspector'){
+  // No valid session -- redirect to login instead of crashing
+  window.location.href='index.html';
+}
+// If no valid inspector session, redirect to login
+if(!currentUser||currentUser.role!=='inspector'){
+  var base=window.location.pathname.replace('inspector.html','');
+  window.location.href=base+'index.html';
+}
+
+function mkPt(id,name,status,notes){return{id:id,name:name,status:status,notes:notes,photos:[]};}
+
+var inspectors=[{id:'insp1',name:'John Davis',email:'inspector@estatecare.com',phone:'239-555-0101',initials:'JD',postalCode:'34108'}];
+
+var estates=[
+  {id:'vs',name:'Hartwell Estate',address:'1402 Pelican Bay Drive, Naples FL 34108',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',clientEmail:'client1@estatecare.com',clientPhone:'+12395550142',clientName:'Mr. & Mrs. Hartwell',postalCode:'34108',access:{method:'Key Lockbox',lockboxCode:'4821',lockboxLocation:'Left side gate post',alarmCode:'7734',alarmNotes:'Disarm within 30 sec. Panel is in entry foyer left wall.',gateCode:'',notes:'Dog on property — friendly lab named Cooper.'},
+   contract:{tier:'Premium',weeklyRate:59.95,nextInspection:new Date('2026-06-15'),assignedInspector:'insp1'},
+   completedAt:new Date('2026-06-01'),completedCats:{exterior:new Date('2026-06-01'),interior:new Date('2026-06-01'),grounds:new Date('2026-06-01')},pastInspections:[
+   {completedAt:new Date('2026-05-01'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'green'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'yellow'},{name:'Exterior Lighting',status:'green'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'green'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'green'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'green'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}},
+   {completedAt:new Date('2026-05-15'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'yellow'},{name:'Windows & Seals',status:'green'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'green'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'green'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'yellow'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'green'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}},
+   {completedAt:new Date('2026-06-01'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'yellow'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'yellow'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'red'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'yellow'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'yellow'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}}
+  ],
+   data:{
+    exterior:{label:'Exterior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',points:[mkPt('e1','Front Entry & Door','green',''),mkPt('e2','Roof & Gutters','green',''),mkPt('e3','Windows & Seals','yellow','West window seal has slight gap.'),mkPt('e4','Driveway & Walkways','green',''),mkPt('e5','Garage Door','green',''),mkPt('e6','Exterior Lighting','yellow','Two path lights not working.')]},
+    interior:{label:'Interior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',points:[mkPt('i1','HVAC System','green',''),mkPt('i2','Water Heater','green',''),mkPt('i3','Kitchen Appliances','green',''),mkPt('i4','Plumbing & Fixtures','red','Active leak under guest bath vanity.'),mkPt('i5','Electrical Panel','green',''),mkPt('i6','Security System','yellow','Battery backup low.')]},
+    grounds:{label:'Grounds',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0020 0h-3"/><path d="M12 12a5 5 0 000-10 5 5 0 000 10z"/></svg>',points:[mkPt('g1','Lawn & Landscaping','green',''),mkPt('g2','Irrigation System','yellow','Zone 4 head blocked.'),mkPt('g3','Pool & Equipment','green',''),mkPt('g4','Outdoor Furniture','green','')]}}},
+  {id:'mh',name:'Beaumont Residence',address:'880 Gulf Shore Blvd N, Naples FL 34102',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><line x1="8" y1="21" x2="8" y2="12"/><line x1="16" y1="21" x2="16" y2="12"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',clientEmail:'client2@estatecare.com',clientPhone:'+12395550198',clientName:'Mr. & Mrs. Beaumont',postalCode:'34102',access:{method:'Keypad Entry',lockboxCode:'',lockboxLocation:'',alarmCode:'9256',alarmNotes:'Disarm within 45 sec. Panel is in garage.',gateCode:'1122',notes:'Pool area has separate keypad — same code as gate.'},
+   contract:{tier:'Luxury',weeklyRate:69.95,nextInspection:new Date('2026-06-11'),assignedInspector:'insp1'},
+   completedAt:new Date('2026-05-28'),completedCats:{exterior:new Date('2026-05-28'),interior:new Date('2026-05-28'),grounds:new Date('2026-05-28')},pastInspections:[
+   {completedAt:new Date('2026-05-01'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'green'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'green'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'green'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'green'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'green'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}},
+   {completedAt:new Date('2026-05-15'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'green'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'green'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'green'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'green'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'green'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}},
+   {completedAt:new Date('2026-05-28'),snapshot:{exterior:{points:[{name:'Front Entry & Door',status:'green'},{name:'Roof & Gutters',status:'green'},{name:'Windows & Seals',status:'green'},{name:'Driveway & Walkways',status:'green'},{name:'Garage Door',status:'green'},{name:'Exterior Lighting',status:'green'}]},interior:{points:[{name:'HVAC System',status:'green'},{name:'Water Heater',status:'green'},{name:'Kitchen Appliances',status:'green'},{name:'Plumbing & Fixtures',status:'green'},{name:'Electrical Panel',status:'green'},{name:'Security System',status:'green'}]},grounds:{points:[{name:'Lawn & Landscaping',status:'green'},{name:'Irrigation System',status:'green'},{name:'Pool & Equipment',status:'green'},{name:'Outdoor Furniture',status:'green'}]}}}
+  ],
+   data:{
+    exterior:{label:'Exterior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>',points:[mkPt('me1','Front Entry & Door','green',''),mkPt('me2','Roof & Gutters','yellow','Debris in north valley gutter.'),mkPt('me3','Windows & Seals','green',''),mkPt('me4','Driveway & Walkways','green',''),mkPt('me5','Garage Door','red','Auto-reverse sensor failed.'),mkPt('me6','Exterior Lighting','green','')]},
+    interior:{label:'Interior',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',points:[mkPt('mi1','HVAC System','green',''),mkPt('mi2','Water Heater','green',''),mkPt('mi3','Kitchen Appliances','green',''),mkPt('mi4','Plumbing & Fixtures','green',''),mkPt('mi5','Electrical Panel','yellow','Outdoor breaker warm to touch.'),mkPt('mi6','Security System','green','')]},
+    grounds:{label:'Grounds',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0020 0h-3"/><path d="M12 12a5 5 0 000-10 5 5 0 000 10z"/></svg>',points:[mkPt('mg1','Lawn & Landscaping','green',''),mkPt('mg2','Irrigation System','yellow','Zone 3 head clogged.'),mkPt('mg3','Pool & Equipment','green',''),mkPt('mg4','Outdoor Furniture','green','')]}}}
+];
+
+var scheduleItems=[];
+var calViewDate=new Date();
+var curEstateId=null,curCat=null,activePoint=null,selKey=null;
+
+function CE(){return estates.find(function(e){return e.id===curEstateId;});}
+function CD(){return CE()?CE().data:null;}
+
+function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.status==='green')g++;else if(p.status==='yellow')y++;else if(p.status==='red')r++;});return{score:t>0?Math.round(((g*2+y)/(t*2))*100):0,green:g,yellow:y,red:r,total:t};}
+function liveScore(e){
+  var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});
+  var hasActive=all.some(function(p){return p.status!==null;});
+  if(!hasActive&&e.pastInspections&&e.pastInspections.length){
+    // No active inspection data -- show last completed inspection's score instead of 0
+    var last=e.pastInspections[e.pastInspections.length-1];
+    var snap=last.snapshot||last.snap;
+    if(snap){
+      var snapAll=Object.values(snap).reduce(function(a,c){return a.concat(c.points);},[]);
+      return scoreOf(snapAll);
+    }
+  }
+  return scoreOf(all);
+}
+function liveSnap(e){var s={};Object.keys(e.data).forEach(function(k){var c=e.data[k];s[k]={label:c.label,icon:c.icon,points:c.points.map(function(p){return{id:p.id,name:p.name,status:p.status,notes:p.notes,photos:(p.photos||[]).slice()};})};});return s;}
+
+function autoAssign(postal,date){
+  var ds=date.toDateString(),loads={};
+  inspectors.forEach(function(i){loads[i.id]=0;});
+  scheduleItems.forEach(function(s){if(s.date&&s.date.toDateString()===ds&&s.inspectorId)loads[s.inspectorId]=(loads[s.inspectorId]||0)+1;});
+  var sorted=inspectors.slice().sort(function(a,b){var am=a.postalCode&&postal&&a.postalCode.substring(0,3)===postal.substring(0,3)?0:1;var bm=b.postalCode&&postal&&b.postalCode.substring(0,3)===postal.substring(0,3)?0:1;if(am!==bm)return am-bm;return(loads[a.id]||0)-(loads[b.id]||0);});
+  var p=sorted.find(function(i){return(loads[i.id]||0)<8;});return p?p.id:null;
+}
+function genSchedule(estate){
+  if(!estate.contract)return;
+  var con=estate.contract,start=new Date(con.startDate||new Date()),end=new Date(con.endDate||new Date());
+  scheduleItems=scheduleItems.filter(function(s){return s.estateId!==estate.id;});
+  var d=new Date(start),count=0,interval=con.tier==='Basic'?7:con.tier==='Premium'?3.5:3;
+  while(d<=end){
+    scheduleItems.push({id:estate.id+'_'+count,estateId:estate.id,inspectorId:autoAssign(estate.postalCode,new Date(d)),date:new Date(d),status:d<new Date()?'completed':'scheduled'});
+    if(con.tier==='Premium')d.setDate(d.getDate()+(count%2===0?3:4));else d.setDate(d.getDate()+Math.round(interval));
+    count++;
+  }
+}
+estates.forEach(genSchedule);
+
+function getMySchedule(){return scheduleItems;} // Will filter by currentUser inspector ID via Firestore
+function getMyForDate(ds){return scheduleItems.filter(function(s){return s.date&&s.date.toDateString()===ds;});}
+
+function render(html){
+  document.getElementById('screen').innerHTML=html;
+  var scr=document.getElementById('screen');
+  // Remove old delegated listener and add fresh one
+  if(scr._handler) scr.removeEventListener('click',scr._handler);
+  scr._handler=function(e){
+    var el=e.target.closest('[data-action]');
+    if(!el) return;
+    var a=el.getAttribute('data-action');
+    if(a==='openEstate'){curEstateId=el.getAttribute('data-id');openDetail('live');}
+    else if(a==='openDay') inspDayDetail(el.getAttribute('data-date'));
+    else if(a==='goEditPts') goEditPoints();
+  };
+  scr.addEventListener('click',scr._handler);
+  document.querySelectorAll('.sbtn[data-pid]').forEach(function(btn){
+    btn.addEventListener('click',function(ev){ev.stopPropagation();setStatus(this.getAttribute('data-pid'),this.getAttribute('data-cat'),this.getAttribute('data-s'));});
+  });
+  document.querySelectorAll('[data-pdkey]').forEach(function(card){
+    card.addEventListener('click',function(ev){if(ev.target.closest('.sbtn'))return;var fn=window[this.getAttribute('data-pdkey')];if(fn)fn();});
+  });
+}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+
+function ringHtml(sc,sz){sz=sz||80;var off=226-(226*sc.score/100);return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 90 90"><circle class="ring-bg" cx="45" cy="45" r="36"/><circle class="ring-fill" cx="45" cy="45" r="36" stroke="#c9a84c" stroke-dasharray="226" stroke-dashoffset="'+off+'" transform="rotate(-90 45 45)"/><text class="ring-score" x="45" y="50" text-anchor="middle">'+sc.score+'%</text></svg>';}
+function statsHtml(sc){return '<div style="flex:1"><div class="stat-row"><div class="sdot" style="background:var(--green)"></div><div class="sname">Healthy</div><div class="sval">'+sc.green+'</div></div><div class="stat-row"><div class="sdot" style="background:var(--yellow)"></div><div class="sname">Monitor</div><div class="sval">'+sc.yellow+'</div></div><div class="stat-row"><div class="sdot" style="background:var(--red)"></div><div class="sname">Attention</div><div class="sval">'+sc.red+'</div></div></div>';}
+function nav(active){return '<div class="bnav"><button class="ni'+(active==='cal'?' active':'')+'" onclick="goCal()"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Schedule</button><button class="ni'+(active==='props'?' active':'')+'" onclick="goProps()"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span>Properties</button><button class="ni'+(active==='settings'?' active':'')+'" onclick="goSettings()"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Settings</button></div>';}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────────
+function goCal(){
+renderCal(calViewDate);}
+
+function renderCal(vd){
+  calViewDate=vd;
+  var y=vd.getFullYear(),m=vd.getMonth();
+  var mn=vd.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+  var today=new Date();
+  var myItems=getMySchedule();
+
+  var html='<div class="topbar"><div><div class="topbar-title">My Schedule</div><div class="topbar-sub">'+currentUser.name+'</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+    +'<button onclick="shiftCal(-1)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--gold);padding:8px 14px;cursor:pointer;font-size:18px">&#8249;</button>'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+mn+'</div>'
+    +'<button onclick="shiftCal(1)" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--gold);padding:8px 14px;cursor:pointer;font-size:18px">&#8250;</button>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){html+='<div style="text-align:center;font-size:9px;color:var(--dim);padding:4px">'+d+'</div>';});
+  html+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">';
+  for(var i=0;i<fd;i++) html+='<div></div>';
+  for(var d=1;d<=dim;d++){
+    var td=new Date(y,m,d),ds=td.toDateString();
+    var items=myItems.filter(function(s){return s.date&&s.date.toDateString()===ds;});
+    var isT=td.toDateString()===today.toDateString();
+    html+='<div data-action="openDay" data-date="'+ds+'" style="min-height:46px;background:'+(isT?'rgba(201,168,76,0.15)':'var(--ch2)')+';border:1px solid '+(isT?'var(--gold)':'var(--border)')+';border-radius:2px;padding:4px;cursor:'+(items.length?'pointer':'default')+'">'
+      +'<div style="font-size:11px;color:'+(isT?'var(--gold)':'var(--dim)')+'">'+d+'</div>'
+      +(items.length?'<div style="margin-top:3px;font-size:12px;font-weight:500;color:var(--gl)">'+items.length+'</div>':'')
+      +'</div>';
+  }
+  html+='</div>';
+
+  // Upcoming inspections list
+  var upcoming=scheduleItems.filter(function(s){return s.date>=today&&s.status!=='completed';}).sort(function(a,b){return a.date-b.date;});
+  if(upcoming.length){
+    html+='<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Upcoming ('+upcoming.length+')</div>';
+    upcoming.slice(0,10).forEach(function(s){
+      var e=estates.find(function(x){return x.id===s.estateId;});if(!e) return;
+      var dStr=s.date.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      html+='<div class="card tap" data-action="openEstate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'        +'<div class="cat-ico">'+e.icon+'</div>'        +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+'</div>'        +'<div style="font-size:9px;color:var(--dim);margin-top:1px">'+e.address+'</div></div>'        +'<div style="text-align:right;flex-shrink:0">'        +'<div style="font-size:11px;color:var(--gold)">'+dStr+'</div>'        +'<div style="font-size:9px;color:var(--dim);margin-top:3px;text-transform:uppercase;letter-spacing:1px">'+e.postalCode+'</div>'        +'</div></div>';
+    });
+    if(upcoming.length>10) html+='<div style="font-size:10px;color:var(--dim);text-align:center;padding:8px">+' +(upcoming.length-10)+' more upcoming</div>';
+  }
+
+  var todayItems=getMyForDate(today.toDateString());
+  if(todayItems.length){
+    html+='<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Today ('+todayItems.length+')</div>';
+    todayItems.forEach(function(s){
+      var e=estates.find(function(x){return x.id===s.estateId;});if(!e)return;
+      html+='<div class="card tap" data-action="openEstate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px">'
+        +'<div class="cat-ico">'+e.icon+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
+        +'<div style="font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:1px">'+e.postalCode+'</div></div>'
+        +'<div style="font-size:9px;color:'+(s.status==='completed'?'var(--green)':'var(--dim)')+';text-transform:uppercase;letter-spacing:1px">'+s.status+'</div></div>';
+    });
+  }
+  html+='</div>'+nav('cal');
+  render(html);
+}
+
+function shiftCal(d){calViewDate=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+d,1);renderCal(calViewDate);}
+
+function inspDayDetail(dateStr){
+  var items=getMyForDate(dateStr);if(!items.length)return;
+  var d=new Date(dateStr);
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goCal()">&#8592;</button><div><div class="topbar-title">'+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div><div class="topbar-sub">'+items.length+' Inspection'+(items.length>1?'s':'')+'</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc"><div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">'+d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+'</div>';
+  items.forEach(function(s,i){
+    var e=estates.find(function(x){return x.id===s.estateId;});if(!e)return;
+    html+='<div class="card tap" data-action="openEstate" data-id="'+e.id+'">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="font-family:var(--ff);font-size:24px;color:var(--gold);min-width:28px;text-align:center">'+(i+1)+'</div>'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:1px">'+e.postalCode+' &nbsp;&#183;&nbsp; '+(e.contract?e.contract.tier:'')+'</div></div>'
+      +'<div style="text-align:right"><div style="font-size:9px;color:'+(s.status==='completed'?'var(--green)':'var(--dim)')+';text-transform:uppercase;letter-spacing:1px">'+s.status+'</div>'
+      +'<div style="font-size:9px;color:var(--gold);margin-top:4px">Tap &#8250;</div></div></div></div>';
+  });
+  html+='</div>'+nav('cal');
+  render(html);
+}
+
+// ── PROPERTIES LIST ───────────────────────────────────────────────────────
+function goProps(){
+  var html='<div class="topbar"><div><div class="topbar-title">Properties</div><div class="topbar-sub">Assigned Estates</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+  estates.forEach(function(e){
+    var sc=liveScore(e);
+    var isComp=!!e.completedAt;
+    var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});
+    var done=all.filter(function(p){return p.status!==null;}).length;
+    var lastDate=e.completedAt?new Date(e.completedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
+    html+='<div class="card tap" data-action="openEstate" data-id="'+e.id+'">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:17px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
+      +(lastDate?'<div style="font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:1px">Last inspected: '+lastDate+'</div>':'')
+      +'</div><div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc.score+'%</div></div>'
+      +'<div style="display:flex;gap:10px">'
+      +'<div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div><span style="font-size:9px;color:var(--dim)">'+sc.green+'</span></div>'
+      +'<div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:var(--yellow)"></div><span style="font-size:9px;color:var(--dim)">'+sc.yellow+'</span></div>'
+      +'<div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div><span style="font-size:9px;color:var(--dim)">'+sc.red+'</span></div>'
+      +'<span style="flex:1"></span>'
+      +'<span style="font-size:9px;color:'+(isComp?'var(--green)':done>0?'var(--yellow)':'var(--dim)')+';letter-spacing:1px;text-transform:uppercase">'+(isComp?'&#10003; Complete':done>0?'In Progress':'Not Started')+'</span>'
+      +'</div></div>';
+  });
+  html+='</div>'+nav('props');
+  render(html);
+}
+
+// ── ESTATE OVERVIEW / DATE LIST ───────────────────────────────────────────
+function openDetail(key){
+  selKey=key;
+  var e=CE();if(!e)return;
+  var isLive=(key==='live');
+  var isComp=!!e.completedAt;
+  var sc=liveScore(e);
+
+  var ownerInitials=e.clientName?e.clientName.replace(/Mr\.|Mrs\.|&/g,'').trim().split(' ').filter(function(w){return w.length;}).map(function(w){return w[0];}).join('').substring(0,2).toUpperCase():'??';
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goProps()">&#8592;</button><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">Property Overview</div></div></div><div class="avatar" onclick="showOwnerContact(\''+e.id+'\')" style="cursor:pointer" title="Owner Contact">'+ownerInitials+'</div></div>'
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px">'
+    +'<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:14px">Current Estate Health</div>'
+    +'<div style="display:flex;align-items:center;gap:20px">'+ringHtml(sc)+statsHtml(sc)+'</div>'
+    +'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Inspections</div>';
+
+  if(isComp){
+    var ds=new Date(e.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'});
+    html+=inspDateCard('live',ds,'&#10003; Completed',sc,false);
+  } else if(e.inspectionStarted){
+    var all=[];Object.values(e.data).forEach(function(c){all=all.concat(c.points);});
+    var done=all.filter(function(p){return p.status!==null;}).length;
+    html+=inspDateCard('live','Current Inspection',done+' / '+all.length+' inspected',scoreOf(all),true);
+  }
+  if(e.pastInspections.length){
+    var lastIdx=e.pastInspections.length-1;
+    var lastInsp=e.pastInspections[lastIdx];
+    var dsL=lastInsp.completedAt?new Date(lastInsp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
+    var scL=lastInsp.snapshot?scoreOf(Object.values(lastInsp.snapshot).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]);
+    html+=inspDateCard(lastIdx,dsL,'&#10003; Completed',scL,false);
+    if(e.pastInspections.length>1){
+      html+='<div onclick="goInspectionHistory(\''+e.id+'\')" style="text-align:center;padding:12px;cursor:pointer;border:1px solid var(--border);border-radius:2px;margin-bottom:8px;background:var(--ch2)">'
+        +'<span style="font-size:11px;color:var(--gold);letter-spacing:1px">View All '+e.pastInspections.length+' Past Inspections &#8250;</span>'
+        +'</div>';
+    }
+  }
+
+  var neverStarted=!e.inspectionStarted&&!isComp;
+  var inProgress=!neverStarted&&!isComp&&e.inspectionStarted;
+  var canStart=neverStarted||isComp;
+  if(inProgress) html+='<button onclick="cancelInspection()\" style="width:100%;background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-top:8px">&#128465; Cancel Inspection</button>';
+  if(canStart){
+    html+='<div style="display:flex;gap:8px;margin-top:8px">';
+    html+='<button class="btn-outline" onclick="startInspection()" style="flex:7;margin-top:0">'+(neverStarted?'+ Start Inspection':'+ Start New Inspection')+'</button>';
+    if(neverStarted) html+='<button onclick="showDeclineModal(\''+e.id+'\')" style="flex:3;background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:12px 4px;cursor:pointer">Decline</button>';
+    html+='</div>';
+  }
+
+  // ── ACCESS INFO ──
+  if(e.access){
+    html+='<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 10px">&#128274; Property Access</div>'
+      +'<div class="card" style="margin-bottom:12px;border-color:var(--border)">'
+      +'<div style="font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Confidential — Do Not Share</div>'
+      // Entry method
+      +'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="font-size:10px;color:var(--dim)">Entry Method</div>'
+      +'<div style="font-size:12px;font-weight:500">'+e.access.method+'</div>'
+      +'</div>';
+    if(e.access.lockboxCode){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
+        +'<div><div style="font-size:10px;color:var(--dim)">Lockbox Code</div>'
+        +(e.access.lockboxLocation?'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.access.lockboxLocation+'</div>':'')
+        +'</div>'
+        +'<div id="lockboxReveal" onclick="revealCode(this,\''+e.access.lockboxCode+'\')" style="font-size:13px;color:var(--gold);font-weight:600;cursor:pointer;background:var(--ch3);padding:6px 12px;border-radius:2px">Tap to reveal</div>'
+        +'</div>';
+    }
+    if(e.access.alarmCode){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
+        +'<div><div style="font-size:10px;color:var(--dim)">Alarm Code</div>'
+        +(e.access.alarmNotes?'<div style="font-size:10px;color:var(--dim);margin-top:2px;max-width:180px;line-height:1.5">'+e.access.alarmNotes+'</div>':'')
+        +'</div>'
+        +'<div id="alarmReveal" onclick="revealCode(this,\''+e.access.alarmCode+'\')" style="font-size:13px;color:var(--gold);font-weight:600;cursor:pointer;background:var(--ch3);padding:6px 12px;border-radius:2px">Tap to reveal</div>'
+        +'</div>';
+    }
+    if(e.access.gateCode){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
+        +'<div style="font-size:10px;color:var(--dim)">Gate Code</div>'
+        +'<div id="gateReveal" onclick="revealCode(this,\''+e.access.gateCode+'\')" style="font-size:13px;color:var(--gold);font-weight:600;cursor:pointer;background:var(--ch3);padding:6px 12px;border-radius:2px">Tap to reveal</div>'
+        +'</div>';
+    }
+    if(e.access.notes){
+      html+='<div style="padding:8px 0">'
+        +'<div style="font-size:10px;color:var(--dim);margin-bottom:4px">Notes</div>'
+        +'<div style="font-size:12px;line-height:1.6">'+e.access.notes+'</div>'
+        +'</div>';
+    }
+    html+='</div>';
+  }
+
+  // ── INVOICES ──
+  var estInvoices=(window.invoices||[]).filter(function(inv){return inv.estateId===e.id;});
+  if(estInvoices.length){
+    html+='<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Invoices</div>';
+    estInvoices.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
+      var isPaid=inv.status==='paid'||inv.autoPay;
+      var col=isPaid?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+      var statusLabel=isPaid?'Paid':inv.status==='unpaid'?'Unpaid':'Upcoming';
+      var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">'
+        +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:2px">'+inv.invoiceNum+'</div>'
+        +'<div style="font-size:12px">'+inv.notes+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Due '+dueStr+'</div>'
+        +(inv.autoPay?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Auto-Pay</div>':'')
+        +'</div>'
+        +'<div style="text-align:right">'
+        +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
+        +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+statusLabel+'</div>'
+        +'</div></div>';
+    });
+  }
+
+  html+='</div>';
+  render(html);
+}
+
+function inspDateCard(key,dateStr,sub,sc,isCurrent){
+  return '<div class="card tap" onclick="openDateDetail(\''+key+'\')" style="display:flex;align-items:center;gap:14px;'+(isCurrent?'border-color:var(--yellow)':'')+'">'
+    +'<div style="flex:1"><div style="font-size:13px">'+dateStr+'</div>'
+    +'<div style="font-size:9px;color:'+(isCurrent?'var(--yellow)':'var(--green)')+';letter-spacing:1.5px;text-transform:uppercase;margin-top:3px">'+sub+'</div>'
+    +'<div style="display:flex;gap:5px;align-items:center;margin-top:6px">'
+    +'<div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div><span style="font-size:9px;color:var(--dim);margin-right:6px">'+sc.green+'</span>'
+    +'<div style="width:7px;height:7px;border-radius:50%;background:var(--yellow)"></div><span style="font-size:9px;color:var(--dim);margin-right:6px">'+sc.yellow+'</span>'
+    +'<div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div><span style="font-size:9px;color:var(--dim)">'+sc.red+'</span>'
+    +'</div></div>'
+    +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:22px;color:var(--gl)">'+sc.score+'%</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:4px">View &#8250;</div></div></div>';
+}
+
+function openDateDetail(key){
+  selKey=key;
+  var e=CE();
+  var isLive=(key==='live');
+  var isComp=!!e.completedAt;
+
+  var snap=isLive?null:(e.pastInspections[parseInt(key)]?e.pastInspections[parseInt(key)].snapshot:null);
+  var sc=isLive?liveScore(e):(snap?scoreOf(Object.values(snap).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]));
+  var dateLabel=isLive?(isComp?new Date(e.completedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'Current Inspection'):(e.pastInspections[parseInt(key)]&&e.pastInspections[parseInt(key)].completedAt?new Date(e.pastInspections[parseInt(key)].completedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'Past');
+
+  var ownerInitials2=e.clientName?e.clientName.replace(/Mr\.|Mrs\.|&/g,'').trim().split(' ').filter(function(w){return w.length;}).map(function(w){return w[0];}).join('').substring(0,2).toUpperCase():'??';
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="openDetail(\'live\')">&#8592;</button><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">'+dateLabel+'</div></div></div><div class="avatar" onclick="showOwnerContact(\''+e.id+'\')" style="cursor:pointer" title="Owner Contact">'+ownerInitials2+'</div></div>'
+    +'<div class="sc">'
+    +'<div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:20px">'+ringHtml(sc,70)+statsHtml(sc)+'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Categories</div>';
+
+  var cats=[{k:'exterior',ico:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>'},{k:'interior',ico:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'},{k:'grounds',ico:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0020 0h-3"/><path d="M12 12a5 5 0 000-10 5 5 0 000 10z"/></svg>'}];
+  cats.forEach(function(cat){
+    if(isLive){
+      var c=e.data[cat.k];
+      var locked=!!e.completedCats[cat.k];
+      var pts=c.points;
+      var done=pts.filter(function(p){return p.status!==null;}).length;
+      var pct=Math.round(done/pts.length*100);
+      var hasR=pts.some(function(p){return p.status==='red';});
+      var hasY=pts.some(function(p){return p.status==='yellow';});
+      var allG=done>0&&pts.every(function(p){return p.status==='green';});
+      var cs=hasR?'cs-r':hasY?'cs-y':allG?'cs-g':'cs-p';
+      var canEdit=!locked;
+      html+='<div class="card tap" onclick="'+(canEdit?'openLiveCat':'openReadCat')+'(\''+cat.k+'\')">'
+        +'<div style="display:flex;align-items:center;gap:14px">'
+        +'<div class="cat-ico">'+cat.ico+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:500;letter-spacing:1px;margin-bottom:4px">'+c.label+'</div>'
+        +'<div style="font-size:10px;color:var(--dim)">'+(locked?'&#10003; Signed &amp; Locked':done+' / '+pts.length+' inspected')+'</div>'
+        +(locked?'<div class="cat-signed">&#10003; Signed &amp; Locked</div>':'')
+        +'<div class="pbar-wrap"><div class="pbar" style="width:'+(locked?100:pct)+'%"></div></div></div>'
+        +'<div class="cstat '+cs+'"></div></div></div>';
+    } else if(snap&&snap[cat.k]){
+      var c2=snap[cat.k];var sc2=scoreOf(c2.points);
+      var hasR2=c2.points.some(function(p){return p.status==='red';});
+      var hasY2=c2.points.some(function(p){return p.status==='yellow';});
+      var cs2=hasR2?'cs-r':hasY2?'cs-y':'cs-g';
+      html+='<div class="card tap" onclick="openPastCat(\''+cat.k+'\')">'
+        +'<div style="display:flex;align-items:center;gap:14px">'
+        +'<div class="cat-ico">'+cat.ico+'</div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:500;letter-spacing:1px;margin-bottom:4px">'+c2.label+'</div>'
+        +'<div class="cat-signed">&#10003; Signed &amp; Locked</div></div>'
+        +'<div class="cstat '+cs2+'"></div></div></div>';
+    }
+  });
+
+  var allLocked=['exterior','interior','grounds'].every(function(k){return !!e.completedCats[k];});
+  if(!isComp&&allLocked) html+='<button class="btn-gold" onclick="finishInsp()">Complete Inspection</button>';
+  if(isComp) html+='<button class="btn-outline" onclick="confirmNew()" style="margin-top:8px">+ Start New Inspection</button>';
+  html+='</div>'+nav('props');
+  render(html);
+}
+
+// ── CATEGORY / POINTS ─────────────────────────────────────────────────────
+function openLiveCat(cat){curCat=cat;var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");}
+function openReadCat(cat){curCat=cat;var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,true,"openDateDetail('live')");}
+function openPastCat(cat){
+  curCat=cat;var e=CE();var idx=parseInt(selKey);
+  var snap=e.pastInspections[idx].snapshot;var c=snap[cat];
+  renderCatScreen(c.label,e.name,c.points,cat,true,"openDateDetail('"+selKey+"')");
+}
+
+function renderCatScreen(label,estateName,pts,cat,readOnly,backFn){
+  window._catPts=pts;window._catCat=cat;window._catBack=backFn;
+  var html='<div class="topbar"><div style="display:flex;align-items:center">'
+    +'<button class="back-btn" onclick="'+backFn+'">&#8592;</button>'
+    +'<div><div class="topbar-title">'+label+'</div><div class="topbar-sub">'+estateName+'</div></div></div>'
+    +'<div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+
+  if(readOnly) html+='<div class="locked-banner">&#10003; Signed &amp; locked &mdash; read only</div>';
+
+  pts.forEach(function(p,idx){
+    var gc=p.status==='green'?'g':'',yc=p.status==='yellow'?'y':'',rc=p.status==='red'?'r':'';
+    var gco=p.status==='green'?'var(--green)':'var(--ch3)';
+    var yco=p.status==='yellow'?'var(--yellow)':'var(--ch3)';
+    var rco=p.status==='red'?'var(--red)':'var(--ch3)';
+    var isIssue=p.status==='yellow'||p.status==='red';
+    var locked=readOnly;
+    var tappable=locked&&isIssue;
+    var noteHtml=p.notes?'<div style="font-size:10px;color:var(--dim);margin-top:4px;font-style:italic">&quot;'+p.notes.substring(0,50)+(p.notes.length>50?'&hellip;':'')+'&quot;</div>':'';
+    var pcnt=p.photos?p.photos.length:0;
+    var photoHtml=pcnt>0?'<div style="font-size:9px;color:var(--gold);margin-top:3px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> '+pcnt+' photo'+(pcnt>1?'s':'')+'</div>':(p.status==='red'&&pcnt===0&&!readOnly?'<div style="font-size:9px;color:var(--red);margin-top:3px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Photo required</div>':'');
+    var pdKey='_pd_'+cat+'_'+idx;
+    window[pdKey]=(function(pp,cc){return function(){openPD(pp,cc);};})(p,cat);
+    var e2=CE();var prevStatus=null;
+    if(e2&&e2.pastInspections&&e2.pastInspections.length){
+      var lastI=e2.pastInspections[e2.pastInspections.length-1];
+      if(lastI&&lastI.snap&&lastI.snap[cat]){
+        var snapPts=lastI.snap[cat].points||[];
+        for(var si=0;si<snapPts.length;si++){if(snapPts[si].name===p.name){prevStatus=snapPts[si].status;break;}}
+      }
+    }
+    var prevCol=prevStatus==='green'?'#4caf7d':prevStatus==='yellow'?'#c9a84c':prevStatus==='red'?'#e05c5c':'#555';
+    var prevLbl=prevStatus==='green'?'Good':prevStatus==='yellow'?'Monitor':prevStatus==='red'?'Issue':'--';
+    var prevHtml=!readOnly?'<div style="font-size:9px;color:#888;margin-top:3px;display:flex;align-items:center;gap:5px"><span style="font-size:8px;letter-spacing:1px;text-transform:uppercase">Last:</span><span style="width:8px;height:8px;border-radius:50%;background:'+prevCol+';display:inline-block;flex-shrink:0;border:1px solid #333"></span><span style="color:'+prevCol+'">'+prevLbl+'</span></div>':'';
+
+    html+='<div class="point-card'+(locked?' locked':'')+(tappable?' tappable':'')+'"'+(tappable?' data-pdkey="'+pdKey+'"':'')+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s-ready="1"')+'>'
+      +'<div style="flex:1"><div style="font-size:12px">'+p.name+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+label+'</div>'
+      +prevHtml+noteHtml+photoHtml+'</div>'
+      +'<div class="trio">'
+      +'<div class="sbtn '+gc+'"'+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s="green"')+' title="Healthy"><span style="color:'+gco+'">&#9679;</span></div>'
+      +'<div class="sbtn '+yc+'"'+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s="yellow"')+' title="Monitor"><span style="color:'+yco+'">&#9679;</span></div>'
+      +'<div class="sbtn '+rc+'"'+(locked?'':' data-pid="'+p.id+'" data-cat="'+cat+'" data-s="red"')+' title="Attention"><span style="color:'+rco+'">&#9679;</span></div>'
+      +'</div></div>';
+  });
+
+  if(!readOnly){
+    var allDone=pts.every(function(p){return p.status!==null;});
+    var catLabel=CE()&&CE().data[cat]?CE().data[cat].label:cat;
+    window._completeCat=cat;
+    html+='<button class="btn-gold" id="btnComplete" style="display:'+(allDone?'block':'none')+'" onclick="completeCategory(window._completeCat)">&#10003; Sign &amp; Complete '+catLabel+'</button>';
+  }
+  html+='</div>';
+  render(html);
+
+  // Re-attach sbtn listeners after render
+  document.querySelectorAll('.sbtn[data-pid]').forEach(function(btn){
+    btn.addEventListener('click',function(ev){ev.stopPropagation();setStatus(this.getAttribute('data-pid'),this.getAttribute('data-cat'),this.getAttribute('data-s'));});
+  });
+  document.querySelectorAll('[data-pdkey]').forEach(function(card){
+    card.addEventListener('click',function(ev){if(ev.target.closest('.sbtn'))return;var fn=window[this.getAttribute('data-pdkey')];if(fn)fn();});
+  });
+}
+
+function openPD(p,cat){
+  var sc=p.status==='red'?'var(--red)':p.status==='yellow'?'var(--yellow)':'var(--green)';
+  var sl=p.status==='red'?'Attention Required':p.status==='yellow'?'Monitor':'Healthy';
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<div class="modal-title">'+p.name+'</div>'
+    +'<button onclick="closePD()" style="background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer">&#215;</button></div>'
+    +'<span class="pd-status" style="background:'+sc+'22;border:1px solid '+sc+';color:'+sc+'">&#9679; '+sl+'</span>';
+  if(p.notes) html+='<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Inspector Note</div><div style="background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:13px;font-style:italic;line-height:1.7;margin-bottom:12px">&ldquo;'+p.notes+'&rdquo;</div>';
+  else html+='<div style="font-size:11px;color:var(--dim);margin-bottom:12px">No notes added.</div>';
+  if(p.photos&&p.photos.length){
+    html+='<div style="font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Photos</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">';
+    p.photos.forEach(function(src,i){window['_pdp'+i]=src;html+='<img style="width:80px;height:80px;object-fit:cover;border-radius:2px;border:1px solid var(--border);cursor:pointer" src="'+src+'" data-pidx="'+i+'">';});
+    html+='</div>';
+  }
+  html+='<button class="btn-ghost" style="margin:0" onclick="closePD()">Close</button>';
+  document.getElementById('pdContent').innerHTML=html;
+  document.getElementById('pdModal').classList.add('open');
+  document.querySelectorAll('[data-pidx]').forEach(function(img){
+    img.addEventListener('click',function(){var s=window['_pdp'+this.getAttribute('data-pidx')];if(s){var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';var im=document.createElement('img');im.src=s;im.style.cssText='max-width:100%;max-height:100%;object-fit:contain';ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};document.body.appendChild(ov);}});
+  });
+
+}
+function closePD(){document.getElementById('pdModal').classList.remove('open');}
+function setStatus(pid,cat,status){
+  var pt=CD()[cat].points.find(function(p){return p.id===pid;});if(!pt)return;
+  pt.status=status;
+  var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");
+  if(status==='yellow'||status==='red') openModal(pid,cat);
+}
+function completeCategory(cat){
+  var e=CE();e.completedCats[cat]=new Date();
+  showToast(e.data[cat].label+' signed & locked');
+  openDateDetail('live');
+}
+function openModal(pid,cat){
+  var pt=CD()[cat].points.find(function(p){return p.id===pid;});
+  activePoint={pid:pid,cat:cat};
+  document.getElementById('mTitle').textContent=pt.name;
+  document.getElementById('mSub').textContent=CE().data[cat].label.toUpperCase()+' · '+pt.status.toUpperCase();
+  document.getElementById('mNotes').value=pt.notes||'';
+  document.getElementById('photoErr').classList.remove('show');
+  document.getElementById('reqBadge').style.display=pt.status==='red'?'inline-block':'none';
+  renderPhotoGrid(pt.photos||[]);
+  document.getElementById('notesModal').classList.add('open');
+}
+function closeModal(){document.getElementById('notesModal').classList.remove('open');activePoint=null;}
+function renderPhotoGrid(photos){
+  var html='';
+  photos.forEach(function(src,i){html+='<div class="thumb-wrap"><img class="thumb" src="'+src+'"><button class="thumb-del" onclick="removePhoto('+i+')">&#x2715;</button></div>';});
+  html+='<div class="photo-add" onclick="triggerCam()"><div style="font-size:22px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div style="font-size:8px;letter-spacing:1px;text-transform:uppercase">Add</div></div>';
+  document.getElementById('photoGrid').innerHTML=html;
+}
+function triggerCam(){document.getElementById('photoInput').value='';document.getElementById('photoInput').click();}
+function onPhotoSelected(e){
+  if(!activePoint)return;
+  var pt=CD()[activePoint.cat].points.find(function(p){return p.id===activePoint.pid;});
+  if(!pt.photos)pt.photos=[];
+  var files=Array.from(e.target.files),rem=files.length;if(!rem)return;
+  files.forEach(function(f){var r=new FileReader();r.onload=function(ev){pt.photos.push(ev.target.result);rem--;if(rem===0){renderPhotoGrid(pt.photos);document.getElementById('photoErr').classList.remove('show');}};r.readAsDataURL(f);});
+}
+function removePhoto(i){if(!activePoint)return;var pt=CD()[activePoint.cat].points.find(function(p){return p.id===activePoint.pid;});pt.photos.splice(i,1);renderPhotoGrid(pt.photos);}
+function saveNote(){
+  if(!activePoint)return;
+  var pt=CD()[activePoint.cat].points.find(function(p){return p.id===activePoint.pid;});
+  if(pt.status==='red'&&(!pt.photos||pt.photos.length===0)){document.getElementById('photoErr').classList.add('show');return;}
+  pt.notes=document.getElementById('mNotes').value;
+  var cat=activePoint.cat;closeModal();
+  var e=CE();renderCatScreen(e.data[cat].label,e.name,e.data[cat].points,cat,false,"openDateDetail('live')");
+  showToast('Saved');
+}
+function goInspectionHistory(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="openDetail(\'live\')">&#8592;</button><div><div class="topbar-title">Inspection History</div><div class="topbar-sub">'+e.name+'</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+  for(var i=e.pastInspections.length-1;i>=0;i--){
+    var insp=e.pastInspections[i];
+    var ds=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
+    var sc=insp.snapshot?scoreOf(Object.values(insp.snapshot).reduce(function(a,c){return a.concat(c.points);},[])):scoreOf([]);
+    html+=inspDateCard(i,ds,'&#10003; Completed',sc,false);
+  }
+  html+='</div>'+nav('props');
+  render(html);
+}
+
+function showOwnerContact(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var html='<div style="text-align:center;padding:8px 0 16px">'
+    +'<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gl));display:flex;align-items:center;justify-content:center;font-family:var(--ff);font-size:22px;color:#000;margin:0 auto 12px">'+(e.clientName?e.clientName.replace(/Mr\.|Mrs\.|&/g,'').trim().split(' ').filter(function(w){return w.length;}).map(function(w){return w[0];}).join('').substring(0,2).toUpperCase():'??')+'</div>'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+(e.clientName||'Property Owner')+'</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.name+'</div>'
+    +'</div>'
+    +(e.clientPhone?'<a href="tel:'+e.clientPhone+'" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--ch2);border:1px solid var(--border);border-radius:2px;margin-bottom:8px;text-decoration:none"><div style="width:36px;height:36px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;flex-shrink:0">&#128222;</div><div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Call</div><div style="font-size:13px;color:var(--gold);font-weight:600">'+e.clientPhone+'</div></div></a>':'')
+    +(e.clientEmail?'<a href="mailto:'+e.clientEmail+'" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--ch2);border:1px solid var(--border);border-radius:2px;margin-bottom:8px;text-decoration:none"><div style="width:36px;height:36px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;flex-shrink:0">&#9993;</div><div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Email</div><div style="font-size:13px;color:var(--gold);font-weight:600">'+e.clientEmail+'</div></div></a>':'')
+    +'<button onclick="closeOwnerContact()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer;margin-top:8px">Close</button>';
+  var overlay=document.createElement('div');
+  overlay.id='ownerContactOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)';
+  overlay.innerHTML='<div style="background:var(--ch);border:1px solid var(--gold);border-radius:4px;padding:24px;max-width:340px;width:100%">'+html+'</div>';
+  overlay.onclick=function(e){if(e.target===overlay)closeOwnerContact();};
+  document.body.appendChild(overlay);
+}
+function closeOwnerContact(){
+  var o=document.getElementById('ownerContactOverlay');
+  if(o) o.remove();
+}
+
+function revealCode(el,code){
+  if(el.textContent==='Tap to reveal'){
+    el.textContent=code;
+    el.style.background='var(--gd)';
+    // Auto-hide after 10 seconds
+    setTimeout(function(){el.textContent='Tap to reveal';el.style.background='var(--ch3)';},10000);
+  } else {
+    el.textContent='Tap to reveal';
+    el.style.background='var(--ch3)';
+  }
+}
+
+function cancelInspection(){
+  var e=CE();
+  if(!e) return;
+  Object.keys(e.data).forEach(function(cat){
+    e.data[cat].points.forEach(function(p){p.status=null;p.notes='';p.photos=[];});
+  });
+  e.completedAt=null;
+  e.completedCats={};
+  e.inspectionStarted=false;
+  showToast('Inspection cancelled');
+  openDetail('live');
+}
+
+function showDeclineModal(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var html='<div style="padding:4px 0 8px">'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--red);margin-bottom:4px">Decline Inspection</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-bottom:18px">'+e.name+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Reason for Declining (required)</div>'
+    +'<textarea id="declineReason" rows="4" placeholder="e.g. Property inaccessible, gate locked, no access codes provided, severe weather, vehicle issue..." style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;padding:12px;outline:none;resize:vertical;margin-bottom:14px"></textarea>'
+    +'<div onclick="toggleNotifyClient()" style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--ch2);border:1px solid var(--border);border-radius:2px;margin-bottom:18px;cursor:pointer">'
+    +'<div id="notifyClientBox" style="width:20px;height:20px;border:2px solid var(--gold);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold)"></div>'
+    +'<div style="font-size:11px;color:var(--dim)">Also notify the client of this decline</div>'
+    +'</div>'
+    +'<button onclick="submitDecline(\''+e.id+'\')" style="width:100%;background:linear-gradient(135deg,#e05c5c,#ff7070);border:none;border-radius:1px;color:#fff;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:13px;cursor:pointer;margin-bottom:8px">Submit Decline</button>'
+    +'<button onclick="closeDeclineModal()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px;cursor:pointer">Cancel</button>'
+    +'</div>';
+  var overlay=document.createElement('div');
+  overlay.id='declineOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)';
+  overlay.innerHTML='<div style="background:var(--ch);border:1px solid var(--red);border-radius:4px;padding:22px;max-width:380px;width:100%">'+html+'</div>';
+  document.body.appendChild(overlay);
+  window._notifyClient=false;
+}
+
+function toggleNotifyClient(){
+  window._notifyClient=!window._notifyClient;
+  var box=document.getElementById('notifyClientBox');
+  if(box) box.innerHTML=window._notifyClient?'&#10003;':'';
+}
+
+function closeDeclineModal(){
+  var o=document.getElementById('declineOverlay');
+  if(o) o.remove();
+}
+
+function submitDecline(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  var reason=document.getElementById('declineReason').value.trim();
+  if(!reason){showToast('Please provide a reason for declining');return;}
+  var notifyClient=!!window._notifyClient;
+  var declineRecord={
+    estateId:estateId,estateName:e.name,inspectorName:currentUser.name,inspectorEmail:currentUser.email,
+    reason:reason,notifyClient:notifyClient,clientEmail:notifyClient?e.clientEmail:null,timestamp:new Date()
+  };
+  console.log('Decline submitted:',declineRecord);
+  closeDeclineModal();
+  showToast('Inspection declined'+(notifyClient?' -- client notified':''));
+  openDetail('live');
+}
+
+function startInspection(){
+  var e=CE();
+  e.inspectionStarted=true;
+  if(e.completedAt){e.pastInspections.push({completedAt:e.completedAt,snapshot:liveSnap(e)});Object.values(e.data).forEach(function(c){c.points.forEach(function(p){p.status=null;p.notes='';p.photos=[];});});e.completedCats={};e.completedAt=null;}
+  openDateDetail('live');
+}
+function confirmNew(){document.getElementById('confirmModal').classList.add('open');}
+function closeConfirm(){document.getElementById('confirmModal').classList.remove('open');}
+function doNew(){closeConfirm();startInspection();}
+function finishInsp(){
+  var e=CE();e.completedAt=new Date();var sc=liveScore(e);
+  var ds=e.completedAt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('screen').innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center">'
+    +'<div style="width:80px;height:80px;border-radius:50%;background:rgba(76,175,125,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px">&#10003;</div>'
+    +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl);margin-bottom:8px">Inspection Complete</div>'
+    +'<div class="gold-line"></div>'
+    +'<div style="font-size:11px;color:var(--dim);letter-spacing:1px;line-height:1.9;margin-top:12px">'+e.name+'<br>'+ds+'<br><br>Health Score: <span style="color:var(--gl)">'+sc.score+'%</span><br>'+sc.green+' Healthy &middot; '+sc.yellow+' Monitor &middot; '+sc.red+' Attention</div>'
+    +'<button class="btn-gold" style="max-width:300px;margin-top:36px" onclick="goProps()">Back to Properties</button>'
+    +'</div>';
+}
+function goSettings(){
+  var inManagerMode=currentUser.managerMode===true;
+  document.getElementById('screen').innerHTML='<div class="topbar"><div><div class="topbar-title">Settings</div><div class="topbar-sub">Account & Preferences</div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px">Inspector</div>'
+    +'<div class="card"><div style="font-size:10px;color:var(--dim);margin-bottom:4px">Signed in as</div>'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+currentUser.name+'</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+currentUser.email+'</div></div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin:20px 0 12px">Inspection Template</div>'
+    +'<div id="editPtsBtn" class="card tap" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-color:var(--gold)">'
+    +'<div>'
+    +'<div style="font-size:13px;font-weight:500;color:var(--gold)">Modify Inspection Points</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:3px">Add, remove or reorganise your default checklist</div>'
+    +'</div>'
+    +'<div style="font-size:20px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
+    +(inManagerMode?'<button class="btn-gold" style="margin-top:20px" onclick="returnToManager()">&#8592; Return to Manager Dashboard</button>':'')
+    +'<button class="btn-ghost" style="margin-top:'+(inManagerMode?'8px':'20px')+'" onclick="doSignOut()">Sign Out</button>'
+    +'</div>'+nav('settings');
+  document.getElementById('editPtsBtn').onclick = function(){ goEditPoints(); };
+}
+
+function returnToManager(){
+  var saved=localStorage.getItem('ec_inspector_return');
+  if(saved){
+    localStorage.setItem('ec_user',saved);
+    localStorage.removeItem('ec_inspector_return');
+    var base=window.location.pathname.replace('inspector.html','');
+    window.location.href=base+'manager.html';
+  }
+}
+
+// ── DEFAULT TEMPLATE ────────────────────────────────────────────────────────
+// Inspector's master checklist — loaded from localStorage if saved, otherwise built from estate data
+function getDefaultTemplate(){
+  var saved=localStorage.getItem('ec_insp_template');
+  if(saved) try{return JSON.parse(saved);}catch(e){}
+  // Build from first estate's data
+  var e=estates&&estates[0];
+  if(!e||!e.data) return {
+    exterior:[{id:'e1',name:'Front Entry & Door'},{id:'e2',name:'Roof & Gutters'},{id:'e3',name:'Windows & Seals'},{id:'e4',name:'Driveway & Walkways'},{id:'e5',name:'Garage Door'},{id:'e6',name:'Exterior Lighting'}],
+    interior:[{id:'i1',name:'HVAC System'},{id:'i2',name:'Water Heater'},{id:'i3',name:'Kitchen Appliances'},{id:'i4',name:'Plumbing & Fixtures'},{id:'i5',name:'Electrical Panel'},{id:'i6',name:'Security System'}],
+    grounds:[{id:'g1',name:'Lawn & Landscaping'},{id:'g2',name:'Irrigation System'},{id:'g3',name:'Pool & Equipment'},{id:'g4',name:'Outdoor Furniture'}]
+  };
+  return {
+    exterior:e.data.exterior.points.map(function(p){return{id:p.id,name:p.name};}),
+    interior:e.data.interior.points.map(function(p){return{id:p.id,name:p.name};}),
+    grounds:e.data.grounds.points.map(function(p){return{id:p.id,name:p.name};})
+  };
+}
+function saveDefaultTemplate(tpl){localStorage.setItem('ec_insp_template',JSON.stringify(tpl));}
+
+function goEditPoints(){
+  var tpl=getDefaultTemplate();
+  var cats=[
+    {k:'exterior',label:'Exterior'},
+    {k:'interior',label:'Interior'},
+    {k:'grounds',label:'Grounds'}
+  ];
+  var body='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goSettings()">&#8592;</button><div><div class="topbar-title">Inspection Points</div><div class="topbar-sub">Your default template</div></div></div></div><div class="sc"><div style="font-size:10px;color:var(--dim);line-height:1.7;margin-bottom:16px">These points apply to every new property. Red/yellow/green rules apply automatically.</div>';
+  cats.forEach(function(cat){
+    var pts=tpl[cat.k]||[];
+    body+='<div style="font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">'+cat.label+'</div><div id="ptList_'+cat.k+'">';
+    pts.forEach(function(pt,idx){
+      body+='<div style="display:flex;align-items:center;gap:10px;background:var(--ch2);border:1px solid var(--border);border-radius:1px;padding:10px 12px;margin-bottom:6px">'
+        +'<div style="display:flex;gap:4px;flex-shrink:0"><div style="width:8px;height:8px;border-radius:50%;background:#4caf7d"></div><div style="width:8px;height:8px;border-radius:50%;background:#c9a84c"></div><div style="width:8px;height:8px;border-radius:50%;background:#e05c5c"></div></div>'
+        +'<div style="flex:1;font-size:13px">'+pt.name+'</div>'
+        +'<button onclick="removePoint(\''+cat.k+'\','+idx+')" style="background:none;border:none;color:#e05c5c;font-size:20px;cursor:pointer;padding:0 4px;line-height:1">&#128465;</button>'
+        +'</div>';
+    });
+    body+='</div><div style="display:flex;gap:8px;margin-bottom:20px"><input id="newPt_'+cat.k+'" placeholder="Add '+cat.label.toLowerCase()+' point…" style="flex:1;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;padding:10px 12px;outline:none"><button onclick="addPoint(\''+cat.k+'\')" style="background:linear-gradient(135deg,#c9a84c,#e2c97e);border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;padding:10px 14px;cursor:pointer">+ Add</button></div>';
+  });
+  body+='<button class="btn-gold" onclick="savePoints()">Save Template</button><button class="btn-ghost" onclick="goSettings()">Cancel</button></div>'+nav('settings');
+  document.getElementById('screen').innerHTML=body;
+}
+
+function ptRow(cat,idx,name){
+  return '<div id="ptRow_'+cat+'_'+idx+'" style="display:flex;align-items:center;gap:10px;background:var(--ch2);border:1px solid var(--border);border-radius:1px;padding:10px 12px;margin-bottom:6px">'
+    +'<div style="display:flex;gap:4px;flex-shrink:0">'
+    +'<div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div>'
+    +'<div style="width:8px;height:8px;border-radius:50%;background:var(--yellow)"></div>'
+    +'<div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div>'
+    +'</div>'
+    +'<div style="flex:1;font-size:13px">'+name+'</div>'
+    +'<button onclick="removePoint(\''+cat+'\','+idx+')" style="background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:0 4px;line-height:1">&#128465;</button>'
+    +'</div>';
+}
+
+function addPoint(cat){
+  var input=document.getElementById('newPt_'+cat);
+  var name=input.value.trim();
+  if(!name) return;
+  var tpl=getDefaultTemplate();
+  tpl[cat].push({id:cat+'_'+Date.now(),name:name});
+  saveDefaultTemplate(tpl);
+  input.value='';
+  // Re-render just that category's list
+  var list=document.getElementById('ptList_'+cat);
+  if(list){
+    var html='';
+    tpl[cat].forEach(function(pt,idx){html+=ptRow(cat,idx,pt.name);});
+    list.innerHTML=html;
+  }
+  showToast('Point added');
+}
+
+function removePoint(cat,idx){
+  var tpl=getDefaultTemplate();
+  var name=tpl[cat][idx]?tpl[cat][idx].name:'';
+  tpl[cat].splice(idx,1);
+  saveDefaultTemplate(tpl);
+  // Re-render the list
+  var list=document.getElementById('ptList_'+cat);
+  if(list){
+    var html='';
+    tpl[cat].forEach(function(pt,i){html+=ptRow(cat,i,pt.name);});
+    list.innerHTML=html;
+  }
+  showToast(name?'"'+name+'" removed':'Point removed');
+}
+
+function savePoints(){
+  // Apply updated template as the base for all estates that haven't been customised yet
+  showToast('Template saved');
+  goSettings();
+}
+function doSignOut(){localStorage.removeItem('ec_user');var base=window.location.pathname.replace('inspector.html','');window.location.href=base+'index.html';}
+goCal();
+</script>
+<script>
+// Unregister any stale service workers
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});});
+}
+</script>
+
+<div id="pwaBanner" style="display:none;position:fixed;bottom:70px;left:12px;right:12px;background:var(--ch);border:1px solid var(--gold);border-radius:4px;padding:12px 16px;z-index:300;box-shadow:0 4px 24px rgba(0,0,0,.6)">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:20px;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+    <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--gl);margin-bottom:2px">Add EstateCare to Home Screen</div><div style="font-size:10px;color:var(--dim)">One tap access — no app store needed</div></div>
+    <button onclick="showPWASteps()" style="background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:2px;color:#000;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:8px 12px;cursor:pointer;white-space:nowrap">How To</button>
+    <button onclick="dismissPWA()" style="background:transparent;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:4px">&#215;</button>
+  </div>
+  <div id="pwaStepsInner" style="display:none;background:var(--ch2);border:1px solid var(--border);border-radius:2px;padding:12px;margin-top:10px"></div>
+</div>
+<script>
+(function(){
+  if(window.navigator.standalone===true) return;
+  if(window.matchMedia('(display-mode: standalone)').matches) return;
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isAndroid=/Android/.test(navigator.userAgent);
+  if(!isIOS&&!isAndroid) return;
+  if(sessionStorage.getItem('pwa_dismissed')) return;
+  setTimeout(function(){
+    var b=document.getElementById('pwaBanner');
+    if(b) b.style.display='block';
+  },4000);
+})();
+function showPWASteps(){
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var steps=document.getElementById('pwaStepsInner');
+  if(!steps) return;
+  var s=isIOS
+    ?'<div style="font-size:11px;color:var(--text);line-height:2">1. Tap the <b style="color:var(--gold)">Share button</b> <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20"/></svg> at the bottom of Safari<br>2. Tap <b style="color:var(--gold)">Add to Home Screen</b><br>3. Tap <b style="color:var(--gold)">Add</b></div>'
+    :'<div style="font-size:11px;color:var(--text);line-height:2">1. Tap the <b style="color:var(--gold)">three dots menu</b> in Chrome<br>2. Tap <b style="color:var(--gold)">Add to Home Screen</b><br>3. Tap <b style="color:var(--gold)">Add</b></div>';
+  steps.innerHTML=s;
+  steps.style.display='block';
+  var btn=document.getElementById('pwaBanner').querySelector('button');
+  if(btn){btn.textContent='Got it!';btn.onclick=dismissPWA;}
+}
+function dismissPWA(){
+  sessionStorage.setItem('pwa_dismissed','1');
+  var b=document.getElementById('pwaBanner');
+  if(b) b.style.display='none';
+}
+</script>
+</body>
+</html>
