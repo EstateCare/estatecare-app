@@ -167,6 +167,10 @@ function render(html){
       else if(a==='nav'){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();}
     });
   });
+  // Inspector switch cards
+  document.querySelectorAll('[data-switchid]').forEach(function(el){
+    el.addEventListener('click',function(){doSwitchToInspectorById(this.getAttribute('data-switchid'));});
+  });
 }
 
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
@@ -276,13 +280,36 @@ var ICO_SCHEDULE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" st
 var ICO_PROFILE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>';
 
 function switchToInspectorMode(){
-  // Solo operators: flip into their own inspector view under the same login
-  var inspectorSelf=inspectors.find(function(i){return i.email===currentUser.email;});
-  if(!inspectorSelf){
-    showToast('No inspector profile linked to this account yet');
-    return;
-  }
-  var inspUser={email:inspectorSelf.email,role:'inspector',name:inspectorSelf.name,initials:inspectorSelf.initials,phone:inspectorSelf.phone,managerMode:true,managerEmail:currentUser.email};
+  if(!inspectors.length){showToast('No inspectors on your team yet');return;}
+  // If only one inspector, go directly
+  if(inspectors.length===1){doSwitchToInspector(inspectors[0]);return;}
+  // Multiple inspectors — show picker
+  var html=topBar('Inspector Mode','Select Inspector','goDash')
+    +'<div class="sc">'
+    +'<div style="font-size:11px;color:var(--dim);line-height:1.7;margin-bottom:16px">Select which inspector profile to work as. Return to Manager Dashboard at any time from Settings.</div>';
+  inspectors.forEach(function(insp){
+    var assigned=estates.filter(function(e){return e.contract&&e.contract.assignedInspector===insp.id;});
+    html+='<div class="card tap" data-switchid="'+insp.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<div class="avatar" style="cursor:default">'+insp.initials+'</div>'
+      +'<div style="flex:1"><div style="font-size:14px;font-weight:500">'+insp.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+insp.email+'</div>'
+      +'<div style="font-size:9px;color:var(--gold);margin-top:2px">'+assigned.length+' estate'+(assigned.length===1?'':'s')+' assigned</div></div>'
+      +'<div style="font-size:18px;color:var(--gold)">&#8250;</div>'
+      +'</div>';
+  });
+  html+='<button class="btn-ghost" onclick="goDash()">Cancel</button>'
+    +'</div>'+nav('dash');
+  render(html);
+}
+
+function doSwitchToInspectorById(id){
+  var insp=inspectors.find(function(i){return i.id===id;});
+  doSwitchToInspector(insp);
+}
+
+function doSwitchToInspector(insp){
+  if(!insp) return;
+  var inspUser={email:insp.email,role:'inspector',name:insp.name,initials:insp.initials,phone:insp.phone,managerMode:true,managerEmail:currentUser.email};
   localStorage.setItem('ec_inspector_return',JSON.stringify(currentUser));
   localStorage.setItem('ec_user',JSON.stringify(inspUser));
   window.location.href=base+'inspector.html';
