@@ -171,6 +171,10 @@ function render(html){
   document.querySelectorAll('[data-switchid]').forEach(function(el){
     el.addEventListener('click',function(){doSwitchToInspectorById(this.getAttribute('data-switchid'));});
   });
+  // Inspection detail cards
+  document.querySelectorAll('[data-estid][data-inspidx]').forEach(function(el){
+    el.addEventListener('click',function(){mgrInspectionDetail(this.getAttribute('data-estid'),parseInt(this.getAttribute('data-inspidx')));});
+  });
 }
 
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
@@ -182,6 +186,7 @@ function liveScore(e){var all=[];Object.values(e.data).forEach(function(c){all=a
 function scoreOf(pts){var g=0,y=0,r=0,t=pts.length;pts.forEach(function(p){if(p.status==='green')g++;else if(p.status==='yellow')y++;else if(p.status==='red')r++;});return{score:t>0?Math.round(((g*2+y)/(t*2))*100):0,green:g,yellow:y,red:r,total:t};}
 
 function topBar(title,sub,back){
+  if(back&&back.indexOf('|')>=0){var parts=back.split('|');var bfn=parts[0];var barg=parts[1];var l='<div style="display:flex;align-items:center"><button class="back-btn" onclick="'+bfn+'(\''+barg+'\')">←</button><div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div></div>';return '<div class="topbar">'+l+'<div class="avatar" data-action="nav" data-fn="goSettings" title="Account">'+currentUser.initials+'</div></div>';}
   var l=back?'<div style="display:flex;align-items:center"><button class="back-btn" data-back="'+back+'">&#8592;</button><div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div></div>':'<div><div class="topbar-title">'+title+'</div><div class="topbar-sub">'+sub+'</div></div>';
   return '<div class="topbar">'+l+'<div class="avatar" data-action="nav" data-fn="goSettings" title="Account">'+currentUser.initials+'</div></div>';
 }
@@ -436,14 +441,17 @@ function goClientDetail(email){
     +'</div>';
 
   if(e){
-    html+='<div class="card" style="margin-bottom:16px">'
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:16px;cursor:pointer">'
       +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
       +'<div class="cat-ico">'+e.icon+'</div>'
       +'<div style="flex:1"><div style="font-family:var(--ff);font-size:16px;color:var(--gl)">'+e.name+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div></div>'
       +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc.score+'%</div>'
       +'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
       +'<div style="font-size:10px;color:var(--gold)">'+e.contract.tier+' &nbsp;&#183;&nbsp; $'+e.contract.weeklyRate+'/week</div>'
+      +'<div style="font-size:11px;color:var(--gold)">View Estate &#8250;</div>'
+      +'</div>'
       +'</div>';
   }
 
@@ -581,12 +589,13 @@ function goEstateDetail(estateId){
   // Past inspections
   if(e.pastInspections&&e.pastInspections.length){
     html+='<div class="sec">Inspection History ('+e.pastInspections.length+')</div>';
-    e.pastInspections.slice().reverse().forEach(function(insp){
+    e.pastInspections.slice().reverse().forEach(function(insp,idx){
       var snap=insp.snapshot||insp.snap;
       var sc2=snap?scoreOf(Object.values(snap).reduce(function(a,c){return a.concat(c.points);},[])):{score:0,green:0,yellow:0,red:0};
       var dStr=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
       var dotCol=sc2.red>0?'var(--red)':sc2.yellow>0?'var(--yellow)':'var(--green)';
-      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
+      var inspIdx=e.pastInspections.length-1-idx;
+      html+='<div class="card tap" data-estid="'+estateId+'" data-inspidx="'+inspIdx+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer">'
         +'<div style="width:10px;height:10px;border-radius:50%;background:'+dotCol+';flex-shrink:0"></div>'
         +'<div style="flex:1">'
         +'<div style="font-size:12px;font-weight:500">'+dStr+'</div>'
@@ -595,7 +604,10 @@ function goEstateDetail(estateId){
         +(sc2.yellow?'<span style="color:var(--yellow)">'+sc2.yellow+' &#9679;</span>&nbsp; ':'')
         +(sc2.red?'<span style="color:var(--red)">'+sc2.red+' &#9888;</span>':'')
         +'</div></div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
         +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc2.score+'%</div>'
+        +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+        +'</div>'
         +'</div>';
     });
   } else {
@@ -617,6 +629,66 @@ function goEstateDetail(estateId){
 function inspectorSelectId(e){return 'estInsp_'+e.id;}
 function inspectorOptions(selectedId){
   return inspectors.map(function(i){return '<option value="'+i.id+'"'+(i.id===selectedId?' selected':'')+'>'+i.name+'</option>';}).join('');
+}
+
+
+// ── INSPECTION DETAIL (read-only view of a past inspection) ───────────────
+function mgrInspectionDetail(estateId, inspIdx){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e||!e.pastInspections[inspIdx]) return;
+  var insp=e.pastInspections[inspIdx];
+  var snap=insp.snapshot||insp.snap;
+  var dStr=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}):'Past Inspection';
+  var sc=snap?scoreOf(Object.values(snap).reduce(function(a,c){return a.concat(c.points);},[])):{score:0,green:0,yellow:0,red:0};
+
+  var html=topBar(e.name,dStr,'goEstateDetail|'+estateId)
+    +'<div class="sc">'
+    // Score summary
+    +'<div class="card" style="display:flex;align-items:center;gap:16px;margin-bottom:16px">'
+    +'<div style="text-align:center">'
+    +'<div style="font-family:var(--ff);font-size:36px;color:var(--gl)">'+sc.score+'%</div>'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Overall</div>'
+    +'</div>'
+    +'<div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+    +'<div style="text-align:center;background:rgba(76,175,125,.08);border:1px solid var(--green);border-radius:2px;padding:8px">'
+    +'<div style="font-family:var(--ff);font-size:20px;color:var(--green)">'+sc.green+'</div>'
+    +'<div style="font-size:8px;color:var(--green);letter-spacing:1px;text-transform:uppercase">Good</div>'
+    +'</div>'
+    +'<div style="text-align:center;background:rgba(230,184,74,.08);border:1px solid var(--yellow);border-radius:2px;padding:8px">'
+    +'<div style="font-family:var(--ff);font-size:20px;color:var(--yellow)">'+sc.yellow+'</div>'
+    +'<div style="font-size:8px;color:var(--yellow);letter-spacing:1px;text-transform:uppercase">Monitor</div>'
+    +'</div>'
+    +'<div style="text-align:center;background:rgba(224,92,92,.08);border:1px solid var(--red);border-radius:2px;padding:8px">'
+    +'<div style="font-family:var(--ff);font-size:20px;color:var(--red)">'+sc.red+'</div>'
+    +'<div style="font-size:8px;color:var(--red);letter-spacing:1px;text-transform:uppercase">Attention</div>'
+    +'</div>'
+    +'</div></div>';
+
+  // Each category
+  if(snap){
+    Object.keys(snap).forEach(function(cat){
+      var catData=snap[cat];
+      var pts=catData.points||[];
+      var catLabel=cat.charAt(0).toUpperCase()+cat.slice(1);
+      html+='<div class="sec">'+catLabel+'</div>';
+      pts.forEach(function(p){
+        var col=p.status==='green'?'var(--green)':p.status==='yellow'?'var(--yellow)':p.status==='red'?'var(--red)':'var(--border)';
+        var bg=p.status==='green'?'rgba(76,175,125,.06)':p.status==='yellow'?'rgba(230,184,74,.06)':p.status==='red'?'rgba(224,92,92,.06)':'var(--ch2)';
+        html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:6px;border-left:3px solid '+col+';background:'+bg+'">'
+          +'<div style="flex:1">'
+          +'<div style="font-size:12px">'+p.name+'</div>'
+          +(p.notes?'<div style="font-size:10px;color:var(--dim);margin-top:3px;font-style:italic">"'+p.notes.substring(0,60)+(p.notes.length>60?'…':'')+'"</div>':'')
+          +'</div>'
+          +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;white-space:nowrap">'
+          +(p.status==='green'?'&#10003; Good':p.status==='yellow'?'&#9679; Monitor':p.status==='red'?'&#9888; Attention':'—')
+          +'</div>'
+          +'</div>';
+      });
+    });
+  }
+
+  html+='</div>'+nav('dash');
+  render(html);
 }
 
 // ── INVOICES ──────────────────────────────────────────────────────────────
