@@ -578,6 +578,31 @@ function goEstateDetail(estateId){
     +'<div class="card" style="margin-bottom:16px">'
     +fs('Inspector',inspectorSelectId(e),inspectorOptions(e.contract.assignedInspector))
     +'</div>'
+  // Past inspections
+  if(e.pastInspections&&e.pastInspections.length){
+    html+='<div class="sec">Inspection History ('+e.pastInspections.length+')</div>';
+    e.pastInspections.slice().reverse().forEach(function(insp){
+      var snap=insp.snapshot||insp.snap;
+      var sc2=snap?scoreOf(Object.values(snap).reduce(function(a,c){return a.concat(c.points);},[])):{score:0,green:0,yellow:0,red:0};
+      var dStr=insp.completedAt?new Date(insp.completedAt).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}):'Past';
+      var dotCol=sc2.red>0?'var(--red)':sc2.yellow>0?'var(--yellow)':'var(--green)';
+      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
+        +'<div style="width:10px;height:10px;border-radius:50%;background:'+dotCol+';flex-shrink:0"></div>'
+        +'<div style="flex:1">'
+        +'<div style="font-size:12px;font-weight:500">'+dStr+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'
+        +(sc2.green?'<span style="color:var(--green)">'+sc2.green+' &#10003;</span>&nbsp; ':'')
+        +(sc2.yellow?'<span style="color:var(--yellow)">'+sc2.yellow+' &#9679;</span>&nbsp; ':'')
+        +(sc2.red?'<span style="color:var(--red)">'+sc2.red+' &#9888;</span>':'')
+        +'</div></div>'
+        +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+sc2.score+'%</div>'
+        +'</div>';
+    });
+  } else {
+    html+='<div class="sec">Inspection History</div>'
+      +'<div style="font-size:11px;color:var(--dim);text-align:center;padding:16px;background:var(--ch2);border:1px solid var(--border);border-radius:2px;margin-bottom:12px">No inspections completed yet</div>';
+  }
+
     +'<div class="sec">Invoices</div>';
   estInv.forEach(function(inv){
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
