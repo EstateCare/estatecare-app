@@ -161,7 +161,7 @@ function render(html){
   document.querySelectorAll('[data-action]').forEach(function(el){
     el.addEventListener('click',function(){
       var a=this.getAttribute('data-action');
-      if(a==='estate') goEstateDetail(this.getAttribute('data-id'));
+      if(a==='estate'){var origin=this.getAttribute('data-origin');if(origin){var p=origin.split('|');_estateDetailOrigin=p[0]+(p[1]?'|'+p[1]:'');}else{_estateDetailOrigin='goEstates';}goEstateDetail(this.getAttribute('data-id'));}
       else if(a==='client') goClientDetail(this.getAttribute('data-id'));
       else if(a==='inspector') goInspectorDetail(this.getAttribute('data-id'));
       else if(a==='nav'){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();}
@@ -535,13 +535,20 @@ function goInspectorDetail(inspId){
     html+='<div class="sec">Assigned Estates</div>';
     assigned.forEach(function(e){
       var sc=liveScore(e);
-      html+='<div class="card" style="margin-bottom:10px">'
-        +'<div style="display:flex;align-items:center;gap:10px">'
+      var lastInsp=e.pastInspections&&e.pastInspections.length?e.pastInspections[e.pastInspections.length-1]:null;
+      var lastDStr=lastInsp&&lastInsp.completedAt?new Date(lastInsp.completedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'No inspections yet';
+      html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" data-origin="goInspectorDetail|'+inspId+'" style="margin-bottom:10px;cursor:pointer">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
         +'<div class="cat-ico">'+e.icon+'</div>'
         +'<div style="flex:1"><div style="font-family:var(--ff);font-size:15px;color:var(--gl)">'+e.name+'</div>'
         +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.clientName+'</div></div>'
         +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl)">'+sc.score+'%</div>'
-        +'</div></div>';
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center">'
+        +'<div style="font-size:9px;color:var(--dim)">Last: '+lastDStr+'</div>'
+        +'<div style="font-size:9px;color:var(--gold)">'+e.pastInspections.length+' inspection'+(e.pastInspections.length===1?'':'s')+' &nbsp;&#8250;</div>'
+        +'</div>'
+        +'</div>';
     });
   }
   html+='</div>'+nav('team');
@@ -568,6 +575,8 @@ function goEstates(){
   render(html);
 }
 
+var _estateDetailOrigin='goEstates';
+function goEstateDetailFrom(estateId,origin){_estateDetailOrigin=origin||'goEstates';goEstateDetail(estateId);}
 function goEstateDetail(estateId){
   var e=estates.find(function(x){return x.id===estateId;});
   if(!e) return;
@@ -575,7 +584,7 @@ function goEstateDetail(estateId){
   var insp=inspectors.find(function(i){return i.id===e.contract.assignedInspector;});
   var estInv=allInvoices.filter(function(i){return i.estateId===estateId;});
 
-  var html=topBar(e.name,e.clientName,'goEstates')
+  var html=topBar(e.name,e.clientName,_estateDetailOrigin)
     +'<div class="sc">'
     +'<div class="card" style="margin-bottom:16px">'
     +'<div style="font-size:10px;color:var(--dim)">'+e.address+'</div>'
