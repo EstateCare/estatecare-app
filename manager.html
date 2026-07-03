@@ -615,8 +615,10 @@ function goFinancials(){
   var lastMonth=thisMonth===0?11:thisMonth-1;
   var lastMonthYear=thisMonth===0?thisYear-1:thisYear;
 
-  var mtd=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getMonth()===thisMonth&&new Date(i.paidDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
-  var lastMonthTotal=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getMonth()===lastMonth&&new Date(i.paidDate).getFullYear()===lastMonthYear;}).reduce(function(s,i){return s+i.amount;},0);
+  // MTD = all invoices due this month (paid + unpaid + upcoming)
+  var mtd=allInvoices.filter(function(i){return new Date(i.dueDate).getMonth()===thisMonth&&new Date(i.dueDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
+  var mtdPaid=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getMonth()===thisMonth&&new Date(i.paidDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
+  var lastMonthTotal=allInvoices.filter(function(i){return new Date(i.dueDate).getMonth()===lastMonth&&new Date(i.dueDate).getFullYear()===lastMonthYear;}).reduce(function(s,i){return s+i.amount;},0);
   var trend=lastMonthTotal>0?Math.round(((mtd-lastMonthTotal)/lastMonthTotal)*100):0;
   var ytd=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
   var avgPerClient=clients.length>0?(ytd/clients.length):0;
@@ -639,6 +641,7 @@ function goFinancials(){
     +'<div class="card" style="border-color:var(--gold);margin-bottom:14px">'
     +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Month to Date</div>'
     +'<div style="font-family:var(--ff);font-size:32px;color:var(--gl)">$'+mtd.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:4px">$'+mtdPaid.toFixed(2)+' collected &nbsp;&#183;&nbsp; $'+(mtd-mtdPaid).toFixed(2)+' outstanding</div>'
     +(lastMonthTotal>0?'<div style="font-size:10px;color:'+(trend>=0?'var(--green)':'var(--red)')+';margin-top:6px">'+(trend>=0?'&#9650;':'&#9660;')+' '+Math.abs(trend)+'% vs last month</div>':'')
     +'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
