@@ -503,7 +503,8 @@ function statBox(label,val,icon,color,fn){
 function goDash(){
   var activeClients=clients.length;
   var activeInspectors=inspectors.length;
-  var mtdRevenue=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getMonth()===new Date().getMonth();}).reduce(function(s,i){return s+i.amount;},0);
+  var thisM=new Date().getMonth(),thisY=new Date().getFullYear();
+  var mtdRevenue=allInvoices.filter(function(i){return new Date(i.dueDate).getMonth()===thisM&&new Date(i.dueDate).getFullYear()===thisY;}).reduce(function(s,i){return s+i.amount;},0);
   var unpaidTotal=allInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
 
   var html=topBar(tenantConfig.companyName,'Manager Dashboard')
