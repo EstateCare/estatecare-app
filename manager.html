@@ -214,12 +214,8 @@ var allInvoices=[
   // Upcoming
   {id:'vs-inv-008',estateId:'vs',clientEmail:'client1@estatecare.com',
    invoiceNum:'EC-2026-008',amount:319.80,period:'Monthly',
-   dueDate:new Date('2026-07-01'),status:'paid',paidDate:new Date('2026-07-05'),
-   notes:'Preferred Plan — July 2026',paymentMethod:'E-Transfer',autoPay:false},
-  {id:'vs-inv-009',estateId:'vs',clientEmail:'client1@estatecare.com',
-   invoiceNum:'EC-2026-017',amount:319.80,period:'Monthly',
-   dueDate:new Date('2026-08-01'),status:'upcoming',paidDate:null,
-   notes:'Preferred Plan — August 2026',paymentMethod:null,autoPay:false},
+   dueDate:new Date('2026-07-01'),status:'upcoming',paidDate:null,
+   notes:'Preferred Plan — July 2026',paymentMethod:null,autoPay:false},
 
   // ── BEAUMONT (client2) ── Total Estate Protection $99.95/wk ────────────
   // Season invoices - all paid
@@ -255,12 +251,8 @@ var allInvoices=[
   // Upcoming
   {id:'mh-inv-008',estateId:'mh',clientEmail:'client2@estatecare.com',
    invoiceNum:'EC-2026-016',amount:399.80,period:'Monthly',
-   dueDate:new Date('2026-07-01'),status:'paid',paidDate:new Date('2026-07-01'),
-   notes:'Total Estate Protection — July 2026',paymentMethod:'Credit Card',autoPay:true},
-  {id:'mh-inv-009',estateId:'mh',clientEmail:'client2@estatecare.com',
-   invoiceNum:'EC-2026-018',amount:399.80,period:'Monthly',
-   dueDate:new Date('2026-08-01'),status:'upcoming',paidDate:null,
-   notes:'Total Estate Protection — August 2026',paymentMethod:null,autoPay:true}
+   dueDate:new Date('2026-07-01'),status:'upcoming',paidDate:null,
+   notes:'Total Estate Protection — July 2026',paymentMethod:null,autoPay:true}
 ];
 
 var scheduleItems=[
@@ -1116,18 +1108,13 @@ function renderInvoiceGroups(tab,searchTerm){
     else if(tab==='upcoming') rowsToShow=upcoming;
     else rowsToShow=estInv.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);});
 
-    // Skip estate entirely in attention/upcoming tabs if nothing to show there, UNLESS attention tab (show "all caught up")
-    if(tab!=='all'&&!rowsToShow.length&&tab==='upcoming') return;
+    // Skip estate entirely if nothing relevant to show in this tab
+    if(tab==='attention'&&!overdue.length) return;
+    if(tab==='upcoming'&&!upcoming.length) return;
 
     html+='<div class="sec">'+e.name+'</div>';
 
-    if(tab==='attention'&&!overdue.length){
-      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;border-left:3px solid var(--green)">'
-        +'<div style="flex:1"><div style="font-size:12px">All caught up</div>'
-        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(upcoming.length?'Next due '+new Date(upcoming[0].dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'No upcoming invoices')+'</div></div>'
-        +'<div style="color:var(--green);font-size:16px">&#10003;</div>'
-        +'</div>';
-    } else {
+    {
       rowsToShow.forEach(function(inv){
         var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
         var daysLate=inv.status==='unpaid'?Math.floor((today-new Date(inv.dueDate))/86400000):0;
@@ -1146,7 +1133,13 @@ function renderInvoiceGroups(tab,searchTerm){
       +'</div>';
   });
 
-  if(!html) html='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices found</div>';
+  if(!html){
+    if(tab==='attention'){
+      html='<div class="card" style="text-align:center;padding:30px;border-color:var(--green)"><div style="color:var(--green);font-size:24px;margin-bottom:8px">&#10003;</div><div style="font-size:12px;color:var(--text)">All clients are caught up</div><div style="font-size:10px;color:var(--dim);margin-top:4px">No overdue invoices right now</div></div>';
+    } else {
+      html='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices found</div>';
+    }
+  }
   return html;
 }
 
