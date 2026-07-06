@@ -453,6 +453,7 @@ function render(html){
       else if(a==='client') goClientDetail(this.getAttribute('data-id'));
       else if(a==='inspector') goInspectorDetail(this.getAttribute('data-id'));
       else if(a==='nav'){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();}
+      else if(a==='esthistory'){goEstateInvoiceHistory(this.getAttribute('data-id'));}
     });
   });
   // Inspector switch cards
@@ -689,6 +690,7 @@ function goTeam(tab){
     +'</div>';
 
   if(tab==='clients'){
+    html+='<button class="btn-outline" onclick="goAddClient()" style="margin-bottom:14px">+ Add Client</button>';
     clients.forEach(function(c){
       var e=estates.find(function(x){return x.id===c.estateId;});
       var sc=e?liveScore(e):{score:0};
@@ -798,6 +800,14 @@ function saveInspector(){
   goTeam('inspectors');
 }
 
+// ── ADD CLIENT (links to same signup flow clients use) ────────────────────
+function goAddClient(){
+  // Pass manager context so index.html knows this signup is staff-assisted
+  // (skips password/payment fields, ties new client to this manager's tenant)
+  localStorage.setItem('ec_staff_signup',JSON.stringify({managerEmail:currentUser.email,managerName:currentUser.name}));
+  window.location.href=base+'index.html?staffAdd=client';
+}
+
 function goInspectorDetail(inspId){
   var insp=inspectors.find(function(i){return i.id===inspId;});
   if(!insp) return;
@@ -850,8 +860,17 @@ function goInspectorDetail(inspId){
 // ── ESTATES ───────────────────────────────────────────────────────────────
 function goEstates(){
   var html=topBar('Estates',estates.length+' Properties','goDash')
-    +'<div class="sc">';
-  estates.forEach(function(e){
+    +'<div class="sc">'
+    +'<input id="estSearch" oninput="filterEstates(this.value)" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:15px;padding:11px 14px;outline:none;margin-bottom:16px" placeholder="Search by name, client, or address…">'
+    +'<div id="estList">'
+    +estateCardsHtml(estates)
+    +'</div></div>'+nav('dash');
+  render(html);
+}
+
+function estateCardsHtml(list){
+  var html='';
+  list.forEach(function(e){
     var sc=liveScore(e);
     var insp=inspectors.find(function(i){return i.id===e.contract.assignedInspector;});
     html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:10px">'
@@ -863,8 +882,26 @@ function goEstates(){
       +'<div style="font-size:9px;color:var(--dim)">Inspector: '+(insp?insp.name:'Unassigned')+'</div>'
       +'</div>';
   });
-  html+='</div>'+nav('dash');
-  render(html);
+  if(!list.length) html='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No estates found</div>';
+  return html;
+}
+
+function filterEstates(v){
+  v=v.toLowerCase();
+  var filtered=estates.filter(function(e){
+    return e.name.toLowerCase().indexOf(v)>=0
+      ||e.clientName.toLowerCase().indexOf(v)>=0
+      ||e.address.toLowerCase().indexOf(v)>=0;
+  });
+  var el=document.getElementById('estList');
+  if(el) el.innerHTML=estateCardsHtml(filtered);
+  // Re-wire data-action clicks since innerHTML replaced them
+  document.querySelectorAll('#estList [data-action="estate"]').forEach(function(card){
+    card.addEventListener('click',function(){
+      _estateDetailOrigin='goEstates';
+      goEstateDetail(this.getAttribute('data-id'));
+    });
+  });
 }
 
 var _estateDetailOrigin='goEstates';
@@ -993,38 +1030,124 @@ function mgrInspectionDetail(estateId, inspIdx){
 }
 
 // ── INVOICES ──────────────────────────────────────────────────────────────
-function goInvoices(filterStatus){
-  filterStatus=filterStatus||'all';
-  var list=allInvoices.slice();
-  if(filterStatus!=='all') list=list.filter(function(i){return i.status===filterStatus;});
+function goInvoices(tab){
+  tab=tab||'attention';
+  window._invTab=tab;
+  var today=new Date();
 
-  var html=topBar('Invoices',filterStatus==='all'?'All Invoices':filterStatus.charAt(0).toUpperCase()+filterStatus.slice(1),'goDash')
+  var html=topBar('Invoices',tabLabel(tab),'goDash')
     +'<div class="sc">'
-    +'<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">'
-    +invFilterBtn('all',filterStatus)+invFilterBtn('unpaid',filterStatus)+invFilterBtn('upcoming',filterStatus)+invFilterBtn('paid',filterStatus)
-    +'</div>';
+    +'<input id="invSearch" oninput="filterInvoicesByTab()" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:15px;padding:11px 14px;outline:none;margin-bottom:14px" placeholder="Search estate, client, or address…">'
+    +'<div style="display:flex;gap:8px;margin-bottom:16px">'
+    +invTabBtn('attention','Needs Attention',tab)
+    +invTabBtn('upcoming','Upcoming',tab)
+    +invTabBtn('all','All History',tab)
+    +'</div>'
+    +'<div id="invGroups">'
+    +renderInvoiceGroups(tab,'')
+    +'</div></div>'+nav('billing');
+  render(html);
+}
 
-  list.sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
-    var e=estates.find(function(x){return x.id===inv.estateId;});
-    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
-    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center">'
-      +'<div><div style="font-size:9px;color:var(--dim)">'+inv.invoiceNum+'</div>'
-      +'<div style="font-size:12px;margin-top:2px">'+(e?e.name:'')+'</div>'
-      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.notes+'</div></div>'
-      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:18px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
-      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div></div>'
-      +'</div></div>';
+function tabLabel(tab){
+  return tab==='attention'?'Needs Attention':tab==='upcoming'?'Upcoming':'All History';
+}
+
+function invTabBtn(val,label,active){
+  var sel=val===active;
+  return '<button onclick="goInvoices(\''+val+'\')" style="flex:1;background:'+(sel?'var(--gd)':'transparent')+';border:1px solid '+(sel?'var(--gold)':'var(--border)')+';border-radius:14px;color:'+(sel?'var(--gl)':'var(--dim)')+';font-family:Montserrat,sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:8px 4px;cursor:pointer">'+label+'</button>';
+}
+
+function filterInvoicesByTab(){
+  var v=document.getElementById('invSearch').value;
+  var el=document.getElementById('invGroups');
+  if(el) el.innerHTML=renderInvoiceGroups(window._invTab||'attention',v);
+  document.querySelectorAll('#invGroups [data-action="esthistory"]').forEach(function(card){
+    card.addEventListener('click',function(){goEstateInvoiceHistory(this.getAttribute('data-id'));});
   });
-  if(!list.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices found</div>';
+}
+
+function renderInvoiceGroups(tab,searchTerm){
+  var today=new Date();
+  searchTerm=(searchTerm||'').toLowerCase();
+
+  var matchingEstates=estates.filter(function(e){
+    if(!searchTerm) return true;
+    return e.name.toLowerCase().indexOf(searchTerm)>=0
+      ||e.clientName.toLowerCase().indexOf(searchTerm)>=0
+      ||e.address.toLowerCase().indexOf(searchTerm)>=0;
+  });
+
+  var html='';
+  matchingEstates.forEach(function(e){
+    var estInv=allInvoices.filter(function(i){return i.estateId===e.id;});
+    var overdue=estInv.filter(function(i){return i.status==='unpaid';});
+    var upcoming=estInv.filter(function(i){return i.status==='upcoming';});
+
+    // Decide what to show for this estate based on tab
+    var rowsToShow=[];
+    if(tab==='attention') rowsToShow=overdue;
+    else if(tab==='upcoming') rowsToShow=upcoming;
+    else rowsToShow=estInv.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);});
+
+    // Skip estate entirely in attention/upcoming tabs if nothing to show there, UNLESS attention tab (show "all caught up")
+    if(tab!=='all'&&!rowsToShow.length&&tab==='upcoming') return;
+
+    html+='<div class="sec">'+e.name+'</div>';
+
+    if(tab==='attention'&&!overdue.length){
+      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;border-left:3px solid var(--green)">'
+        +'<div style="flex:1"><div style="font-size:12px">All caught up</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(upcoming.length?'Next due '+new Date(upcoming[0].dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'No upcoming invoices')+'</div></div>'
+        +'<div style="color:var(--green);font-size:16px">&#10003;</div>'
+        +'</div>';
+    } else {
+      rowsToShow.forEach(function(inv){
+        var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+        var daysLate=inv.status==='unpaid'?Math.floor((today-new Date(inv.dueDate))/86400000):0;
+        html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+'">'
+          +'<div style="flex:1">'
+          +'<div style="font-size:12px">'+inv.notes+'</div>'
+          +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Due '+new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(daysLate>0?' &middot; '+daysLate+' days late':'')+'</div>'
+          +'</div>'
+          +'<div style="font-family:var(--ff);font-size:18px;color:'+col+'">$'+inv.amount.toFixed(2)+'</div>'
+          +'</div>';
+      });
+    }
+
+    html+='<div class="card tap" data-action="esthistory" data-id="'+e.id+'" style="text-align:center;padding:10px;cursor:pointer;background:transparent;border-style:dashed;margin-bottom:16px">'
+      +'<span style="font-size:10px;color:var(--gold)">View full history ('+estInv.length+' invoices) &#8250;</span>'
+      +'</div>';
+  });
+
+  if(!html) html='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices found</div>';
+  return html;
+}
+
+function goEstateInvoiceHistory(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var estInv=allInvoices.filter(function(i){return i.estateId===estateId;}).sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);});
+
+  var html=topBar(e.name,'Full Invoice History','goInvoices')
+    +'<div class="sc">';
+  estInv.forEach(function(inv){
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+'">'
+      +'<div style="flex:1">'
+      +'<div style="font-size:9px;color:var(--dim)">'+inv.invoiceNum+'</div>'
+      +'<div style="font-size:12px;margin-top:2px">'+inv.notes+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Due '+new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'</div>'
+      +'</div>'
+      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:18px;color:'+col+'">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div></div>'
+      +'</div>';
+  });
+  if(!estInv.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices for this estate</div>';
   html+='</div>'+nav('billing');
   render(html);
 }
-function invFilterBtn(status,active){
-  var label=status==='all'?'All':status.charAt(0).toUpperCase()+status.slice(1);
-  var sel=status===active;
-  return '<button onclick="goInvoices(\''+status+'\')" style="background:'+(sel?'var(--gd)':'transparent')+';border:1px solid '+(sel?'var(--gold)':'var(--border)')+';border-radius:12px;color:'+(sel?'var(--gl)':'var(--dim)')+';font-family:Montserrat,sans-serif;font-size:10px;padding:7px 14px;cursor:pointer">'+label+'</button>';
-}
+
 
 // ── SCHEDULE ──────────────────────────────────────────────────────────────
 var mgCalViewDate=new Date();
@@ -1078,11 +1201,11 @@ function renderMgrCal(vd){
   html+='</div>';
 
   var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=today;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
-  html+='<div class="sec">Upcoming</div>';
+  html+='<div class="sec">Next Up</div>';
   if(!upcoming.length){
     html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px;background:var(--ch2);border:1px solid var(--border);border-radius:2px">No upcoming inspections scheduled</div>';
   } else {
-    upcoming.forEach(function(s){
+    upcoming.slice(0,5).forEach(function(s){
       var e=estates.find(function(x){return x.id===s.estateId;});
       var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
       if(!e) return;
@@ -1095,7 +1218,34 @@ function renderMgrCal(vd){
         +'<div style="font-size:9px;color:var(--dim);margin-top:2px">'+e.postalCode+'</div></div>'
         +'</div>';
     });
+    if(upcoming.length>5){
+      html+='<div class="card tap" onclick="goFullSchedule()" style="text-align:center;padding:10px;cursor:pointer;background:transparent;border-style:dashed">'
+        +'<span style="font-size:10px;color:var(--gold)">View full schedule ('+upcoming.length+' upcoming) &#8250;</span>'
+        +'</div>';
+    }
   }
+  html+='</div>'+nav('cal');
+  render(html);
+}
+
+function goFullSchedule(){
+  var today=new Date();
+  var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=today;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  var html=topBar('Full Schedule',upcoming.length+' Upcoming Inspections','goSchedule')
+    +'<div class="sc">';
+  upcoming.forEach(function(s){
+    var e=estates.find(function(x){return x.id===s.estateId;});
+    var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
+    if(!e) return;
+    var dStr=new Date(s.date).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'});
+    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+'</div></div>'
+      +'<div style="text-align:right"><div style="font-size:11px;color:var(--gold)">'+dStr+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:2px">'+e.postalCode+'</div></div>'
+      +'</div>';
+  });
   html+='</div>'+nav('cal');
   render(html);
 }

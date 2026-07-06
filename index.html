@@ -406,13 +406,15 @@ function selectTier(id){
 
 // ── STEP 2 — YOUR INFORMATION ─────────────────────────────────────────────
 function goToSignup(){
-  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="showTiers()">&#8592;</button><div><div class="topbar-title">Your Information</div><div class="topbar-sub">Step 2 of 4</div></div></div></div>'
+  var isStaffAdd=window._staffSignupMode===true;
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="showTiers()">&#8592;</button><div><div class="topbar-title">'+(isStaffAdd?'Client Information':'Your Information')+'</div><div class="topbar-sub">Step 2 of 4</div></div></div></div>'
     +'<div class="sc">'+stepDots(2,4)
+    +(isStaffAdd?'<div class="card" style="margin-bottom:16px;background:rgba(201,168,76,0.06)"><div style="font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Staff-Assisted Signup</div><div style="font-size:11px;color:var(--dim);line-height:1.7">The client will set their own password and payment method when they first log in.</div></div>':'')
     +'<div class="sec">Account</div>'
     +'<div class="card">'
     +ff('Full Name','text','sName','e.g. Michael Hartwell',signup.name)
     +ff('Email','email','sEmail','your@email.com',signup.email)
-    +ff('Password','password','sPass','Create a password','')
+    +(isStaffAdd?'':ff('Password','password','sPass','Create a password',''))
     +ff('Phone','tel','sPhone','',signup.phone)
     +'</div>'
     +'<div class="sec">Secondary Contact</div>'
@@ -421,7 +423,7 @@ function goToSignup(){
     +ff('Phone','tel','sSecPhone','',signup.secPhone)
     +ff('Secondary Address','text','sSecAddr','Where you live while away',signup.secAddr)
     +'</div>'
-    +'<div id="infoErr" class="err">Please fill in your name, email and password.</div>'
+    +'<div id="infoErr" class="err">Please fill in '+(isStaffAdd?'the name and email':'your name, email and password')+'.</div>'
     +'<button class="btn-gold" onclick="saveInfo()">Continue</button>'
     +'<button class="btn-ghost" onclick="showTiers()">&#8592; Back</button>'
     +'</div>';
@@ -429,10 +431,11 @@ function goToSignup(){
 }
 
 function saveInfo(){
+  var isStaffAdd=window._staffSignupMode===true;
   var n=document.getElementById('sName').value.trim();
   var e=document.getElementById('sEmail').value.trim();
-  var p=document.getElementById('sPass').value;
-  if(!n||!e||!p){document.getElementById('infoErr').classList.add('show');return;}
+  var p=isStaffAdd?'':document.getElementById('sPass').value;
+  if(!n||!e||(!isStaffAdd&&!p)){document.getElementById('infoErr').classList.add('show');return;}
   signup.name=n;signup.email=e;signup.password=p;
   signup.phone=document.getElementById('sPhone').value.trim();
   signup.secName=document.getElementById('sSecName').value.trim();
@@ -657,6 +660,7 @@ function showLogin(){
     +'<input class="inp" type="password" id="loginPass" placeholder="••••••••">'
     +'<div id="loginErr" style="display:none;font-size:10px;color:var(--red);letter-spacing:1px;text-align:center;margin-bottom:12px">Incorrect email or password</div>'
     +'<button class="btn-gold" onclick="doLogin()">Sign In</button>'
+    +'<div style="text-align:center;margin-top:12px"><span onclick="showForgotPassword()" style="font-size:11px;color:var(--gold);cursor:pointer;text-decoration:underline">Forgot Password?</span></div>'
     +'<button class="btn-ghost" onclick="showWelcome()">&#8592; Back</button>'
     +'</div></div>'
   );
@@ -664,6 +668,38 @@ function showLogin(){
     var el=document.getElementById('loginPass');
     if(el) el.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
   },100);
+}
+
+function showForgotPassword(){
+  render(
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a);min-height:100vh">'
+    +'<div style="text-align:center;margin-bottom:24px">'
+    +'<img src="Logo%20(Master).png" alt="EstateCare" style="width:100px;margin-bottom:8px">'
+    +'<div class="gold-line"></div>'
+    +'</div>'
+    +'<div class="card" style="width:100%;max-width:360px">'
+    +'<div style="font-family:var(--ff);font-size:20px;color:var(--gl);margin-bottom:6px;text-align:center">Reset Password</div>'
+    +'<div style="font-size:11px;color:var(--dim);text-align:center;margin-bottom:20px;line-height:1.7">Enter the email associated with your account and we will send you a link to reset your password.</div>'
+    +'<div class="lbl">Email</div>'
+    +'<input class="inp" type="email" id="forgotEmail" placeholder="your@email.com">'
+    +'<div id="forgotErr" style="display:none;font-size:10px;color:var(--red);letter-spacing:1px;text-align:center;margin-bottom:12px">Please enter your email</div>'
+    +'<button class="btn-gold" onclick="submitForgotPassword()">Send Reset Link</button>'
+    +'<button class="btn-ghost" onclick="showLogin()">&#8592; Back to Sign In</button>'
+    +'</div></div>'
+  );
+}
+
+function submitForgotPassword(){
+  var email=document.getElementById('forgotEmail').value.trim();
+  if(!email){document.getElementById('forgotErr').style.display='block';return;}
+  render(
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a);min-height:100vh;text-align:center">'
+    +'<div style="width:64px;height:64px;border-radius:50%;background:rgba(76,175,125,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px">&#10003;</div>'
+    +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl);margin-bottom:8px">Check Your Email</div>'
+    +'<div style="font-size:11px;color:var(--dim);line-height:1.8;max-width:320px">If an account exists for <span style="color:var(--gold)">'+email+'</span>, you will receive password reset instructions shortly.</div>'
+    +'<button class="btn-ghost" style="margin-top:28px;max-width:280px" onclick="showLogin()">&#8592; Back to Sign In</button>'
+    +'</div>'
+  );
 }
 
 function doLogin(){
@@ -680,7 +716,13 @@ function doLogin(){
   else window.location.href=base+'client.html';
 }
 
-showWelcome();
+// Detect staff-assisted client signup (manager adding a client)
+window._staffSignupMode=new URLSearchParams(window.location.search).get('staffAdd')==='client';
+if(window._staffSignupMode){
+  showTiers();
+} else {
+  showWelcome();
+}
 
 // PWA banner - called after login, not on welcome screen
 function checkShowPWA(){
