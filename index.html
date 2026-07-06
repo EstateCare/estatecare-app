@@ -130,7 +130,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
+html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:#0a0a0a;}
 :root{--black:#0a0a0a;--ch:#141414;--ch2:#1c1c1c;--ch3:#242424;--gold:#c9a84c;--gl:#e2c97e;--gd:rgba(201,168,76,0.15);--green:#4caf7d;--yellow:#e6b84a;--red:#e05c5c;--text:#f0ece4;--dim:#9a9488;--border:rgba(201,168,76,0.2);--ff:"Cormorant Garamond",serif;}
 #app{position:fixed;inset:0;display:flex;flex-direction:column;font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);background:var(--black);}
 #screen{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
@@ -263,7 +263,7 @@ function fs(label,id,opts,val){
 // ── WELCOME ───────────────────────────────────────────────────────────────
 function showWelcome(){
   render(
-    '<div class="welcome-bg" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 40px;min-height:100vh">'
+    '<div class="welcome-bg" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 40px">'
     +'<div style="width:100%;padding:0 32px;display:flex;flex-direction:column;gap:12px">'
     +'<button class="btn-gold" onclick="showRoleSelector()">Get Started</button>'
     +'<button class="btn-outline-gold" onclick="showLogin()">Sign In</button>'
@@ -344,7 +344,7 @@ function submitManagerSignup(){
   var company=document.getElementById('mgCompany').value.trim();
   if(!name||!email||!pass||!company){document.getElementById('mgErr').style.display='block';return;}
   render(
-    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;min-height:100vh">'
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center">'
     +'<div style="width:72px;height:72px;border-radius:50%;background:rgba(76,175,125,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px">&#10003;</div>'
     +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl);margin-bottom:8px">Request Submitted</div>'
     +'<div class="gold-line"></div>'
@@ -606,7 +606,7 @@ function confirmSignup(){
   localStorage.setItem('ec_new_estate',JSON.stringify(estateData));
 
   render(
-    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;min-height:100vh;background:radial-gradient(ellipse at 50% 30%,#0a1a0a,#0a0a0a)">'
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;background:radial-gradient(ellipse at 50% 30%,#0a1a0a,#0a0a0a)">'
     +'<div style="width:80px;height:80px;border-radius:50%;background:rgba(76,175,125,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px">&#10003;</div>'
     +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl);margin-bottom:8px">Welcome, '+signup.name.split(' ')[0]+'</div>'
     +'<div class="gold-line"></div>'
@@ -647,7 +647,7 @@ var users=[
 
 function showLogin(){
   render(
-    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a);min-height:100vh">'
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a)">'
     +'<div style="text-align:center;margin-bottom:32px">'
     +'<img src="Logo%20(Master).png" alt="EstateCare" style="width:120px;margin-bottom:8px">'
     +'<div class="gold-line"></div>'
@@ -672,7 +672,7 @@ function showLogin(){
 
 function showForgotPassword(){
   render(
-    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a);min-height:100vh">'
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a)">'
     +'<div style="text-align:center;margin-bottom:24px">'
     +'<img src="Logo%20(Master).png" alt="EstateCare" style="width:100px;margin-bottom:8px">'
     +'<div class="gold-line"></div>'
@@ -693,7 +693,7 @@ function submitForgotPassword(){
   var email=document.getElementById('forgotEmail').value.trim();
   if(!email){document.getElementById('forgotErr').style.display='block';return;}
   render(
-    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a);min-height:100vh;text-align:center">'
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 60% 20%,#1e1a0e,#0a0a0a);text-align:center">'
     +'<div style="width:64px;height:64px;border-radius:50%;background:rgba(76,175,125,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px">&#10003;</div>'
     +'<div style="font-family:var(--ff);font-size:22px;color:var(--gl);margin-bottom:8px">Check Your Email</div>'
     +'<div style="font-size:11px;color:var(--dim);line-height:1.8;max-width:320px">If an account exists for <span style="color:var(--gold)">'+email+'</span>, you will receive password reset instructions shortly.</div>'

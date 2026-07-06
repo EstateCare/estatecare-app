@@ -523,7 +523,7 @@ function goDash(){
     +statBox('Active Clients',activeClients,null,null,'goTeam(\'clients\')')
     +statBox('Inspectors',activeInspectors,null,null,'goTeam(\'inspectors\')')
     +statBox('This Month Revenue','$'+mtdRevenue.toLocaleString('en',{maximumFractionDigits:0}),null,'var(--green)','goFinancials()')
-    +statBox('Unpaid Invoices','$'+unpaidTotal.toLocaleString('en',{maximumFractionDigits:0}),null,unpaidTotal>0?'var(--red)':'var(--green)','goInvoices(\'unpaid\')')
+    +statBox('Unpaid Invoices','$'+unpaidTotal.toLocaleString('en',{maximumFractionDigits:0}),null,unpaidTotal>0?'var(--red)':'var(--green)','goInvoices(\'attention\')')
     +'</div>';
 
   // Today's schedule
@@ -539,9 +539,10 @@ function goDash(){
       if(!e) return;
       var isDone=s.status==='completed';
       var timeStr=new Date(s.date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+(isDone?'var(--green)':'var(--gold)')+'">'
+      html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+(isDone?'var(--green)':'var(--gold)')+';cursor:pointer">'
         +'<div class="cat-ico">'+e.icon+'</div>'
         +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
         +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+' &nbsp;&#183;&nbsp; '+(isDone?'Completed '+timeStr:timeStr)+'</div></div>'
         +'<div style="font-size:9px;color:'+(isDone?'var(--green)':'var(--gold)')+';text-transform:uppercase;letter-spacing:1px;white-space:nowrap">'+(isDone?'Done':'Scheduled')+'</div>'
         +'</div>';
@@ -1426,37 +1427,39 @@ function renderMgrCal(vd){
   }
   html+='</div>';
 
-  var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=today;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
-  html+='<div class="sec">Next Up</div>';
-  if(!upcoming.length){
-    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px;background:var(--ch2);border:1px solid var(--border);border-radius:2px">No upcoming inspections scheduled</div>';
+  var todayStr2=today.toDateString();
+  var nextUp=scheduleItems.filter(function(s){
+    return new Date(s.date).toDateString()===todayStr2&&s.status!=='completed';
+  }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  html+='<div class="sec">Next Up (Today)</div>';
+  if(!nextUp.length){
+    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px;background:var(--ch2);border:1px solid var(--border);border-radius:2px">No remaining inspections today</div>';
   } else {
-    upcoming.slice(0,5).forEach(function(s){
+    nextUp.forEach(function(s){
       var e=estates.find(function(x){return x.id===s.estateId;});
       var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
       if(!e) return;
-      var dStr=new Date(s.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-      html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
+      var timeStr2=new Date(s.date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer">'
         +'<div class="cat-ico">'+e.icon+'</div>'
         +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
         +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+'</div></div>'
-        +'<div style="text-align:right"><div style="font-size:11px;color:var(--gold)">'+dStr+'</div>'
+        +'<div style="text-align:right"><div style="font-size:11px;color:var(--gold)">'+timeStr2+'</div>'
         +'<div style="font-size:9px;color:var(--dim);margin-top:2px">'+e.postalCode+'</div></div>'
         +'</div>';
     });
-    if(upcoming.length>5){
-      html+='<div class="card tap" onclick="goFullSchedule()" style="text-align:center;padding:10px;cursor:pointer;background:transparent;border-style:dashed">'
-        +'<span style="font-size:10px;color:var(--gold)">View full schedule ('+upcoming.length+' upcoming) &#8250;</span>'
-        +'</div>';
-    }
   }
+  html+='<div class="card tap" onclick="goFullSchedule()" style="text-align:center;padding:10px;cursor:pointer;background:transparent;border-style:dashed;margin-top:4px">'
+    +'<span style="font-size:10px;color:var(--gold)">View Full Upcoming Schedule &#8250;</span>'
+    +'</div>';
   html+='</div>'+nav('cal');
   render(html);
 }
 
 function goFullSchedule(){
   var today=new Date();
-  var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=today;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  var upcoming=scheduleItems.filter(function(s){return new Date(s.date)>=today&&s.status!=='completed';}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
   var html=topBar('Full Schedule',upcoming.length+' Upcoming Inspections','goSchedule')
     +'<div class="sc">';
   upcoming.forEach(function(s){
@@ -1464,9 +1467,10 @@ function goFullSchedule(){
     var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
     if(!e) return;
     var dStr=new Date(s.date).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'});
-    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer">'
       +'<div class="cat-ico">'+e.icon+'</div>'
       +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+'</div></div>'
       +'<div style="text-align:right"><div style="font-size:11px;color:var(--gold)">'+dStr+'</div>'
       +'<div style="font-size:9px;color:var(--dim);margin-top:2px">'+e.postalCode+'</div></div>'
@@ -1489,9 +1493,10 @@ function mgrDayDetail(y,m,day){
     var insp=inspectors.find(function(i){return i.id===s.inspectorId;});
     if(!e) return;
     var isDone=s.status==='completed';
-    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+(isDone?'var(--green)':'var(--gold)')+'">'
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+(isDone?'var(--green)':'var(--gold)')+';cursor:pointer">'
       +'<div class="cat-ico">'+e.icon+'</div>'
       +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+(insp?insp.name:'Unassigned')+'</div></div>'
       +'<div style="font-size:9px;color:'+(isDone?'var(--green)':'var(--gold)')+';text-transform:uppercase;letter-spacing:1px">'+(isDone?'Done':'Scheduled')+'</div>'
       +'</div>';
