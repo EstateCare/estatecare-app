@@ -462,6 +462,7 @@ function render(html){
       else if(a==='inspector') goInspectorDetail(this.getAttribute('data-id'));
       else if(a==='nav'){var fn=this.getAttribute('data-fn');if(fn&&window[fn])window[fn]();}
       else if(a==='esthistory'){goEstateInvoiceHistory(this.getAttribute('data-id'));}
+      else if(a==='mgrinv'){var bk=this.getAttribute('data-back')||'goFinancials';mgrInvoiceDetail(this.getAttribute('data-id'),bk);}
     });
   });
   // Inspector switch cards
@@ -619,6 +620,39 @@ function doSwitchToInspector(insp){
 }
 
 // ── FINANCIALS ────────────────────────────────────────────────────────────
+function mgrInvoiceDetail(invId,backFn){
+  var inv=allInvoices.find(function(i){return i.id===invId;});
+  if(!inv) return;
+  var e=estates.find(function(x){return x.id===inv.estateId;});
+  var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+  var today=new Date();
+  var daysLate=inv.status==='unpaid'?Math.floor((today-new Date(inv.dueDate))/86400000):0;
+
+  var html=topBar(inv.invoiceNum,e?e.name:'',backFn||'goFinancials')
+    +'<div class="sc">'
+    +'<div class="card" style="border-color:'+col+';margin-bottom:16px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+    +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">'+(e?e.name:'')+'</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:2px">'+(e?e.clientName:'')+'</div></div>'
+    +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;background:rgba(0,0,0,.2);padding:4px 10px;border-radius:10px">'+inv.status+'</div>'
+    +'</div>'
+    +'<div style="font-family:var(--ff);font-size:36px;color:var(--gl);margin-bottom:6px">$'+inv.amount.toFixed(2)+'</div>'
+    +'<div style="font-size:12px;color:var(--text);margin-bottom:4px">'+inv.notes+'</div>'
+    +'<div style="font-size:10px;color:var(--dim)">Due '+new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+(daysLate>0?' &middot; <span style="color:var(--red)">'+daysLate+' days late</span>':'')+'</div>'
+    +(inv.status==='paid'&&inv.paidDate?'<div style="font-size:10px;color:var(--green);margin-top:8px">&#10003; Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
+    +(inv.autoPay?'<div style="font-size:10px;color:var(--green);margin-top:4px">&#10003; Auto-Pay Enabled</div>':'')
+    +'</div>'
+    +'<div class="sec">Property</div>'
+    +(e?'<div class="card tap" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;cursor:pointer">'
+      +'<div class="cat-ico">'+e.icon+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--ff);font-size:15px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+e.address+'</div></div>'
+      +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+      +'</div>':'')
+    +'</div>'+nav('billing');
+  render(html);
+}
+
 function goMonthInvoices(year,month){
   var monthDate=new Date(year,month);
   var monthLabel=monthDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
@@ -632,7 +666,7 @@ function goMonthInvoices(year,month){
   monthInvoices.forEach(function(inv){
     var e=estates.find(function(x){return x.id===inv.estateId;});
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
-    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+'">'
+    html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goFinancials" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
       +'<div style="flex:1">'
       +'<div style="font-size:12px">'+(e?e.name:'')+'</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.notes+'</div>'
@@ -1157,7 +1191,7 @@ function renderInvoiceGroups(tab,searchTerm){
       rowsToShow.forEach(function(inv){
         var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
         var daysLate=inv.status==='unpaid'?Math.floor((today-new Date(inv.dueDate))/86400000):0;
-        html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+'">'
+        html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goInvoices" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
           +'<div style="flex:1">'
           +'<div style="font-size:12px">'+inv.notes+'</div>'
           +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Due '+new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(daysLate>0?' &middot; '+daysLate+' days late':'')+'</div>'
@@ -1191,7 +1225,7 @@ function goEstateInvoiceHistory(estateId){
     +'<div class="sc">';
   estInv.forEach(function(inv){
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
-    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+'">'
+    html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goInvoices" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
       +'<div style="flex:1">'
       +'<div style="font-size:9px;color:var(--dim)">'+inv.invoiceNum+'</div>'
       +'<div style="font-size:12px;margin-top:2px">'+inv.notes+'</div>'
