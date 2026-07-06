@@ -1078,6 +1078,24 @@ function renderInvoiceGroups(tab,searchTerm){
       ||e.address.toLowerCase().indexOf(searchTerm)>=0;
   });
 
+  // Sort so estates needing attention appear first
+  matchingEstates=matchingEstates.slice().sort(function(a,b){
+    var aInv=allInvoices.filter(function(i){return i.estateId===a.id;});
+    var bInv=allInvoices.filter(function(i){return i.estateId===b.id;});
+    var aOverdue=aInv.filter(function(i){return i.status==='unpaid';}).length;
+    var bOverdue=bInv.filter(function(i){return i.status==='unpaid';}).length;
+    if(tab==='attention'){
+      if(aOverdue!==bOverdue) return bOverdue-aOverdue; // most overdue first
+    } else if(tab==='upcoming'){
+      var aUp=aInv.filter(function(i){return i.status==='upcoming';});
+      var bUp=bInv.filter(function(i){return i.status==='upcoming';});
+      var aNext=aUp.length?new Date(aUp[0].dueDate):new Date(8640000000000000);
+      var bNext=bUp.length?new Date(bUp[0].dueDate):new Date(8640000000000000);
+      return aNext-bNext; // soonest due first
+    }
+    return a.name.localeCompare(b.name);
+  });
+
   var html='';
   matchingEstates.forEach(function(e){
     var estInv=allInvoices.filter(function(i){return i.estateId===e.id;});
