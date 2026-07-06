@@ -697,22 +697,92 @@ function toggleRow(label,sub,on){
     +'</div></div>';
 }
 
-function goClientInvoices(){
+function goClientInvoices(filterStatus){
+  filterStatus=filterStatus||'all';
+  window._invClientFilter=filterStatus;
   var myInvoices=clientInvoices;
   var unpaidTotal=myInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
   var upcomingCount=myInvoices.filter(function(i){return i.status==='upcoming';}).length;
+  var paidCount=myInvoices.filter(function(i){return i.status==='paid';}).length;
+
+  function cardStyle(status){
+    var active=filterStatus===status;
+    if(status==='unpaid') return 'border-color:'+(active?'var(--red)':unpaidTotal>0?'var(--red)':'var(--border)')+';background:'+(active?'rgba(224,92,92,0.1)':'transparent');
+    if(status==='upcoming') return 'border-color:'+(active?'var(--gold)':'var(--border)')+';background:'+(active?'rgba(201,168,76,0.1)':'transparent');
+    if(status==='paid') return 'border-color:'+(active?'var(--green)':'var(--border)')+';background:'+(active?'rgba(76,175,125,0.1)':'transparent');
+    return '';
+  }
 
   var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" data-action="cnav" data-fn="goDashboard">&#8592;</button><div><div class="topbar-title">Invoices</div><div class="topbar-sub">Billing & Payments</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">'
-    +'<div class="card" style="padding:12px;text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Upcoming</div><div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+upcomingCount+'</div></div>'
-    +'<div class="card" style="padding:12px;text-align:center;border-color:'+(unpaidTotal>0?'var(--red)':'var(--border)')+'"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Unpaid</div><div style="font-family:var(--ff);font-size:20px;color:'+(unpaidTotal>0?'var(--red)':'var(--gl)')+'">$'+unpaidTotal.toFixed(2)+'</div></div>'
-    +'<div class="card" style="padding:12px;text-align:center"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Paid</div><div style="font-family:var(--ff);font-size:20px;color:var(--green)">'+myInvoices.filter(function(i){return i.status==='paid';}).length+'</div></div>'
+    +'<div class="card tap" onclick="goClientInvoices(\'upcoming\')" style="padding:12px;text-align:center;cursor:pointer;'+cardStyle('upcoming')+'"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Upcoming</div><div style="font-family:var(--ff);font-size:20px;color:var(--gl)">'+upcomingCount+'</div></div>'
+    +'<div class="card tap" onclick="goClientInvoices(\'unpaid\')" style="padding:12px;text-align:center;cursor:pointer;'+cardStyle('unpaid')+'"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Unpaid</div><div style="font-family:var(--ff);font-size:20px;color:'+(unpaidTotal>0?'var(--red)':'var(--gl)')+'">$'+unpaidTotal.toFixed(2)+'</div></div>'
+    +'<div class="card tap" onclick="goClientInvoices(\'paid\')" style="padding:12px;text-align:center;cursor:pointer;'+cardStyle('paid')+'"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Paid</div><div style="font-family:var(--ff);font-size:20px;color:var(--green)">'+paidCount+'</div></div>'
     +'</div>'
     +'<input oninput="filterClientInvoices(this.value)" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;padding:10px 14px;outline:none;margin-bottom:16px" placeholder="Search invoices…">'
-    +'<div class="sec">All Invoices</div>'
-    +'<div id="clientInvList">';
-  myInvoices.slice().sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);}).forEach(function(inv){
+    +'<div class="sec">'+(filterStatus==='all'?'All Months':filterStatus.charAt(0).toUpperCase()+filterStatus.slice(1))+'</div>'
+    +'<div id="clientInvList">'
+    +renderInvoiceMonths(filterStatus)
+    +'</div></div>'+clientNav('invoices');
+  render(html);
+}
+
+function renderInvoiceMonths(filterStatus){
+  var myInvoices=clientInvoices;
+  var filtered=filterStatus==='all'?myInvoices:myInvoices.filter(function(i){return i.status===filterStatus;});
+  if(!filtered.length) return '<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px">No invoices found</div>';
+
+  // Group by month/year
+  var months={};
+  filtered.forEach(function(inv){
+    var d=new Date(inv.dueDate);
+    var key=d.getFullYear()+'-'+d.getMonth();
+    if(!months[key]) months[key]=[];
+    months[key].push(inv);
+  });
+
+  var sortedKeys=Object.keys(months).sort(function(a,b){
+    var da=a.split('-'),db=b.split('-');
+    return new Date(db[0],db[1])-new Date(da[0],da[1]);
+  });
+
+  var html='';
+  sortedKeys.forEach(function(key){
+    var parts=key.split('-');
+    var monthDate=new Date(parts[0],parts[1]);
+    var monthLabel=monthDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    var monthInvoices=months[key];
+    var monthTotal=monthInvoices.reduce(function(s,i){return s+i.amount;},0);
+    var hasUnpaid=monthInvoices.some(function(i){return i.status==='unpaid';});
+    var allPaid=monthInvoices.every(function(i){return i.status==='paid';});
+    var col=hasUnpaid?'var(--red)':allPaid?'var(--green)':'var(--gold)';
+
+    html+='<div class="card tap" onclick="goInvoiceMonth(\''+key+'\',\''+filterStatus+'\')" style="border-left:3px solid '+col+';margin-bottom:8px;cursor:pointer">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:14px;font-weight:500">'+monthLabel+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:3px">'+monthInvoices.length+' invoice'+(monthInvoices.length===1?'':'s')+'</div></div>'
+      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:20px;color:var(--gl)">$'+monthTotal.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:4px">View &#8250;</div></div>'
+      +'</div></div>';
+  });
+  return html;
+}
+
+function goInvoiceMonth(key,filterStatus){
+  var parts=key.split('-');
+  var monthDate=new Date(parts[0],parts[1]);
+  var monthLabel=monthDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var monthInvoices=clientInvoices.filter(function(i){
+    var d=new Date(i.dueDate);
+    return d.getFullYear()===parseInt(parts[0])&&d.getMonth()===parseInt(parts[1])
+      &&(filterStatus==='all'||i.status===filterStatus);
+  }).sort(function(a,b){return new Date(a.dueDate)-new Date(b.dueDate);});
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goClientInvoices(\''+filterStatus+'\')">&#8592;</button><div><div class="topbar-title">'+monthLabel+'</div><div class="topbar-sub">Invoices</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+
+  monthInvoices.forEach(function(inv){
     var isPaidRow=(inv.status==='paid'||inv.autoPay);
     var col=isPaidRow?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
     var statusLabel=isPaidRow?'paid':inv.status;
@@ -733,13 +803,15 @@ function goClientInvoices(){
       +'<div style="font-size:9px;color:var(--dim);margin-top:4px">View &#8250;</div>'
       +'</div></div></div>';
   });
-  html+='</div></div>'+clientNav('invoices');
+  if(!monthInvoices.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px">No invoices this month</div>';
+  html+='</div>'+clientNav('invoices');
   render(html);
 }
 
 function filterClientInvoices(v){
-  var e=CE();
-  var filtered=clientInvoices.filter(function(i){
+  var statusFilter=window._invClientFilter||'all';
+  var base=statusFilter==='all'?clientInvoices:clientInvoices.filter(function(i){return i.status===statusFilter;});
+  var filtered=base.filter(function(i){
     return i.notes.toLowerCase().indexOf(v.toLowerCase())>=0
       ||i.status.toLowerCase().indexOf(v.toLowerCase())>=0
       ||i.period.toLowerCase().indexOf(v.toLowerCase())>=0
@@ -768,6 +840,11 @@ function filterClientInvoices(v){
       +'</div></div></div>';
   });
   var el=document.getElementById('clientInvList');
+  if(!v){
+    // Empty search box - restore monthly grouped view
+    if(el) el.innerHTML=renderInvoiceMonths(statusFilter);
+    return;
+  }
   if(el) el.innerHTML=html||'<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px">No invoices found</div>';
 }
 
