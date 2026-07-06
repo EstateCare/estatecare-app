@@ -447,7 +447,11 @@ function genSchedule(estate){
     count++;
   }
 }
-estates.forEach(genSchedule);
+// NOTE: genSchedule() is kept for future use (auto-generating a new estate's
+// schedule when added via Firestore) but must NOT run automatically here —
+// it was overwriting the hand-seeded demo schedule (which extends through
+// March 2027) with a shorter one based only on each contract's start/end date.
+// estates.forEach(genSchedule);
 
 function getMySchedule(){return scheduleItems;} // Will filter by currentUser inspector ID via Firestore
 function getMyForDate(ds){return scheduleItems.filter(function(s){return s.date&&s.date.toDateString()===ds;});}
