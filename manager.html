@@ -653,15 +653,21 @@ function mgrInvoiceDetail(invId,backFn){
   render(html);
 }
 
-function goMonthInvoices(year,month){
+function goMonthInvoicesFiltered(year,month,status){
+  goMonthInvoices(year,month,status);
+}
+
+function goMonthInvoices(year,month,filterStatus){
   var monthDate=new Date(year,month);
   var monthLabel=monthDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
   var monthInvoices=allInvoices.filter(function(i){
     var d=new Date(i.dueDate);
-    return d.getFullYear()===year&&d.getMonth()===month;
+    var matchMonth=d.getFullYear()===year&&d.getMonth()===month;
+    return matchMonth&&(!filterStatus||i.status===filterStatus);
   }).sort(function(a,b){return new Date(a.dueDate)-new Date(b.dueDate);});
 
-  var html=topBar(monthLabel,'Invoices Due This Month','goFinancials')
+  var subLabel=filterStatus?(filterStatus.charAt(0).toUpperCase()+filterStatus.slice(1)+' Invoices'):'Invoices Due This Month';
+  var html=topBar(monthLabel,subLabel,'goFinancials')
     +'<div class="sc">';
   monthInvoices.forEach(function(inv){
     var e=estates.find(function(x){return x.id===inv.estateId;});
@@ -676,7 +682,135 @@ function goMonthInvoices(year,month){
       +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div></div>'
       +'</div>';
   });
-  if(!monthInvoices.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices due this month</div>';
+  if(!monthInvoices.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No '+(filterStatus||'')+' invoices this month</div>';
+  html+='</div>'+nav('billing');
+  render(html);
+}
+
+// ── REPORTS (all invoices, custom date range) ──────────────────────────────
+var _reportsRange={start:null,end:null,preset:'ytd'};
+
+function goReports(preset){
+  preset=preset||_reportsRange.preset||'ytd';
+  _reportsRange.preset=preset;
+  var now=new Date();
+  var start,end;
+
+  if(preset==='ytd'){start=new Date(now.getFullYear(),0,1);end=now;}
+  else if(preset==='last12'){start=new Date(now.getFullYear()-1,now.getMonth(),now.getDate());end=now;}
+  else if(preset==='thisyear'){start=new Date(now.getFullYear(),0,1);end=new Date(now.getFullYear(),11,31);}
+  else if(preset==='lastyear'){start=new Date(now.getFullYear()-1,0,1);end=new Date(now.getFullYear()-1,11,31);}
+  else if(preset==='custom'&&_reportsRange.start&&_reportsRange.end){start=new Date(_reportsRange.start);end=new Date(_reportsRange.end);}
+  else{start=new Date(now.getFullYear(),0,1);end=now;}
+
+  _reportsRange.start=start.toISOString().slice(0,10);
+  _reportsRange.end=end.toISOString().slice(0,10);
+
+  var inRange=allInvoices.filter(function(i){
+    var d=new Date(i.dueDate);
+    return d>=start&&d<=end;
+  });
+
+  var totalPaid=inRange.filter(function(i){return i.status==='paid';}).reduce(function(s,i){return s+i.amount;},0);
+  var totalUnpaid=inRange.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
+  var totalUpcoming=inRange.filter(function(i){return i.status==='upcoming';}).reduce(function(s,i){return s+i.amount;},0);
+  var totalAll=totalPaid+totalUnpaid+totalUpcoming;
+
+  var rangeLabel=start.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' — '+end.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  var html=topBar('Reports',rangeLabel,'goFinancials')
+    +'<div class="sc">'
+    +'<div class="sec">Date Range</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +reportPresetBtn('ytd','Year to Date',preset)
+    +reportPresetBtn('last12','Last 12 Months',preset)
+    +reportPresetBtn('thisyear','This Calendar Year',preset)
+    +reportPresetBtn('lastyear','Last Calendar Year',preset)
+    +'</div>'
+    +'<div class="card tap" onclick="showCustomRangePicker()" style="text-align:center;padding:10px;margin-bottom:20px;'+(preset==='custom'?'border-color:var(--gold)':'')+'">'
+    +'<span style="font-size:10px;color:var(--gold)">'+(preset==='custom'?'Custom: '+rangeLabel:'&#128197; Choose Custom Range')+'</span>'
+    +'</div>'
+
+    +'<div class="card" style="border-color:var(--gold);margin-bottom:16px;text-align:center">'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Total Invoiced</div>'
+    +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl)">$'+totalAll.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div>'
+    +'</div>'
+
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px">'
+    +'<div class="card tap" onclick="goReportInvoiceList(\'paid\')" style="padding:10px;text-align:center">'
+    +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Income</div>'
+    +'<div style="font-family:var(--ff);font-size:16px;color:var(--green);margin-top:4px">$'+totalPaid.toLocaleString('en',{maximumFractionDigits:0})+'</div>'
+    +'</div>'
+    +'<div class="card tap" onclick="goReportInvoiceList(\'unpaid\')" style="padding:10px;text-align:center">'
+    +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Outstanding</div>'
+    +'<div style="font-family:var(--ff);font-size:16px;color:var(--red);margin-top:4px">$'+totalUnpaid.toLocaleString('en',{maximumFractionDigits:0})+'</div>'
+    +'</div>'
+    +'<div class="card tap" onclick="goReportInvoiceList(\'upcoming\')" style="padding:10px;text-align:center">'
+    +'<div style="font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Upcoming</div>'
+    +'<div style="font-family:var(--ff);font-size:16px;color:var(--gold);margin-top:4px">$'+totalUpcoming.toLocaleString('en',{maximumFractionDigits:0})+'</div>'
+    +'</div>'
+    +'</div>'
+
+    +'<div class="card tap" onclick="goReportInvoiceList(\'all\')" style="display:flex;align-items:center;justify-content:space-between">'
+    +'<div style="font-size:11px;color:var(--gl)">View All '+inRange.length+' Invoices in Range</div><div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
+    +'</div>'+nav('billing');
+  render(html);
+}
+
+function reportPresetBtn(val,label,active){
+  var sel=val===active;
+  return '<button onclick="goReports(\''+val+'\')" style="background:'+(sel?'var(--gd)':'transparent')+';border:1px solid '+(sel?'var(--gold)':'var(--border)')+';border-radius:2px;color:'+(sel?'var(--gl)':'var(--dim)')+';font-family:Montserrat,sans-serif;font-size:9px;letter-spacing:1px;padding:10px 6px;cursor:pointer">'+label+'</button>';
+}
+
+function showCustomRangePicker(){
+  var overlay=document.createElement('div');
+  overlay.id='rangeOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.innerHTML='<div style="background:var(--ch);border:1px solid var(--gold);border-radius:4px;padding:22px;max-width:340px;width:100%">'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl);margin-bottom:16px">Custom Date Range</div>'
+    +ff('Start Date','date','rangeStart','',_reportsRange.start||'')
+    +ff('End Date','date','rangeEnd','',_reportsRange.end||'')
+    +'<button class="btn-gold" onclick="applyCustomRange()">Apply Range</button>'
+    +'<button class="btn-ghost" onclick="closeRangePicker()">Cancel</button>'
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+function closeRangePicker(){var o=document.getElementById('rangeOverlay');if(o)o.remove();}
+function applyCustomRange(){
+  var s=document.getElementById('rangeStart').value;
+  var e=document.getElementById('rangeEnd').value;
+  if(!s||!e){showToast('Please select both dates');return;}
+  _reportsRange.start=s;_reportsRange.end=e;
+  closeRangePicker();
+  goReports('custom');
+}
+
+function goReportInvoiceList(filterStatus){
+  var start=new Date(_reportsRange.start);
+  var end=new Date(_reportsRange.end);
+  var list=allInvoices.filter(function(i){
+    var d=new Date(i.dueDate);
+    var inRange=d>=start&&d<=end;
+    return inRange&&(filterStatus==='all'||i.status===filterStatus);
+  }).sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);});
+
+  var titleMap={paid:'Income',unpaid:'Outstanding',upcoming:'Upcoming',all:'All Invoices'};
+  var html=topBar(titleMap[filterStatus]||'Invoices',start.toLocaleDateString('en-US',{month:'short',year:'numeric'})+' — '+end.toLocaleDateString('en-US',{month:'short',year:'numeric'}),'goReports')
+    +'<div class="sc">';
+  list.forEach(function(inv){
+    var e=estates.find(function(x){return x.id===inv.estateId;});
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goReports" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
+      +'<div style="flex:1">'
+      +'<div style="font-size:12px">'+(e?e.name:'')+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.notes+'</div>'
+      +'</div>'
+      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:18px;color:'+col+'">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div></div>'
+      +'</div>';
+  });
+  if(!list.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices found in this range</div>';
   html+='</div>'+nav('billing');
   render(html);
 }
@@ -724,10 +858,10 @@ function goFinancials(){
     +'<div class="card" style="padding:12px"><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Avg / Client</div><div style="font-size:18px;color:var(--text);margin-top:4px">$'+avgPerClient.toFixed(0)+'</div></div>'
     +'</div>'
     +'<div class="sec">Invoice Status</div>'
-    +'<div class="card tap" onclick="goInvoices(\'paid\')" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+    +'<div class="card tap" onclick="goMonthInvoicesFiltered('+thisYear+','+thisMonth+',\'paid\')" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
     +'<div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div><div style="font-size:12px">Paid this month</div></div>'
     +'<div style="font-size:13px;color:var(--green);font-weight:500">$'+paidThisMonth.toFixed(2)+'</div></div>'
-    +'<div class="card tap" onclick="goInvoices(\'unpaid\')" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;border-color:'+(unpaidTotal>0?'var(--red)':'var(--border)')+'">'
+    +'<div class="card tap" onclick="goMonthInvoicesFiltered('+thisYear+','+thisMonth+',\'unpaid\')" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;border-color:'+(unpaidTotal>0?'var(--red)':'var(--border)')+'">'
     +'<div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div><div style="font-size:12px">Unpaid</div></div>'
     +'<div style="font-size:13px;color:var(--red);font-weight:500">$'+unpaidTotal.toFixed(2)+'</div></div>'
     +'<div class="card tap" onclick="goInvoices(\'upcoming\')" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
@@ -745,8 +879,8 @@ function goFinancials(){
   });
 
   html+='</div>'
-    +'<div class="card tap" onclick="goInvoices()" style="display:flex;align-items:center;justify-content:space-between">'
-    +'<div style="font-size:11px;color:var(--gl)">View All Invoices</div><div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+    +'<div class="card tap" onclick="goReports()" style="display:flex;align-items:center;justify-content:space-between">'
+    +'<div style="font-size:11px;color:var(--gl)">All Invoices &amp; Reports</div><div style="font-size:14px;color:var(--gold)">&#8250;</div>'
     +'</div>'
     +'</div>'+nav('billing');
   render(html);
