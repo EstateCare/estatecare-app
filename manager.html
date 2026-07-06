@@ -214,8 +214,12 @@ var allInvoices=[
   // Upcoming
   {id:'vs-inv-008',estateId:'vs',clientEmail:'client1@estatecare.com',
    invoiceNum:'EC-2026-008',amount:319.80,period:'Monthly',
-   dueDate:new Date('2026-07-01'),status:'upcoming',paidDate:null,
-   notes:'Preferred Plan — July 2026',paymentMethod:null,autoPay:false},
+   dueDate:new Date('2026-07-01'),status:'paid',paidDate:new Date('2026-07-05'),
+   notes:'Preferred Plan — July 2026',paymentMethod:'E-Transfer',autoPay:false},
+  {id:'vs-inv-009',estateId:'vs',clientEmail:'client1@estatecare.com',
+   invoiceNum:'EC-2026-017',amount:319.80,period:'Monthly',
+   dueDate:new Date('2026-08-01'),status:'upcoming',paidDate:null,
+   notes:'Preferred Plan — August 2026',paymentMethod:null,autoPay:false},
 
   // ── BEAUMONT (client2) ── Total Estate Protection $99.95/wk ────────────
   // Season invoices - all paid
@@ -251,8 +255,12 @@ var allInvoices=[
   // Upcoming
   {id:'mh-inv-008',estateId:'mh',clientEmail:'client2@estatecare.com',
    invoiceNum:'EC-2026-016',amount:399.80,period:'Monthly',
-   dueDate:new Date('2026-07-01'),status:'upcoming',paidDate:null,
-   notes:'Total Estate Protection — July 2026',paymentMethod:null,autoPay:true}
+   dueDate:new Date('2026-07-01'),status:'paid',paidDate:new Date('2026-07-01'),
+   notes:'Total Estate Protection — July 2026',paymentMethod:'Credit Card',autoPay:true},
+  {id:'mh-inv-009',estateId:'mh',clientEmail:'client2@estatecare.com',
+   invoiceNum:'EC-2026-018',amount:399.80,period:'Monthly',
+   dueDate:new Date('2026-08-01'),status:'upcoming',paidDate:null,
+   notes:'Total Estate Protection — August 2026',paymentMethod:null,autoPay:true}
 ];
 
 var scheduleItems=[
@@ -611,6 +619,34 @@ function doSwitchToInspector(insp){
 }
 
 // ── FINANCIALS ────────────────────────────────────────────────────────────
+function goMonthInvoices(year,month){
+  var monthDate=new Date(year,month);
+  var monthLabel=monthDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var monthInvoices=allInvoices.filter(function(i){
+    var d=new Date(i.dueDate);
+    return d.getFullYear()===year&&d.getMonth()===month;
+  }).sort(function(a,b){return new Date(a.dueDate)-new Date(b.dueDate);});
+
+  var html=topBar(monthLabel,'Invoices Due This Month','goFinancials')
+    +'<div class="sc">';
+  monthInvoices.forEach(function(inv){
+    var e=estates.find(function(x){return x.id===inv.estateId;});
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    html+='<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+'">'
+      +'<div style="flex:1">'
+      +'<div style="font-size:12px">'+(e?e.name:'')+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.notes+'</div>'
+      +(inv.status==='paid'&&inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:18px;color:'+col+'">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div></div>'
+      +'</div>';
+  });
+  if(!monthInvoices.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices due this month</div>';
+  html+='</div>'+nav('billing');
+  render(html);
+}
+
 function goFinancials(){
   var now=new Date();
   var thisMonth=now.getMonth(),thisYear=now.getFullYear();
@@ -640,8 +676,11 @@ function goFinancials(){
 
   var html=topBar('Financials','Revenue Overview','goDash')
     +'<div class="sc">'
-    +'<div class="card" style="border-color:var(--gold);margin-bottom:14px">'
+    +'<div class="card tap" onclick="goMonthInvoices('+thisYear+','+thisMonth+')" style="border-color:var(--gold);margin-bottom:14px;cursor:pointer">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Month to Date</div>'
+    +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
     +'<div style="font-family:var(--ff);font-size:32px;color:var(--gl)">$'+mtd.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div>'
     +'<div style="font-size:10px;color:var(--dim);margin-top:4px">$'+mtdPaid.toFixed(2)+' collected &nbsp;&#183;&nbsp; $'+(mtd-mtdPaid).toFixed(2)+' outstanding</div>'
     +(lastMonthTotal>0?'<div style="font-size:10px;color:'+(trend>=0?'var(--green)':'var(--red)')+';margin-top:6px">'+(trend>=0?'&#9650;':'&#9660;')+' '+Math.abs(trend)+'% vs last month</div>':'')
