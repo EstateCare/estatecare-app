@@ -122,8 +122,12 @@ var allInvoices=[
   // Upcoming
   {id:'vs-inv-008',estateId:'vs',clientEmail:'client1@estatecare.com',
    invoiceNum:'EC-2026-008',amount:319.80,period:'Monthly',
-   dueDate:new Date('2026-07-01'),status:'upcoming',paidDate:null,
-   notes:'Preferred Plan — July 2026',paymentMethod:null,autoPay:false},
+   dueDate:new Date('2026-07-01'),status:'paid',paidDate:new Date('2026-07-05'),
+   notes:'Preferred Plan — July 2026',paymentMethod:'E-Transfer',autoPay:false},
+  {id:'vs-inv-009',estateId:'vs',clientEmail:'client1@estatecare.com',
+   invoiceNum:'EC-2026-017',amount:319.80,period:'Monthly',
+   dueDate:new Date('2026-08-01'),status:'upcoming',paidDate:null,
+   notes:'Preferred Plan — August 2026',paymentMethod:null,autoPay:false},
 
   // ── BEAUMONT (client2) ── Total Estate Protection $99.95/wk ────────────
   // Season invoices - all paid
@@ -159,8 +163,12 @@ var allInvoices=[
   // Upcoming
   {id:'mh-inv-008',estateId:'mh',clientEmail:'client2@estatecare.com',
    invoiceNum:'EC-2026-016',amount:399.80,period:'Monthly',
-   dueDate:new Date('2026-07-01'),status:'upcoming',paidDate:null,
-   notes:'Total Estate Protection — July 2026',paymentMethod:null,autoPay:true}
+   dueDate:new Date('2026-07-01'),status:'paid',paidDate:new Date('2026-07-01'),
+   notes:'Total Estate Protection — July 2026',paymentMethod:'Credit Card',autoPay:true},
+  {id:'mh-inv-009',estateId:'mh',clientEmail:'client2@estatecare.com',
+   invoiceNum:'EC-2026-018',amount:399.80,period:'Monthly',
+   dueDate:new Date('2026-08-01'),status:'upcoming',paidDate:null,
+   notes:'Total Estate Protection — August 2026',paymentMethod:null,autoPay:true}
 ];
 var clientInvoices=allInvoices.filter(function(i){return i.clientEmail===currentUser.email;});
 
