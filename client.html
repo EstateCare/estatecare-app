@@ -393,7 +393,7 @@ function showFullDashboard(){
     });
   });
 
-  var myInvoices=clientInvoices||[];
+  var myInvoices=(clientInvoices||[]).filter(function(i){return i.estateId===e.id;});
   var hasUnpaid=myInvoices.some(function(i){return i.status==='unpaid';});
   var unpaidAmt=myInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
   var acctCol=hasUnpaid?'#e05c5c':'#4caf7d';
@@ -402,7 +402,7 @@ function showFullDashboard(){
 
   var html='<div class="topbar"><div><div class="topbar-title">'+e.name+'</div><div class="topbar-sub">My Property</div></div><div class="avatar" onclick="goClientProfile()">'+currentUser.initials+'</div></div>'
     +'<div class="sc">'
-    +'<div onclick="goClientInvoices(\'unpaid\')" style="display:flex;align-items:center;justify-content:space-between;background:'+acctCol+'18;border:1px solid '+acctCol+';border-radius:2px;padding:10px 14px;margin-bottom:12px;cursor:pointer">'
+    +'<div onclick="goEstateInvoices(\''+e.id+'\',\'unpaid\')" style="display:flex;align-items:center;justify-content:space-between;background:'+acctCol+'18;border:1px solid '+acctCol+';border-radius:2px;padding:10px 14px;margin-bottom:12px;cursor:pointer">'
     +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;color:'+acctCol+'">'+acctIcon+'</span><span style="font-size:11px;font-weight:500;color:'+acctCol+'">'+acctLabel+'</span></div>'
     +'<span style="font-size:11px;color:'+acctCol+'">&#8250;</span>'
     +'</div>'
@@ -703,6 +703,33 @@ function toggleRow(label,sub,on){
     +'<div id="'+id+'" onclick="var o=this.classList.toggle(\'on\');this.style.background=this.classList.contains(\'on\')?\'var(--gold)\':\'var(--ch)\';this.querySelector(\'span\').style.transform=this.classList.contains(\'on\')?\'translateX(20px)\':\'none\';this.querySelector(\'span\').style.background=this.classList.contains(\'on\')?\'#000\':\'var(--dim)\';" style="width:44px;height:24px;border-radius:12px;background:'+(on?'var(--gold)':'var(--ch)')+';border:1px solid var(--border);cursor:pointer;position:relative;flex-shrink:0;transition:background .2s" class="'+(on?'on':'')+'">'
     +'<span style="position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:'+(on?'#000':'var(--dim)')+';transition:transform .2s;transform:'+(on?'translateX(20px)':'none')+'"></span>'
     +'</div></div>';
+}
+
+function goEstateInvoices(estateId,filterStatus){
+  filterStatus=filterStatus||'unpaid';
+  var e=estates.find(function(x){return x.id===estateId;});
+  var list=(clientInvoices||[]).filter(function(i){return i.estateId===estateId&&(filterStatus==='all'||i.status===filterStatus);})
+    .sort(function(a,b){return new Date(a.dueDate)-new Date(b.dueDate);});
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goDashboard()">&#8592;</button><div><div class="topbar-title">'+(e?e.name:'Property')+'</div><div class="topbar-sub">'+filterStatus.charAt(0).toUpperCase()+filterStatus.slice(1)+' Invoices</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">';
+
+  list.forEach(function(inv){
+    var isPaidRow=(inv.status==='paid'||inv.autoPay);
+    var col=isPaidRow?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    var statusLabel=isPaidRow?'paid':inv.status;
+    var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    window['_inv_'+inv.id]=inv;
+    html+='<div class="card tap" onclick="openInvoice(\''+inv.id+'\')" style="border-left:3px solid '+col+';margin-bottom:8px;cursor:pointer">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:12px">'+dueStr+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px">'+(inv.notes||'')+'</div></div>'
+      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:16px;color:'+col+'">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+statusLabel+'</div></div>'
+      +'</div></div>';
+  });
+  if(!list.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No '+filterStatus+' invoices for this property</div>';
+  html+='</div>'+clientNav('invoices');
+  render(html);
 }
 
 function goClientInvoices(filterStatus){

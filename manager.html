@@ -654,8 +654,52 @@ function mgrInvoiceDetail(invId,backFn){
   render(html);
 }
 
+function goTierInvoices(tier){
+  // Matches tierTotals calc in goFinancials: all paid invoices for estates of this contract tier
+  var list=allInvoices.filter(function(i){
+    if(i.status!=='paid') return false;
+    var e=estates.find(function(x){return x.id===i.estateId;});
+    var t=e&&e.contract?e.contract.tier:'Other';
+    return t===tier;
+  }).sort(function(a,b){return new Date(b.paidDate)-new Date(a.paidDate);});
+  return renderStatusInvoiceList(list,tier,'Paid Invoices — All Time');
+}
+
 function goMonthInvoicesFiltered(year,month,status){
+  if(status==='paid'){
+    // Match the "Paid this month" total: filter by paidDate, not dueDate
+    var list=allInvoices.filter(function(i){return i.status==='paid'&&i.paidDate&&new Date(i.paidDate).getFullYear()===year&&new Date(i.paidDate).getMonth()===month;})
+      .sort(function(a,b){return new Date(a.paidDate)-new Date(b.paidDate);});
+    return renderStatusInvoiceList(list,'Paid Invoices',new Date(year,month).toLocaleDateString('en-US',{month:'long',year:'numeric'}));
+  }
+  if(status==='unpaid'){
+    // Match the "Unpaid" total on Financials: NOT month-scoped, shows all outstanding invoices
+    var list=allInvoices.filter(function(i){return i.status==='unpaid';})
+      .sort(function(a,b){return new Date(a.dueDate)-new Date(b.dueDate);});
+    return renderStatusInvoiceList(list,'Unpaid Invoices','All Outstanding');
+  }
   goMonthInvoices(year,month,status);
+}
+
+function renderStatusInvoiceList(list,title,sub){
+  var html=topBar(title,sub,'goFinancials')
+    +'<div class="sc">';
+  list.forEach(function(inv){
+    var e=estates.find(function(x){return x.id===inv.estateId;});
+    var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
+    html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goFinancials" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
+      +'<div style="flex:1">'
+      +'<div style="font-size:12px">'+(e?e.name:'')+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+inv.notes+'</div>'
+      +(inv.status==='paid'&&inv.paidDate?'<div style="font-size:9px;color:var(--green);margin-top:2px">&#10003; Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right"><div style="font-family:var(--ff);font-size:18px;color:'+col+'">$'+inv.amount.toFixed(2)+'</div>'
+      +'<div style="font-size:9px;color:'+col+';text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+inv.status+'</div></div>'
+      +'</div>';
+  });
+  if(!list.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No invoices found</div>';
+  html+='</div>'+nav('billing');
+  render(html);
 }
 
 function goMonthInvoices(year,month,filterStatus){
@@ -875,7 +919,7 @@ function goFinancials(){
 
   Object.keys(tierTotals).forEach(function(tier){
     var pct=Math.round((tierTotals[tier]/maxTier)*100);
-    html+='<div style="margin-bottom:12px">'
+    html+='<div class="tap" onclick="goTierInvoices(\''+tier.replace(/'/g,"\\'")+'\')" style="margin-bottom:12px;cursor:pointer">'
       +'<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:11px;color:var(--text)">'+tier+'</div><div style="font-size:11px;color:var(--text)">$'+tierTotals[tier].toFixed(0)+'</div></div>'
       +'<div class="pbar-wrap"><div class="pbar" style="width:'+pct+'%"></div></div>'
       +'</div>';
