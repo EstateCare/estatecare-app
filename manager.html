@@ -830,7 +830,7 @@ function goFinancials(){
   var ytd=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
   var avgPerClient=clients.length>0?(ytd/clients.length):0;
 
-  var paidThisMonth=mtd;
+  var paidThisMonth=mtdPaid;
   var unpaidTotal=allInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
   var upcoming30=allInvoices.filter(function(i){return i.status==='upcoming';}).reduce(function(s,i){return s+i.amount;},0);
 
