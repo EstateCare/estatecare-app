@@ -1372,7 +1372,7 @@ function renderInvoiceGroups(tab,searchTerm){
       rowsToShow.forEach(function(inv){
         var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
         var daysLate=inv.status==='unpaid'?Math.floor((today-new Date(inv.dueDate))/86400000):0;
-        html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goInvoices" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
+        html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goInvoices|'+tab+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
           +'<div style="flex:1">'
           +'<div style="font-size:12px">'+inv.notes+'</div>'
           +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Due '+new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(daysLate>0?' &middot; '+daysLate+' days late':'')+'</div>'
@@ -1400,13 +1400,14 @@ function renderInvoiceGroups(tab,searchTerm){
 function goEstateInvoiceHistory(estateId){
   var e=estates.find(function(x){return x.id===estateId;});
   if(!e) return;
+  var tab=window._invTab||'attention';
   var estInv=allInvoices.filter(function(i){return i.estateId===estateId;}).sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);});
 
-  var html=topBar(e.name,'Full Invoice History','goInvoices')
+  var html=topBar(e.name,'Full Invoice History','goInvoices|'+tab)
     +'<div class="sc">';
   estInv.forEach(function(inv){
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
-    html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goInvoices" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
+    html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goEstateInvoiceHistory|'+estateId+'" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:3px solid '+col+';cursor:pointer">'
       +'<div style="flex:1">'
       +'<div style="font-size:9px;color:var(--dim)">'+inv.invoiceNum+'</div>'
       +'<div style="font-size:12px;margin-top:2px">'+inv.notes+'</div>'
