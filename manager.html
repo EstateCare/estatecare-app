@@ -631,7 +631,7 @@ function mgrInvoiceDetail(invId,backFn){
 
   var html=topBar(inv.invoiceNum,e?e.name:'',backFn||'goFinancials')
     +'<div class="sc">'
-    +'<div class="card" style="border-color:'+col+';margin-bottom:16px">'
+    +'<div class="card tap" onclick="mgrInvoiceDocument(\''+invId+'\',\''+(backFn||'goFinancials').replace(/'/g,"\\'")+'\')" style="border-color:'+col+';margin-bottom:16px;cursor:pointer">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
     +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">'+(e?e.name:'')+'</div>'
     +'<div style="font-size:11px;color:var(--dim);margin-top:2px">'+(e?e.clientName:'')+'</div></div>'
@@ -642,6 +642,7 @@ function mgrInvoiceDetail(invId,backFn){
     +'<div style="font-size:10px;color:var(--dim)">Due '+new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+(daysLate>0?' &middot; <span style="color:var(--red)">'+daysLate+' days late</span>':'')+'</div>'
     +(inv.status==='paid'&&inv.paidDate?'<div style="font-size:10px;color:var(--green);margin-top:8px">&#10003; Paid '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>':'')
     +(inv.autoPay?'<div style="font-size:10px;color:var(--green);margin-top:4px">&#10003; Auto-Pay Enabled</div>':'')
+    +'<div style="font-size:9px;color:var(--gold);margin-top:10px;letter-spacing:1px;text-transform:uppercase">View Full Invoice &#8250;</div>'
     +'</div>'
     +'<div class="sec">Property</div>'
     +(e?'<div class="card tap" data-action="estate" data-id="'+e.id+'" style="display:flex;align-items:center;gap:12px;cursor:pointer">'
@@ -653,6 +654,99 @@ function mgrInvoiceDetail(invId,backFn){
     +'</div>'+nav('billing');
   render(html);
 }
+
+function mgrInvRow(label,val){
+  return '<div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:4px">'
+    +'<span style="font-size:10px;color:var(--dim)">'+label+':</span>'
+    +'<span style="font-size:11px">'+val+'</span></div>';
+}
+
+function mgrInvoiceDocument(invId,backFn){
+  var inv=allInvoices.find(function(i){return i.id===invId;});
+  if(!inv) return;
+  var e=estates.find(function(x){return x.id===inv.estateId;});
+
+  var isPaid=inv.status==='paid'||inv.autoPay;
+  var isUnpaid=!isPaid&&inv.status==='unpaid';
+  var statusColor=isPaid?'#4caf7d':isUnpaid?'#e05c5c':'#c9a84c';
+  var statusLabel=isPaid?'PAID':isUnpaid?'PAYMENT DUE':'UPCOMING';
+  var dueStr=new Date(inv.dueDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  var issuedStr=new Date(inv.dueDate.getTime()-7*24*60*60*1000).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center">'
+    +'<button class="back-btn" onclick="mgrInvoiceDetail(\''+invId+'\',\''+(backFn||'goFinancials').replace(/'/g,"\\'")+'\')">&#8592;</button>'
+    +'<div><div class="topbar-title">Invoice</div><div class="topbar-sub">'+inv.invoiceNum+'</div></div></div>'
+    +'<button onclick="printMgrInvoice()" style="background:none;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 12px;cursor:pointer;margin-right:8px">Print</button>'
+    +'</div>'
+    +'<div class="sc" id="mgrInvoiceDoc">'
+    +'<div style="background:var(--ch);border:1px solid var(--border);border-radius:2px;padding:28px;margin-bottom:12px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:20px;border-bottom:2px solid var(--gold)">'
+    +'<div style="display:flex;align-items:center;gap:14px"><img src="Logo%20(Master).png" style="height:44px;width:auto" onerror="this.style.display=\'none\'">'
+    +'<div><div style="font-family:var(--ff);font-size:22px;letter-spacing:3px;color:var(--gl)">ESTATE CARE</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase">Luxury Home Maintenance</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.7">hello@myestatecare.ca<br>myestatecare.ca</div>'
+    +'</div></div>'
+    +'<div style="text-align:right">'
+    +'<div style="font-family:var(--ff);font-size:28px;color:var(--gl)">INVOICE</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:4px">'+inv.invoiceNum+'</div>'
+    +'<div style="display:inline-block;margin-top:8px;background:'+statusColor+'22;border:1px solid '+statusColor+';border-radius:20px;padding:4px 14px;font-size:9px;font-weight:600;letter-spacing:2px;color:'+statusColor+';text-transform:uppercase">'+statusLabel+'</div>'
+    +'</div></div>'
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:24px">'
+    +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Bill To</div>'
+    +'<div style="font-size:14px;font-weight:500">'+(e?e.clientName:'')+'</div>'
+    +(e?'<div style="font-size:12px;color:var(--dim);margin-top:3px">'+e.name+'</div>':'')
+    +(e?'<div style="font-size:11px;color:var(--dim);margin-top:2px">'+e.address+'</div>':'')
+    +'</div>'
+    +'<div style="text-align:right">'
+    +'<div style="font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Invoice Details</div>'
+    +mgrInvRow('Invoice #',inv.invoiceNum)
+    +mgrInvRow('Issued',issuedStr)
+    +mgrInvRow('Due Date',dueStr)
+    +(inv.paidDate?mgrInvRow('Paid On',new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})):'')
+    +'</div></div>'
+    +'<table style="width:100%;border-collapse:collapse;margin-bottom:20px">'
+    +'<thead><tr style="border-bottom:1px solid var(--gold)">'
+    +'<th style="text-align:left;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;padding:8px 0">Description</th>'
+    +'<th style="text-align:right;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;padding:8px 0">Amount</th>'
+    +'</tr></thead>'
+    +'<tbody>'
+    +'<tr style="border-bottom:1px solid rgba(201,168,76,0.1)">'
+    +'<td style="padding:14px 0"><div style="font-size:13px;font-weight:500">'+inv.notes+'</div>'
+    +(e&&e.contract?'<div style="font-size:11px;color:var(--dim);margin-top:3px">'+e.contract.tier+' Plan &nbsp;&#183;&nbsp; '+inv.period+' Billing</div>':'')
+    +'<div style="font-size:11px;color:var(--dim);margin-top:3px">Service Period: '+dueStr+'</div>'
+    +'</td>'
+    +'<td style="padding:14px 0;text-align:right;font-family:var(--ff);font-size:18px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</td>'
+    +'</tr></tbody>'
+    +'<tfoot>'
+    +'<tr><td colspan="2" style="padding-top:12px;border-top:2px solid var(--gold)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase">Total Due</div>'
+    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl)">$'+inv.amount.toFixed(2)+' CAD</div>'
+    +'</div></td></tr>'
+    +'</tfoot></table>'
+    +(isPaid?
+      '<div style="background:rgba(76,175,125,0.08);border:1px solid var(--green);border-radius:2px;padding:20px;margin-bottom:16px;text-align:center">'
+      +'<div style="font-size:28px;font-family:var(--ff);color:var(--green);letter-spacing:4px;border:2px solid var(--green);display:inline-block;padding:6px 20px;transform:rotate(-2deg);margin-bottom:10px">PAID</div>'
+      +(inv.autoPay&&!inv.paidDate
+        ? '<div style="font-size:11px;color:var(--green);margin-top:4px">Covered under pre-authorized '+(inv.period||'recurring')+' payment</div>'
+        : '<div style="font-size:12px;color:var(--green);margin-top:4px">Payment received'+(inv.paidDate?' on '+new Date(inv.paidDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'')+(inv.paymentMethod?' via '+inv.paymentMethod:'')+'</div>'
+      )
+      +'</div>'
+    :
+      '<div style="background:rgba(224,92,92,0.08);border:1px solid var(--red);border-radius:2px;padding:14px;margin-bottom:12px;text-align:center">'
+      +'<div style="font-size:11px;color:var(--red);letter-spacing:1px;text-transform:uppercase">Awaiting Client Payment</div>'
+      +'</div>'
+    )
+    +'<div style="border-top:1px solid var(--border);padding-top:14px;text-align:center">'
+    +'<div style="font-size:10px;color:var(--dim);line-height:1.8">Thank you for choosing EstateCare.<br>Questions? Contact us at <span style="color:var(--gold)">hello@myestatecare.ca</span> or visit <span style="color:var(--gold)">myestatecare.ca</span></div>'
+    +'</div>'
+    +'</div>'
+    +'<button onclick="printMgrInvoice()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:1px;color:var(--dim);font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer">Print / Save as PDF</button>'
+    +'</div>'+nav('billing');
+  render(html);
+}
+
+function printMgrInvoice(){window.print();}
 
 function goTierInvoices(tier){
   // Matches tierTotals calc in goFinancials: all paid invoices for estates of this contract tier
