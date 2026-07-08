@@ -106,7 +106,8 @@ var estates=[
    access:{method:'Key Lockbox',lockboxCode:'4821',lockboxLocation:'Left side gate post',alarmCode:'7734',alarmNotes:'Disarm within 30 sec. Panel is in entry foyer left wall.',gateCode:'',notes:'Dog on property — friendly lab named Cooper.'},
    contract:{tier:'Preferred',weeklyRate:79.95,inspectionsPerWeek:1.75,inspectionIntervalDays:4,assignedInspector:'insp1',
      startDate:new Date('2025-10-15'),endDate:new Date('2026-04-15'),returnDate:new Date('2026-04-17'),
-     totalWeeks:26,totalInspections:66,contractValue:2078.70,nextInspection:new Date('2026-07-02'),billingFrequency:'Monthly'},
+     totalWeeks:26,totalInspections:66,contractValue:2078.70,nextInspection:new Date('2026-07-02'),billingFrequency:'Monthly',
+     signature:null,signedAt:null,signedBy:null},
    completedAt:new Date('2026-06-18'),inspectionStarted:false,completedCats:{},
    pastInspections:[
      {completedAt:new Date('2026-04-07'),snapshot:{
@@ -149,7 +150,8 @@ var estates=[
    access:{method:'Keypad Entry',lockboxCode:'',lockboxLocation:'',alarmCode:'9256',alarmNotes:'Disarm within 45 sec. Panel is in garage.',gateCode:'1122',notes:'Pool area has separate keypad — same code as gate.'},
    contract:{tier:'Total Estate Protection',weeklyRate:99.95,inspectionsPerWeek:1,inspectionIntervalDays:7,assignedInspector:'insp1',
      startDate:new Date('2025-11-01'),endDate:new Date('2026-04-30'),returnDate:new Date('2026-05-02'),
-     totalWeeks:26,totalInspections:26,contractValue:2598.70,nextInspection:new Date('2026-07-03'),billingFrequency:'Monthly'},
+     totalWeeks:26,totalInspections:26,contractValue:2598.70,nextInspection:new Date('2026-07-03'),billingFrequency:'Monthly',
+     signature:null,signedAt:null,signedBy:null},
    completedAt:new Date('2026-06-12'),inspectionStarted:false,completedCats:{},
    pastInspections:[
      {completedAt:new Date('2026-04-10'),snapshot:{
@@ -520,6 +522,113 @@ function statBox(label,val,icon,color,fn){
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────
+function goServiceAgreement(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var signed=!!e.contract.signature;
+
+  var html=topBar('Service Agreement',e.name,'goClientDetail|'+e.clientEmail)
+    +'<div class="sc">'
+    +'<div style="background:var(--ch);border:1px solid var(--border);border-radius:2px;padding:20px;margin-bottom:16px;max-height:280px;overflow-y:auto">'
+    +'<div style="font-family:var(--ff);font-size:16px;color:var(--gl);margin-bottom:12px">EstateCare Home Watch Service Agreement</div>'
+    +'<div style="font-size:11px;color:var(--dim);line-height:1.7">'
+    +'This agreement is between EstateCare and <strong style="color:var(--text)">'+e.clientName+'</strong> for the property located at <strong style="color:var(--text)">'+e.address+'</strong>.<br><br>'
+    +'<strong style="color:var(--text)">Plan:</strong> '+e.contract.tier+' &mdash; $'+e.contract.weeklyRate+'/week, billed '+(e.contract.billingFrequency||'Monthly')+'.<br><br>'
+    +'<strong style="color:var(--text)">Term:</strong> '+new Date(e.contract.startDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+' through '+new Date(e.contract.endDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'.<br><br>'
+    +'<strong style="color:var(--text)">Scope:</strong> Approximately '+e.contract.inspectionsPerWeek+' inspection(s) per week, covering exterior/interior visual checks, mail/package collection, and reporting of any issues found. Emergency issues will be reported to the client immediately.<br><br>'
+    +'By signing below, the client authorizes EstateCare to perform the services described above and agrees to the billing terms.'
+    +'</div></div>';
+
+  if(signed){
+    html+='<div class="card" style="border-color:var(--green);text-align:center;padding:20px;margin-bottom:16px">'
+      +'<img src="'+e.contract.signature+'" style="max-width:200px;background:#fff;border-radius:2px;padding:8px;margin-bottom:10px">'
+      +'<div style="font-size:11px;color:var(--green)">&#10003; Signed by '+e.contract.signedBy+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+new Date(e.contract.signedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})+'</div>'
+      +'</div>'
+      +'<button class="btn-outline" onclick="resetSignature(\''+estateId+'\')">Clear & Re-Sign</button>';
+  } else {
+    html+='<div class="sec">Signature</div>'
+      +'<div class="card" style="padding:12px;margin-bottom:12px">'
+      +'<canvas id="sigCanvas" width="300" height="150" style="width:100%;height:150px;background:#fff;border-radius:2px;touch-action:none;cursor:crosshair"></canvas>'
+      +'</div>'
+      +ff('Signed By (Full Name)','text','sigName','Client full name','')
+      +'<button class="btn-outline" onclick="clearSigCanvas()" style="margin-bottom:10px">Clear</button>'
+      +'<button class="btn-gold" onclick="saveSignature(\''+estateId+'\')">Save Signature</button>';
+  }
+  html+='</div>'+nav('billing');
+  render(html);
+  if(!signed) initSigCanvas();
+}
+
+var _sigDrawing=false,_sigHasStrokes=false;
+function initSigCanvas(){
+  var c=document.getElementById('sigCanvas');
+  if(!c) return;
+  var ctx=c.getContext('2d');
+  ctx.strokeStyle='#0a0a0a';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+  _sigHasStrokes=false;
+  function pos(evt){
+    var rect=c.getBoundingClientRect();
+    var x=(evt.touches?evt.touches[0].clientX:evt.clientX)-rect.left;
+    var y=(evt.touches?evt.touches[0].clientY:evt.clientY)-rect.top;
+    return {x:x*(c.width/rect.width),y:y*(c.height/rect.height)};
+  }
+  function start(evt){_sigDrawing=true;_sigHasStrokes=true;var p=pos(evt);ctx.beginPath();ctx.moveTo(p.x,p.y);evt.preventDefault();}
+  function move(evt){if(!_sigDrawing)return;var p=pos(evt);ctx.lineTo(p.x,p.y);ctx.stroke();evt.preventDefault();}
+  function end(){_sigDrawing=false;}
+  c.addEventListener('mousedown',start);c.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+  c.addEventListener('touchstart',start,{passive:false});c.addEventListener('touchmove',move,{passive:false});c.addEventListener('touchend',end);
+}
+function clearSigCanvas(){
+  var c=document.getElementById('sigCanvas');
+  if(!c) return;
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+  _sigHasStrokes=false;
+}
+function saveSignature(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  var c=document.getElementById('sigCanvas');
+  var name=document.getElementById('sigName').value.trim();
+  if(!name){showToast('Please enter the signer\'s full name');return;}
+  if(!_sigHasStrokes){showToast('Please draw a signature first');return;}
+  e.contract.signature=c.toDataURL('image/png');
+  e.contract.signedBy=name;
+  e.contract.signedAt=new Date();
+  showToast('Agreement signed');
+  goServiceAgreement(estateId);
+}
+function resetSignature(estateId){
+  var e=estates.find(function(x){return x.id===estateId;});
+  e.contract.signature=null;e.contract.signedBy=null;e.contract.signedAt=null;
+  goServiceAgreement(estateId);
+}
+
+function goRenewals(){
+  var list=estates.filter(function(e){
+    if(e.contract.status==='cancelled'||!e.contract.endDate) return false;
+    var daysLeft=Math.ceil((new Date(e.contract.endDate)-new Date())/86400000);
+    return daysLeft>=0&&daysLeft<=30;
+  }).sort(function(a,b){return new Date(a.contract.endDate)-new Date(b.contract.endDate);});
+
+  var html=topBar('Contract Renewals','Ending Within 30 Days','goDash')
+    +'<div class="sc">';
+  list.forEach(function(e){
+    var daysLeft=Math.ceil((new Date(e.contract.endDate)-new Date())/86400000);
+    var urgentCol=daysLeft<=7?'var(--red)':'var(--gold)';
+    html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:10px;border-left:3px solid '+urgentCol+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      +'<div style="font-family:var(--ff);font-size:15px;color:var(--gl)">'+e.name+'</div>'
+      +'<div style="font-size:10px;color:'+urgentCol+'">'+daysLeft+' day'+(daysLeft===1?'':'s')+'</div>'
+      +'</div>'
+      +'<div style="font-size:10px;color:var(--dim)">'+e.clientName+' &nbsp;&#183;&nbsp; '+e.contract.tier+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">Ends '+new Date(e.contract.endDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</div>'
+      +'</div>';
+  });
+  if(!list.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:30px">No contracts ending in the next 30 days</div>';
+  html+='</div>'+nav('dash');
+  render(html);
+}
+
 function goDash(){
   var activeClients=clients.length;
   var activeInspectors=inspectors.length;
@@ -528,8 +637,24 @@ function goDash(){
   var unpaidTotal=allInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
 
   var html=topBar(tenantConfig.companyName,'Manager Dashboard')
-    +'<div class="sc">'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
+    +'<div class="sc">';
+
+  // Contract renewal / expiry alert
+  var soon=estates.filter(function(e){
+    if(e.contract.status==='cancelled'||!e.contract.endDate) return false;
+    var daysLeft=Math.ceil((new Date(e.contract.endDate)-new Date())/86400000);
+    return daysLeft>=0&&daysLeft<=30;
+  }).sort(function(a,b){return new Date(a.contract.endDate)-new Date(b.contract.endDate);});
+  if(soon.length){
+    html+='<div class="card tap" onclick="goRenewals()" style="border-color:var(--gold);margin-bottom:16px;cursor:pointer">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:9px;color:var(--gold);letter-spacing:1px;text-transform:uppercase">Contract'+(soon.length>1?'s':'')+' Ending Soon</div>'
+      +'<div style="font-size:12px;color:var(--dim);margin-top:4px">'+soon.length+' contract'+(soon.length>1?'s':'')+' within 30 days</div></div>'
+      +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+      +'</div></div>';
+  }
+
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
     +statBox('Active Clients',activeClients,null,null,'goTeam(\'clients\')')
     +statBox('Inspectors',activeInspectors,null,null,'goTeam(\'inspectors\')')
     +statBox('This Month Revenue','$'+mtdRevenue.toLocaleString('en',{maximumFractionDigits:0}),null,'var(--green)','goFinancials()')
@@ -1114,6 +1239,12 @@ function goClientDetail(email){
       +'<div style="font-size:13px;color:'+(isCancelled?'var(--red)':'var(--green)')+';margin-top:2px">'+(isCancelled?'Cancelled':'Active')+'</div></div>'
       +(isCancelled?'<button class="btn-outline" onclick="reactivatePlan(\''+e.id+'\',\''+email+'\')" style="width:auto;padding:8px 16px">Reactivate Plan</button>'
         :'<button onclick="showCancelPlanConfirm(\''+e.id+'\',\''+email+'\')" style="background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;cursor:pointer">Cancel Plan</button>')
+      +'</div>'
+      +'<div class="sec">Service Agreement</div>'
+      +'<div class="card tap" onclick="goServiceAgreement(\''+e.id+'\')" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
+      +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Status</div>'
+      +'<div style="font-size:13px;color:'+(e.contract.signature?'var(--green)':'var(--gold)')+';margin-top:2px">'+(e.contract.signature?'Signed '+new Date(e.contract.signedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Awaiting Signature')+'</div></div>'
+      +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
       +'</div>';
   }
 
@@ -1320,6 +1451,7 @@ function goEstateDetail(estateId){
     +'<div style="font-size:10px;color:var(--dim)">'+e.address+'</div>'
     +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl);margin-top:8px">'+sc.score+'%</div>'
     +'<div style="font-size:10px;color:var(--gold);margin-top:4px">'+e.contract.tier+' &nbsp;&#183;&nbsp; $'+e.contract.weeklyRate+'/week</div>'
+    +(e.contract.endDate?'<div style="font-size:9px;color:var(--dim);margin-top:6px">Contract ends '+new Date(e.contract.endDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</div>':'')
     +'</div>'
     +'<div class="sec">Client</div>'
     +'<div class="card tap" onclick="goClientDetail(\''+e.clientEmail+'\')" style="margin-bottom:16px;cursor:pointer">'

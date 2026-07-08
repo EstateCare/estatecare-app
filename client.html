@@ -187,7 +187,8 @@ var estates=[
    access:{method:'Key Lockbox',lockboxCode:'4821',lockboxLocation:'Left side gate post',alarmCode:'7734',alarmNotes:'Disarm within 30 sec. Panel is in entry foyer left wall.',gateCode:'',notes:'Dog on property — friendly lab named Cooper.'},
    contract:{tier:'Preferred',weeklyRate:79.95,inspectionsPerWeek:1.75,inspectionIntervalDays:4,assignedInspector:'insp1',
      startDate:new Date('2025-10-15'),endDate:new Date('2026-04-15'),returnDate:new Date('2026-04-17'),
-     totalWeeks:26,totalInspections:66,contractValue:2078.70,nextInspection:new Date('2026-07-02')},
+     totalWeeks:26,totalInspections:66,contractValue:2078.70,nextInspection:new Date('2026-07-02'),billingFrequency:'Monthly',
+     signature:null,signedAt:null,signedBy:null},
    completedAt:new Date('2026-06-18'),inspectionStarted:false,completedCats:{},
    pastInspections:[
      {completedAt:new Date('2026-04-07'),snapshot:{
@@ -230,7 +231,8 @@ var estates=[
    access:{method:'Keypad Entry',lockboxCode:'',lockboxLocation:'',alarmCode:'9256',alarmNotes:'Disarm within 45 sec. Panel is in garage.',gateCode:'1122',notes:'Pool area has separate keypad — same code as gate.'},
    contract:{tier:'Total Estate Protection',weeklyRate:99.95,inspectionsPerWeek:1,inspectionIntervalDays:7,assignedInspector:'insp1',
      startDate:new Date('2025-11-01'),endDate:new Date('2026-04-30'),returnDate:new Date('2026-05-02'),
-     totalWeeks:26,totalInspections:26,contractValue:2598.70,nextInspection:new Date('2026-07-03')},
+     totalWeeks:26,totalInspections:26,contractValue:2598.70,nextInspection:new Date('2026-07-03'),billingFrequency:'Monthly',
+     signature:null,signedAt:null,signedBy:null},
    completedAt:new Date('2026-06-12'),inspectionStarted:false,completedCats:{},
    pastInspections:[
      {completedAt:new Date('2026-04-10'),snapshot:{
@@ -669,6 +671,81 @@ function confirmClientCancelPlan(){
   goClientProfile();
 }
 
+function goServiceAgreement(){
+  var e=CE();
+  if(!e) return;
+  var signed=!!e.contract.signature;
+
+  var html='<div class="topbar"><div style="display:flex;align-items:center"><button class="back-btn" onclick="goClientProfile()">&#8592;</button><div><div class="topbar-title">Service Agreement</div><div class="topbar-sub">'+e.name+'</div></div></div><div class="avatar">'+currentUser.initials+'</div></div>'
+    +'<div class="sc">'
+    +'<div style="background:var(--ch);border:1px solid var(--border);border-radius:2px;padding:20px;margin-bottom:16px;max-height:280px;overflow-y:auto">'
+    +'<div style="font-family:var(--ff);font-size:16px;color:var(--gl);margin-bottom:12px">EstateCare Home Watch Service Agreement</div>'
+    +'<div style="font-size:11px;color:var(--dim);line-height:1.7">'
+    +'This agreement is between EstateCare and <strong style="color:var(--text)">'+e.clientName+'</strong> for the property located at <strong style="color:var(--text)">'+e.address+'</strong>.<br><br>'
+    +'<strong style="color:var(--text)">Plan:</strong> '+e.contract.tier+' &mdash; $'+e.contract.weeklyRate+'/week, billed '+(e.contract.billingFrequency||'Monthly')+'.<br><br>'
+    +'<strong style="color:var(--text)">Term:</strong> '+new Date(e.contract.startDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+' through '+new Date(e.contract.endDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'.<br><br>'
+    +'<strong style="color:var(--text)">Scope:</strong> Approximately '+e.contract.inspectionsPerWeek+' inspection(s) per week, covering exterior/interior visual checks, mail/package collection, and reporting of any issues found.<br><br>'
+    +'By signing below, I authorize EstateCare to perform the services described above and agree to the billing terms.'
+    +'</div></div>';
+
+  if(signed){
+    html+='<div class="card" style="border-color:var(--green);text-align:center;padding:20px;margin-bottom:16px">'
+      +'<img src="'+e.contract.signature+'" style="max-width:200px;background:#fff;border-radius:2px;padding:8px;margin-bottom:10px">'
+      +'<div style="font-size:11px;color:var(--green)">&#10003; Signed by '+e.contract.signedBy+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+new Date(e.contract.signedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})+'</div>'
+      +'</div>';
+  } else {
+    html+='<div class="sec">Signature</div>'
+      +'<div class="card" style="padding:12px;margin-bottom:12px">'
+      +'<canvas id="sigCanvas" width="300" height="150" style="width:100%;height:150px;background:#fff;border-radius:2px;touch-action:none;cursor:crosshair"></canvas>'
+      +'</div>'
+      +'<div class="lbl">Signed By (Full Name)</div><input class="inp" type="text" id="sigName" placeholder="Your full name">'
+      +'<button class="btn-outline" onclick="clearSigCanvas()" style="margin-bottom:10px">Clear</button>'
+      +'<button class="btn-gold" onclick="saveClientSignature()">Sign Agreement</button>';
+  }
+  html+='</div>'+clientNav('profile');
+  render(html);
+  if(!signed) initSigCanvas();
+}
+
+var _sigDrawing=false,_sigHasStrokes=false;
+function initSigCanvas(){
+  var c=document.getElementById('sigCanvas');
+  if(!c) return;
+  var ctx=c.getContext('2d');
+  ctx.strokeStyle='#0a0a0a';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+  _sigHasStrokes=false;
+  function pos(evt){
+    var rect=c.getBoundingClientRect();
+    var x=(evt.touches?evt.touches[0].clientX:evt.clientX)-rect.left;
+    var y=(evt.touches?evt.touches[0].clientY:evt.clientY)-rect.top;
+    return {x:x*(c.width/rect.width),y:y*(c.height/rect.height)};
+  }
+  function start(evt){_sigDrawing=true;_sigHasStrokes=true;var p=pos(evt);ctx.beginPath();ctx.moveTo(p.x,p.y);evt.preventDefault();}
+  function move(evt){if(!_sigDrawing)return;var p=pos(evt);ctx.lineTo(p.x,p.y);ctx.stroke();evt.preventDefault();}
+  function end(){_sigDrawing=false;}
+  c.addEventListener('mousedown',start);c.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+  c.addEventListener('touchstart',start,{passive:false});c.addEventListener('touchmove',move,{passive:false});c.addEventListener('touchend',end);
+}
+function clearSigCanvas(){
+  var c=document.getElementById('sigCanvas');
+  if(!c) return;
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+  _sigHasStrokes=false;
+}
+function saveClientSignature(){
+  var e=CE();
+  var c=document.getElementById('sigCanvas');
+  var name=document.getElementById('sigName').value.trim();
+  if(!name){showToast('Please enter your full name');return;}
+  if(!_sigHasStrokes){showToast('Please draw a signature first');return;}
+  e.contract.signature=c.toDataURL('image/png');
+  e.contract.signedBy=name;
+  e.contract.signedAt=new Date();
+  showToast('Agreement signed');
+  goServiceAgreement();
+}
+
 function goClientProfile(){
   var e=CE();
   var con=e?e.contract:{};
@@ -709,6 +786,11 @@ function goClientProfile(){
     +toggleRow('Invoice Reminders','Payment due reminders',true)
     +'</div>'
     +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">Plan</div>'
+    +'<div class="card tap" onclick="goServiceAgreement()" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
+    +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Service Agreement</div>'
+    +'<div style="font-size:13px;color:'+((e&&e.contract&&e.contract.signature)?'var(--green)':'var(--gold)')+';margin-top:2px">'+((e&&e.contract&&e.contract.signature)?'Signed':'Awaiting Signature')+'</div></div>'
+    +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
     +'<div class="card" style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">'
     +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Status</div>'
     +'<div style="font-size:13px;color:'+((e&&e.contract&&e.contract.status==='cancelled')?'var(--red)':'var(--green)')+';margin-top:2px">'+((e&&e.contract&&e.contract.status==='cancelled')?'Cancelled':'Active')+'</div></div>'
