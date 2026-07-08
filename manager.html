@@ -1121,7 +1121,7 @@ function goFinancials(){
   var html=topBar('Financials','Revenue Overview','goDash')
     +'<div class="sc">'
     +'<button class="btn-outline" onclick="exportFinancialsToExcel()" style="width:100%;margin-bottom:14px">&#128190; Export to Excel</button>'
-    +'<div class="card tap" onclick="goMonthInvoices('+thisYear+','+thisMonth+')" style="border-color:var(--gold);margin-bottom:14px;cursor:pointer">'
+    +'<div class="card tap" onclick="goMonthInvoicesFiltered('+thisYear+','+thisMonth+',\'paid\')" style="border-color:var(--gold);margin-bottom:14px;cursor:pointer">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Month to Date Revenue</div>'
     +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
