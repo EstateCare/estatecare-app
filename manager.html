@@ -42,6 +42,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .pbar{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--gl));}
 .lbl{font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;}
 .inp{width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:16px;font-weight:300;padding:12px 16px;margin-bottom:14px;outline:none;transition:border-color .2s;}
+input[type="date"].inp{-webkit-appearance:none;appearance:none;height:44px;line-height:20px;}
+input[type="date"].inp::-webkit-date-and-time-value{text-align:left;}
 .inp:focus{border-color:var(--gold);}
 .sel{width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:16px;padding:12px;margin-bottom:14px;outline:none;}
 .pill{display:inline-block;padding:3px 10px;border-radius:10px;font-size:9px;letter-spacing:1px;text-transform:uppercase;}
@@ -53,6 +55,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;}
 .color-swatch.selected{border-color:#fff;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div id="app"><div id="screen"></div></div>
@@ -70,6 +73,7 @@ var tenantConfig={
   logoUrl:'Logo IOS 192.png',
   brandColor:'#c9a84c',
   bgTheme:'dark',
+  currency:'CAD',
   businessAddress:'',
   taxNumber:'',
   licenseNumber:'',
@@ -102,7 +106,7 @@ var estates=[
    access:{method:'Key Lockbox',lockboxCode:'4821',lockboxLocation:'Left side gate post',alarmCode:'7734',alarmNotes:'Disarm within 30 sec. Panel is in entry foyer left wall.',gateCode:'',notes:'Dog on property — friendly lab named Cooper.'},
    contract:{tier:'Preferred',weeklyRate:79.95,inspectionsPerWeek:1.75,inspectionIntervalDays:4,assignedInspector:'insp1',
      startDate:new Date('2025-10-15'),endDate:new Date('2026-04-15'),returnDate:new Date('2026-04-17'),
-     totalWeeks:26,totalInspections:66,contractValue:2078.70,nextInspection:new Date('2026-07-02')},
+     totalWeeks:26,totalInspections:66,contractValue:2078.70,nextInspection:new Date('2026-07-02'),billingFrequency:'Monthly'},
    completedAt:new Date('2026-06-18'),inspectionStarted:false,completedCats:{},
    pastInspections:[
      {completedAt:new Date('2026-04-07'),snapshot:{
@@ -145,7 +149,7 @@ var estates=[
    access:{method:'Keypad Entry',lockboxCode:'',lockboxLocation:'',alarmCode:'9256',alarmNotes:'Disarm within 45 sec. Panel is in garage.',gateCode:'1122',notes:'Pool area has separate keypad — same code as gate.'},
    contract:{tier:'Total Estate Protection',weeklyRate:99.95,inspectionsPerWeek:1,inspectionIntervalDays:7,assignedInspector:'insp1',
      startDate:new Date('2025-11-01'),endDate:new Date('2026-04-30'),returnDate:new Date('2026-05-02'),
-     totalWeeks:26,totalInspections:26,contractValue:2598.70,nextInspection:new Date('2026-07-03')},
+     totalWeeks:26,totalInspections:26,contractValue:2598.70,nextInspection:new Date('2026-07-03'),billingFrequency:'Monthly'},
    completedAt:new Date('2026-06-12'),inspectionStarted:false,completedCats:{},
    pastInspections:[
      {completedAt:new Date('2026-04-10'),snapshot:{
@@ -477,6 +481,12 @@ function render(html){
 
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
 
+function statRow(label,val){
+  return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(201,168,76,0.08)">'
+    +'<span style="font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">'+label+'</span>'
+    +'<span style="font-size:12px;color:var(--text)">'+val+'</span></div>';
+}
+
 function ff(label,type,id,ph,val){return '<div class="lbl">'+label+'</div><input class="inp" type="'+type+'" id="'+id+'" placeholder="'+(ph||'')+'" value="'+(val||'')+'">';}
 function fs(label,id,opts){return '<div class="lbl">'+label+'</div><select class="sel" id="'+id+'">'+opts+'</select>';}
 
@@ -721,7 +731,7 @@ function mgrInvoiceDocument(invId,backFn){
     +'<tr><td colspan="2" style="padding-top:12px;border-top:2px solid var(--gold)">'
     +'<div style="display:flex;justify-content:space-between;align-items:center">'
     +'<div style="font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase">Total Due</div>'
-    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl)">$'+inv.amount.toFixed(2)+' CAD</div>'
+    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl)">$'+inv.amount.toFixed(2)+' '+(tenantConfig.currency||'CAD')+'</div>'
     +'</div></td></tr>'
     +'</tfoot></table>'
     +(isPaid?
@@ -985,6 +995,7 @@ function goFinancials(){
 
   var html=topBar('Financials','Revenue Overview','goDash')
     +'<div class="sc">'
+    +'<button class="btn-outline" onclick="exportFinancialsToExcel()" style="width:100%;margin-bottom:14px">&#128190; Export to Excel</button>'
     +'<div class="card tap" onclick="goMonthInvoices('+thisYear+','+thisMonth+')" style="border-color:var(--gold);margin-bottom:14px;cursor:pointer">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     +'<div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Month to Date Revenue</div>'
@@ -1038,6 +1049,7 @@ function goTeam(tab){
     +'</div>';
 
   if(tab==='clients'){
+    html+='<button class="btn-outline" onclick="exportClientsToExcel()" style="margin-bottom:10px">&#128190; Export Clients to Excel</button>';
     html+='<button class="btn-outline" onclick="goAddClient()" style="margin-bottom:14px">+ Add Client</button>';
     clients.forEach(function(c){
       var e=estates.find(function(x){return x.id===c.estateId;});
@@ -1083,6 +1095,7 @@ function goClientDetail(email){
     +'</div>';
 
   if(e){
+    var isCancelled=e.contract.status==='cancelled';
     html+='<div class="card tap" data-action="estate" data-id="'+e.id+'" style="margin-bottom:16px;cursor:pointer">'
       +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
       +'<div class="cat-ico">'+e.icon+'</div>'
@@ -1094,23 +1107,60 @@ function goClientDetail(email){
       +'<div style="font-size:10px;color:var(--gold)">'+e.contract.tier+' &nbsp;&#183;&nbsp; $'+e.contract.weeklyRate+'/week</div>'
       +'<div style="font-size:11px;color:var(--gold)">View Estate &#8250;</div>'
       +'</div>'
+      +'</div>'
+      +'<div class="sec">Plan Status</div>'
+      +'<div class="card" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">'
+      +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Status</div>'
+      +'<div style="font-size:13px;color:'+(isCancelled?'var(--red)':'var(--green)')+';margin-top:2px">'+(isCancelled?'Cancelled':'Active')+'</div></div>'
+      +(isCancelled?'<button class="btn-outline" onclick="reactivatePlan(\''+e.id+'\',\''+email+'\')" style="width:auto;padding:8px 16px">Reactivate Plan</button>'
+        :'<button onclick="showCancelPlanConfirm(\''+e.id+'\',\''+email+'\')" style="background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;cursor:pointer">Cancel Plan</button>')
       +'</div>';
   }
 
   html+='<div class="sec">Invoices</div>';
   clientInv.forEach(function(inv){
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
-    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px;display:flex;justify-content:space-between">'
+    html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goClientDetail|'+email+'" style="border-left:3px solid '+col+';margin-bottom:8px;display:flex;justify-content:space-between;cursor:pointer">'
       +'<div><div style="font-size:11px">'+inv.notes+'</div><div style="font-size:9px;color:var(--dim);margin-top:2px">'+new Date(inv.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div></div>'
       +'<div style="font-family:var(--ff);font-size:16px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
       +'</div>';
   });
+  if(!clientInv.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px">No invoices yet</div>';
 
   html+='</div>'+nav('team');
   render(html);
 }
 
 // ── ADD INSPECTOR ─────────────────────────────────────────────────────────
+function showCancelPlanConfirm(estateId,email){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(!e) return;
+  var overlay=document.createElement('div');
+  overlay.id='cancelPlanOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.innerHTML='<div style="background:var(--ch);border:1px solid var(--red);border-radius:4px;padding:22px;max-width:340px;width:100%">'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl);margin-bottom:10px">Cancel Plan?</div>'
+    +'<div style="font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:20px">This will cancel active service for <strong style="color:var(--text)">'+e.name+'</strong>. No further inspections will be scheduled and billing will stop. This can be reversed later if needed.</div>'
+    +'<button onclick="confirmCancelPlan(\''+estateId+'\',\''+email+'\')" style="width:100%;background:var(--red);border:none;border-radius:1px;color:#fff;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-bottom:8px">Yes, Cancel Plan</button>'
+    +'<button class="btn-ghost" onclick="closeCancelPlanConfirm()">Keep Active</button>'
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+function closeCancelPlanConfirm(){var o=document.getElementById('cancelPlanOverlay');if(o)o.remove();}
+function confirmCancelPlan(estateId,email){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(e){e.contract.status='cancelled';}
+  closeCancelPlanConfirm();
+  showToast('Plan cancelled for '+(e?e.name:'estate'));
+  goClientDetail(email);
+}
+function reactivatePlan(estateId,email){
+  var e=estates.find(function(x){return x.id===estateId;});
+  if(e){e.contract.status='active';}
+  showToast('Plan reactivated');
+  goClientDetail(email);
+}
+
 function goAddInspector(){
   var html=topBar('Add Inspector','Invite a New Team Member','goTeam')
     +'<div class="sc">'
@@ -1261,12 +1311,32 @@ function goEstateDetail(estateId){
   var insp=inspectors.find(function(i){return i.id===e.contract.assignedInspector;});
   var estInv=allInvoices.filter(function(i){return i.estateId===estateId;});
 
+  var client=clients.find(function(c){return c.email===e.clientEmail;});
+  var lastPaidInv=estInv.filter(function(i){return i.paymentMethod;}).sort(function(a,b){return new Date(b.dueDate)-new Date(a.dueDate);})[0];
+
   var html=topBar(e.name,e.clientName,_estateDetailOrigin)
     +'<div class="sc">'
     +'<div class="card" style="margin-bottom:16px">'
     +'<div style="font-size:10px;color:var(--dim)">'+e.address+'</div>'
     +'<div style="font-family:var(--ff);font-size:30px;color:var(--gl);margin-top:8px">'+sc.score+'%</div>'
     +'<div style="font-size:10px;color:var(--gold);margin-top:4px">'+e.contract.tier+' &nbsp;&#183;&nbsp; $'+e.contract.weeklyRate+'/week</div>'
+    +'</div>'
+    +'<div class="sec">Client</div>'
+    +'<div class="card tap" onclick="goClientDetail(\''+e.clientEmail+'\')" style="margin-bottom:16px;cursor:pointer">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+    +'<div style="font-family:var(--ff);font-size:16px;color:var(--gl)">'+e.clientName+'</div>'
+    +'<div style="font-size:14px;color:var(--gold)">&#8250;</div>'
+    +'</div>'
+    +(client?'<div style="font-size:11px;color:var(--dim);margin-bottom:4px">&#9993; '+client.email+'</div>'
+      +'<div style="font-size:11px;color:var(--dim)">&#9742; '+client.phone+'</div>':'<div style="font-size:11px;color:var(--dim)">No contact on file</div>')
+    +'</div>'
+    +'<div class="sec">Billing</div>'
+    +'<div class="card" style="margin-bottom:16px">'
+    +statRow('Plan',e.contract.tier)
+    +statRow('Rate','$'+e.contract.weeklyRate+'/week')
+    +statRow('Billing Frequency',e.contract.billingFrequency||'Monthly')
+    +statRow('Payment Method',lastPaidInv?lastPaidInv.paymentMethod:'Not on file')
+    +statRow('Auto-Pay',lastPaidInv&&lastPaidInv.autoPay?'Enabled':'Disabled')
     +'</div>'
     +'<div class="sec">Assigned Inspector</div>'
     +'<div class="card" style="margin-bottom:16px">'
@@ -1301,14 +1371,15 @@ function goEstateDetail(estateId){
       +'<div style="font-size:11px;color:var(--dim);text-align:center;padding:16px;background:var(--ch2);border:1px solid var(--border);border-radius:2px;margin-bottom:12px">No inspections completed yet</div>';
   }
 
-    +'<div class="sec">Invoices</div>';
+  html+='<div class="sec">Invoices</div>';
   estInv.forEach(function(inv){
     var col=inv.status==='paid'?'var(--green)':inv.status==='unpaid'?'var(--red)':'var(--dim)';
-    html+='<div class="card" style="border-left:3px solid '+col+';margin-bottom:8px;display:flex;justify-content:space-between">'
+    html+='<div class="card tap" data-action="mgrinv" data-id="'+inv.id+'" data-back="goEstateDetail|'+estateId+'" style="border-left:3px solid '+col+';margin-bottom:8px;display:flex;justify-content:space-between;cursor:pointer">'
       +'<div style="font-size:11px">'+inv.notes+'</div>'
       +'<div style="font-family:var(--ff);font-size:16px;color:var(--gl)">$'+inv.amount.toFixed(2)+'</div>'
       +'</div>';
   });
+  if(!estInv.length) html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:20px">No invoices yet</div>';
   html+='</div>'+nav('dash');
   render(html);
 }
@@ -1385,6 +1456,7 @@ function goInvoices(tab){
 
   var html=topBar('Invoices',tabLabel(tab),'goDash')
     +'<div class="sc">'
+    +'<button class="btn-outline" onclick="exportInvoicesToExcel()" style="width:100%;margin-bottom:12px">&#128190; Export All Invoices to Excel</button>'
     +'<input id="invSearch" oninput="filterInvoicesByTab()" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:15px;padding:11px 14px;outline:none;margin-bottom:14px" placeholder="Search estate, client, or address…">'
     +'<div style="display:flex;gap:8px;margin-bottom:16px">'
     +invTabBtn('attention','Needs Attention',tab)
@@ -1675,6 +1747,11 @@ function goCompanyProfile(){
     +ff('Tax / GST Number','text','cpTax','',tenantConfig.taxNumber)
     +ff('Business License Number','text','cpLicense','',tenantConfig.licenseNumber)
     +'</div>'
+    +'<div class="sec">Invoicing Currency</div>'
+    +'<div class="card" style="display:flex;gap:10px;margin-bottom:16px">'
+    +currencyBtn('CAD','Canadian Dollar')
+    +currencyBtn('USD','US Dollar')
+    +'</div>'
     +'<div class="sec">Invoice Footer</div>'
     +'<div class="card" style="margin-bottom:16px">'
     +'<textarea id="cpFooter" placeholder="Thank you message, terms, or payment instructions shown on every invoice" style="width:100%;background:var(--ch2);border:1px solid var(--border);border-radius:1px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;padding:12px;outline:none;resize:vertical;min-height:80px">'+(tenantConfig.invoiceFooter||'')+'</textarea>'
@@ -1691,6 +1768,15 @@ function themeBtn(val,label){
     +'</div>';
 }
 function selectBrandColor(c){tenantConfig.brandColor=c;goCompanyProfile();}
+function currencyBtn(val,label){
+  var sel=(tenantConfig.currency||'CAD')===val;
+  return '<div onclick="selectCurrency(\''+val+'\')" style="flex:1;text-align:center;padding:14px;border:2px solid '+(sel?'var(--gold)':'var(--border)')+';border-radius:2px;cursor:pointer">'
+    +'<div style="font-family:var(--ff);font-size:15px;color:var(--gl)">'+val+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:2px">'+label+'</div>'
+    +(sel?'<div style="font-size:9px;color:var(--gold);margin-top:4px">&#10003; Selected</div>':'')
+    +'</div>';
+}
+function selectCurrency(c){tenantConfig.currency=c;goCompanyProfile();}
 function selectTheme(t){tenantConfig.bgTheme=t;goCompanyProfile();}
 function saveCompanyProfile(){
   tenantConfig.companyName=document.getElementById('cpName').value.trim()||tenantConfig.companyName;
@@ -1722,6 +1808,85 @@ function goSettings(){
 function doSignOut(){
   localStorage.removeItem('ec_user');
   window.location.href=base+'index.html';
+}
+
+// ── EXCEL EXPORTS ─────────────────────────────────────────────────────────
+function exportInvoicesToExcel(){
+  var rows=allInvoices.map(function(inv){
+    var e=estates.find(function(x){return x.id===inv.estateId;});
+    return {
+      'Invoice #':inv.invoiceNum,
+      'Property':e?e.name:'',
+      'Client':e?e.clientName:'',
+      'Amount':inv.amount,
+      'Status':inv.status,
+      'Due Date':new Date(inv.dueDate).toLocaleDateString('en-US'),
+      'Paid Date':inv.paidDate?new Date(inv.paidDate).toLocaleDateString('en-US'):'',
+      'Payment Method':inv.paymentMethod||'',
+      'Notes':inv.notes||''
+    };
+  });
+  var ws=XLSX.utils.json_to_sheet(rows);
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Invoices');
+  XLSX.writeFile(wb,'EstateCare_Invoices_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+function exportFinancialsToExcel(){
+  var now=new Date();
+  var thisMonth=now.getMonth(),thisYear=now.getFullYear();
+  var mtdPaid=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getMonth()===thisMonth&&new Date(i.paidDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
+  var mtdBilled=allInvoices.filter(function(i){return new Date(i.dueDate).getMonth()===thisMonth&&new Date(i.dueDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
+  var ytd=allInvoices.filter(function(i){return i.status==='paid'&&new Date(i.paidDate).getFullYear()===thisYear;}).reduce(function(s,i){return s+i.amount;},0);
+  var avgPerClient=clients.length>0?(ytd/clients.length):0;
+  var unpaidTotal=allInvoices.filter(function(i){return i.status==='unpaid';}).reduce(function(s,i){return s+i.amount;},0);
+  var upcoming30=allInvoices.filter(function(i){return i.status==='upcoming';}).reduce(function(s,i){return s+i.amount;},0);
+
+  var summaryRows=[
+    {Metric:'Month to Date Revenue (Collected)',Value:mtdPaid},
+    {Metric:'Month to Date Billed',Value:mtdBilled},
+    {Metric:'Year to Date Revenue',Value:ytd},
+    {Metric:'Avg Revenue / Client (YTD)',Value:avgPerClient},
+    {Metric:'Unpaid Total (All-Time)',Value:unpaidTotal},
+    {Metric:'Upcoming (30 Days)',Value:upcoming30}
+  ];
+
+  var tierTotals={};
+  allInvoices.filter(function(i){return i.status==='paid';}).forEach(function(i){
+    var e=estates.find(function(x){return x.id===i.estateId;});
+    var tier=e&&e.contract?e.contract.tier:'Other';
+    tierTotals[tier]=(tierTotals[tier]||0)+i.amount;
+  });
+  var tierRows=Object.keys(tierTotals).map(function(t){return {Tier:t,'Total Paid':tierTotals[t]};});
+
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summaryRows),'Summary');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(tierRows),'Revenue by Tier');
+  XLSX.writeFile(wb,'EstateCare_Financials_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+function exportClientsToExcel(){
+  var rows=clients.map(function(c){
+    var e=estates.find(function(x){return x.id===c.estateId;});
+    return {
+      'Client Name':c.name,
+      'Email':c.email,
+      'Phone':c.phone,
+      'Property':e?e.name:'',
+      'Address':e?e.address:'',
+      'Tier':e&&e.contract?e.contract.tier:'',
+      'Weekly Rate':e&&e.contract?e.contract.weeklyRate:'',
+      'Assigned Inspector':(function(){
+        if(!e||!e.contract||!e.contract.assignedInspector) return '';
+        var insp=inspectors.find(function(i){return i.id===e.contract.assignedInspector;});
+        return insp?insp.name:'';
+      })()
+    };
+  });
+  var ws=XLSX.utils.json_to_sheet(rows);
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Clients');
+  XLSX.writeFile(wb,'EstateCare_Clients_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 
 goDash();

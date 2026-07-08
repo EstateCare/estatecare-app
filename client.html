@@ -172,6 +172,10 @@ var allInvoices=[
 ];
 var clientInvoices=allInvoices.filter(function(i){return i.clientEmail===currentUser.email;});
 
+// Temporary local mirror of manager's Company Profile currency setting.
+// Once Firestore is connected, this reads from tenants/{tenantId} instead.
+var tenantConfig={currency:'CAD'};
+
 var estates=[
   {id:'vs',name:'Hartwell Estate',
    address:'1402 Pelican Bay Drive, Naples FL 34108',
@@ -643,6 +647,28 @@ function openPointDetail(p){
 function closePD(){document.getElementById('pdModal').classList.remove('open');}
 
 // ── CLIENT PROFILE ────────────────────────────────────────────────────────
+function showClientCancelConfirm(){
+  var e=CE();
+  var overlay=document.createElement('div');
+  overlay.id='clientCancelOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.innerHTML='<div style="background:var(--ch);border:1px solid var(--red);border-radius:4px;padding:22px;max-width:340px;width:100%">'
+    +'<div style="font-family:var(--ff);font-size:18px;color:var(--gl);margin-bottom:10px">Cancel Plan?</div>'
+    +'<div style="font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:20px">This will cancel your EstateCare service'+(e?' for '+e.name:'')+'. No further inspections will be scheduled. Our team will reach out to confirm.</div>'
+    +'<button onclick="confirmClientCancelPlan()" style="width:100%;background:var(--red);border:none;border-radius:1px;color:#fff;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px;cursor:pointer;margin-bottom:8px">Yes, Cancel Plan</button>'
+    +'<button class="btn-ghost" onclick="closeClientCancelConfirm()">Keep Active</button>'
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+function closeClientCancelConfirm(){var o=document.getElementById('clientCancelOverlay');if(o)o.remove();}
+function confirmClientCancelPlan(){
+  var e=CE();
+  if(e&&e.contract){e.contract.status='cancelled';}
+  closeClientCancelConfirm();
+  showToast('Cancellation request submitted. We will be in touch shortly.');
+  goClientProfile();
+}
+
 function goClientProfile(){
   var e=CE();
   var con=e?e.contract:{};
@@ -681,6 +707,12 @@ function goClientProfile(){
     +toggleRow('Inspection Reports','Receive report after each visit',true)
     +toggleRow('Issue Alerts','Notify me of red flags immediately',true)
     +toggleRow('Invoice Reminders','Payment due reminders',true)
+    +'</div>'
+    +'<div style="font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px">Plan</div>'
+    +'<div class="card" style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Status</div>'
+    +'<div style="font-size:13px;color:'+((e&&e.contract&&e.contract.status==='cancelled')?'var(--red)':'var(--green)')+';margin-top:2px">'+((e&&e.contract&&e.contract.status==='cancelled')?'Cancelled':'Active')+'</div></div>'
+    +((e&&e.contract&&e.contract.status==='cancelled')?'':'<button onclick="showClientCancelConfirm()" style="background:transparent;border:1px solid var(--red);border-radius:1px;color:var(--red);font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;cursor:pointer">Cancel Plan</button>')
     +'</div>'
     +'<button class="btn-ghost" onclick="doSignOut()">Sign Out</button>'
     +'</div>'+clientNav('home');
@@ -1015,7 +1047,7 @@ function openInvoice(invId){
     +'<tr><td colspan="2" style="padding-top:12px;border-top:2px solid var(--gold)">'
     +'<div style="display:flex;justify-content:space-between;align-items:center">'
     +'<div style="font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase">Total Due</div>'
-    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl)">$'+inv.amount.toFixed(2)+' CAD</div>'
+    +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl)">$'+inv.amount.toFixed(2)+' '+(tenantConfig.currency||'CAD')+'</div>'
     +'</div></td></tr>'
     +'</tfoot></table>'
     // Payment section
@@ -1062,7 +1094,7 @@ function invRow2(label,val){
 function goPayment(invId){
   var inv=window['_inv_'+invId]||clientInvoices.find(function(i){return i.id===invId;});
   if(!inv) return;
-  var amtStr='$'+inv.amount.toFixed(2)+' CAD';
+  var amtStr='$'+inv.amount.toFixed(2)+' '+(tenantConfig.currency||'CAD');
 
   var html='<div class="topbar"><div style="display:flex;align-items:center">'
     +'<button class="back-btn" onclick="openInvoice(\''+invId+'\')">&#8592;</button>'
@@ -1216,7 +1248,7 @@ function confirmPayment(invId,method){
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;backdrop-filter:blur(6px)';
   overlay.innerHTML='<div style="width:70px;height:70px;border-radius:50%;background:rgba(76,175,125,.15);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:32px">✓</div>'
     +'<div style="font-family:var(--ff);font-size:26px;color:var(--gl);letter-spacing:2px">Payment Received</div>'
-    +'<div style="font-size:12px;color:var(--dim);text-align:center;line-height:1.8">'+inv.invoiceNum+'<br>'+method+'<br><span style="color:var(--green)">$'+inv.amount.toFixed(2)+' CAD</span></div>'
+    +'<div style="font-size:12px;color:var(--dim);text-align:center;line-height:1.8">'+inv.invoiceNum+'<br>'+method+'<br><span style="color:var(--green)">$'+inv.amount.toFixed(2)+' '+(tenantConfig.currency||'CAD')+'</span></div>'
     +'<button onclick="this.parentNode.remove();openInvoice(\''+invId+'\')" style="margin-top:8px;background:linear-gradient(135deg,var(--gold),var(--gl));border:none;border-radius:1px;color:#000;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:13px 32px;cursor:pointer">View Receipt</button>';
   document.body.appendChild(overlay);
 }
